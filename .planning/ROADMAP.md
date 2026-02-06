@@ -44,10 +44,12 @@ Plans:
   3. User understands all flags (--copy, --symlink) and their use cases
   4. User can create and customize .wtconfig following documented format
   5. User knows container/Docker workflows (port overrides, .env handling, named volumes)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] (Plans will be created during plan-phase)
+- [ ] 02-01-PLAN.md — Create README.md with header, installation, quick start, wt init, and tab completion
+- [ ] 02-02-PLAN.md — Add wt new, wt eject, wt goto, wt home, wt list command reference
+- [ ] 02-03-PLAN.md — Add wt merge/rebase/delete, configuration section, and container workflow
 
 ## Progress
 
@@ -57,4 +59,4 @@ Phases execute in numeric order: 1 → 2
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Internal Documentation Refresh | 3/3 | Complete | 2026-02-07 |
-| 2. User-Facing Documentation | 0/TBD | Not started | - |
+| 2. User-Facing Documentation | 0/3 | Not started | - |
