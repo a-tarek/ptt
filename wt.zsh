@@ -8,6 +8,8 @@ function wt() {
   case "$cmd" in
     new)    _wt_new "$@" ;;
     goto)   _wt_goto "$@" ;;
+    home)   _wt_home ;;
+    list)   _wt_list ;;
     merge)  _wt_merge "$@" ;;
     rebase) _wt_rebase "$@" ;;
     delete) _wt_delete "$@" ;;
@@ -17,6 +19,8 @@ function wt() {
       echo "Commands:"
       echo "  new [--copy-node-modules] <name> [branch]   Create a new worktree"
       echo "  goto <worktree>                              cd into a worktree"
+      echo "  home                                         cd into the main worktree"
+      echo "  list                                         List all worktrees"
       echo "  merge <worktree>                             Merge worktree's branch into current"
       echo "  rebase <worktree>                            Rebase current onto worktree's branch"
       echo "  delete <worktree>                            Remove a worktree (keeps branch)"
@@ -108,6 +112,50 @@ function _wt_goto() {
   fi
 
   cd "$wt_path"
+}
+
+function _wt_home() {
+  local main_path
+  main_path=$(git worktree list --porcelain 2>/dev/null | head -1 | sed 's/^worktree //')
+  if [[ -z "$main_path" ]]; then
+    echo "Error: not inside a git repository"
+    return 1
+  fi
+  cd "$main_path"
+}
+
+function _wt_list() {
+  local base_name current_dir
+  base_name=$(git worktree list --porcelain 2>/dev/null | head -1 | sed 's/^worktree //')
+  if [[ -z "$base_name" ]]; then
+    echo "Error: not inside a git repository"
+    return 1
+  fi
+  current_dir="$(git rev-parse --show-toplevel)"
+
+  local wt_entry="" branch=""
+  git worktree list --porcelain 2>/dev/null | while IFS= read -r line; do
+    if [[ "$line" == worktree\ * ]]; then
+      wt_entry="${line#worktree }"
+      branch=""
+    elif [[ "$line" == branch\ * ]]; then
+      branch="${line#branch refs/heads/}"
+    elif [[ -z "$line" && -n "$wt_entry" ]]; then
+      local marker=" "
+      [[ "$wt_entry" == "$current_dir" ]] && marker="*"
+      local dir="${wt_entry:t}"
+      printf "%s %-30s %s\n" "$marker" "$dir" "$branch"
+      wt_entry=""
+      branch=""
+    fi
+  done
+  # Handle last entry (porcelain output may not end with blank line)
+  if [[ -n "$wt_entry" ]]; then
+    local marker=" "
+    [[ "$wt_entry" == "$current_dir" ]] && marker="*"
+    local dir="${wt_entry:t}"
+    printf "%s %-30s %s\n" "$marker" "$dir" "$branch"
+  fi
 }
 
 function _wt_merge() {
@@ -230,6 +278,8 @@ function _wt() {
   subcmds=(
     'new:Create a new worktree'
     'goto:cd into a worktree'
+    'home:cd into the main worktree'
+    'list:List all worktrees'
     'merge:Merge a worktree branch into current'
     'rebase:Rebase current onto a worktree branch'
     'delete:Remove a worktree'
