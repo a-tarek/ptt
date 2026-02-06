@@ -54,28 +54,28 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MAP-01 | - | Pending |
-| MAP-02 | - | Pending |
-| MAP-03 | - | Pending |
-| MAP-04 | - | Pending |
-| MAP-05 | - | Pending |
-| DOC-01 | - | Pending |
-| DOC-02 | - | Pending |
-| DOC-03 | - | Pending |
-| DOC-04 | - | Pending |
-| DOC-05 | - | Pending |
-| DOC-06 | - | Pending |
-| DOC-07 | - | Pending |
-| DOC-08 | - | Pending |
-| DOC-09 | - | Pending |
-| DOC-10 | - | Pending |
-| DOC-11 | - | Pending |
+| MAP-01 | Phase 1 | Pending |
+| MAP-02 | Phase 1 | Pending |
+| MAP-03 | Phase 1 | Pending |
+| MAP-04 | Phase 1 | Pending |
+| MAP-05 | Phase 1 | Pending |
+| DOC-01 | Phase 2 | Pending |
+| DOC-02 | Phase 2 | Pending |
+| DOC-03 | Phase 2 | Pending |
+| DOC-04 | Phase 2 | Pending |
+| DOC-05 | Phase 2 | Pending |
+| DOC-06 | Phase 2 | Pending |
+| DOC-07 | Phase 2 | Pending |
+| DOC-08 | Phase 2 | Pending |
+| DOC-09 | Phase 2 | Pending |
+| DOC-10 | Phase 2 | Pending |
+| DOC-11 | Phase 2 | Pending |
 
 **Coverage:**
 - v1 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16
+- Mapped to phases: 16
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-07*
-*Last updated: 2026-02-07 after initial definition*
+*Last updated: 2026-02-07 after roadmap creation*
