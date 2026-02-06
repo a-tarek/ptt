@@ -220,9 +220,10 @@ function _wt_resolve_path() {
   local name="$1"
   git worktree list --porcelain 2>/dev/null | while read -r line; do
     if [[ "$line" == worktree\ * ]]; then
-      local path="${line#worktree }"
-      if [[ "${path:t}" == *"-${name}" ]]; then
-        echo "$path"
+      local wt_entry="${line#worktree }"
+      local dir="${wt_entry:t}"
+      if [[ "$dir" == *"-${name}" || "$dir" == "$name" ]]; then
+        echo "$wt_entry"
         return 0
       fi
     fi
@@ -235,8 +236,9 @@ function _wt_resolve_branch() {
   local found_path=false
   git worktree list --porcelain 2>/dev/null | while read -r line; do
     if [[ "$line" == worktree\ * ]]; then
-      local path="${line#worktree }"
-      if [[ "${path:t}" == *"-${name}" ]]; then
+      local wt_entry="${line#worktree }"
+      local dir="${wt_entry:t}"
+      if [[ "$dir" == *"-${name}" || "$dir" == "$name" ]]; then
         found_path=true
       else
         found_path=false
@@ -262,10 +264,12 @@ function _wt_list_names() {
 
   git worktree list --porcelain 2>/dev/null | while read -r line; do
     if [[ "$line" == worktree\ * ]]; then
-      local path="${line#worktree }"
-      local dir="${path:t}"
+      local wt_entry="${line#worktree }"
+      local dir="${wt_entry:t}"
       if [[ "$dir" == "${base_name}-"* && "$dir" != "$base_name" ]]; then
         echo "${dir#${base_name}-}"
+      elif [[ "$dir" != "$base_name" ]]; then
+        echo "$dir"
       fi
     fi
   done
