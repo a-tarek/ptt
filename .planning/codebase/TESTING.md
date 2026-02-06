@@ -20,7 +20,9 @@ The following operations should be manually validated:
 
 **Basic Commands:**
 - `wt new <name> [branch]` - Create worktree with default or specified branch
-- `wt new --copy-node-modules <name>` - Create worktree with node_modules copied
+- `wt new --copy <path> <name>` - Create worktree with specific path copied
+- `wt new --symlink <path> <name>` - Create worktree with specific path symlinked
+- `wt init` - Create .wtconfig template
 - `wt goto <worktree>` - Navigate to worktree
 - `wt home` - Return to main worktree
 - `wt list` - List all worktrees
@@ -28,6 +30,8 @@ The following operations should be manually validated:
 - `wt merge <worktree>` - Merge worktree branch
 - `wt rebase <worktree>` - Rebase onto worktree branch
 - `wt eject [name]` - Eject current branch to new worktree
+- `wt eject --copy <path> [name]` - Eject with copy override
+- `wt eject --symlink <path> [name]` - Eject with symlink override
 
 **State-Based Testing:**
 - Pre-conditions: Repository state, existing worktrees, branch existence
@@ -40,8 +44,15 @@ The following operations should be manually validated:
 1. Initialize git repo with multiple branches
 2. Run `wt new feature-x`
 3. Verify: New directory created, correct branch checked out
-4. Test with `--copy-node-modules` flag
-5. Verify: node_modules copied, symlink when flag omitted
+4. Test with `--copy .env --symlink node_modules` flags
+5. Verify: .env copied, node_modules symlinked
+6. Test multiple flags: `wt new --copy .env.local --copy .env --symlink node_modules feature-y`
+
+**Init Command:**
+1. From git repo: `wt init`
+2. Verify: `.wtconfig` created with template content
+3. Test error when run again: should report `.wtconfig already exists`
+4. Test outside git repo: should report error
 
 **Navigation:**
 1. From main worktree: `wt goto feature-x`
@@ -56,6 +67,8 @@ The following operations should be manually validated:
 4. Verify: New worktree created, original falls back, stash preserved
 5. Test on detached HEAD - should error
 6. Test on main worktree fallback logic
+7. Test with override flags: `wt eject --copy .env --symlink node_modules`
+8. Verify: Override flags applied to new worktree
 
 **List Command:**
 1. Create multiple worktrees
@@ -98,18 +111,35 @@ Tests should verify git command execution by checking:
 ## Code Inspection Points
 
 **Critical Paths:**
-`_wt_eject` (function at lines 129-258 in `/Users/ahmed.tarek/code/wt/wt.zsh`):
+
+`_wt_init` (function at lines 115-144 in `/Users/ahmed.tarek/code/wt/wt.zsh`):
+- Validation: Git repo check, `.wtconfig` existence check
+- Template generation: Heredoc with commented examples
+- Error handling: Clear error messages for non-git repo or existing config
+
+`_wt_setup` (function at lines 368-444 in `/Users/ahmed.tarek/code/wt/wt.zsh`):
+- Override parsing: Associative array building from "action:path" format
+- Two-phase application: Config-based actions first, then one-off overrides
+- Override precedence: CLI flags override config defaults
+- Critical path: Ensure overrides array parsed correctly
+- Critical path: Verify both config-based and one-off overrides applied
+- Test cases: Override existing config entry, add one-off not in config
+
+`_wt_new` (function at lines 36-86 in `/Users/ahmed.tarek/code/wt/wt.zsh`):
+- Flag parsing: Loop processes `--copy` and `--symlink` before positional args
+- Override array building: Collects flag pairs into array
+- Override passing: Array passed to `_wt_setup`
+- Branch creation logic: Test with existing vs new branches
+
+`_wt_eject` (function at lines 146-276 in `/Users/ahmed.tarek/code/wt/wt.zsh`):
+- Flag parsing: Same pattern as `_wt_new`
 - Most complex function with multi-step state management
 - Stash tracking: Needs validation that stash is correctly counted before/after
 - Rollback logic: Verify git checkout failure triggers stash pop
 - Branch fallback logic: Test main vs non-main worktree fallback paths
+- Override application: Verify flags applied to ejected worktree
 
-`_wt_new` (function at lines 34-100 in `/Users/ahmed.tarek/code/wt/wt.zsh`):
-- Branch creation logic: Test with existing vs new branches
-- node_modules handling: Copy vs symlink paths
-- .env.local propagation: Verify file is copied when present
-
-`_wt_resolve_path` and `_wt_resolve_branch` (lines 352-384 in `/Users/ahmed.tarek/code/wt/wt.zsh`):
+`_wt_resolve_path` and `_wt_resolve_branch` (lines 446-480 in `/Users/ahmed.tarek/code/wt/wt.zsh`):
 - Matching logic: Test fuzzy matching (suffix matching)
 - Edge cases: Worktree name matches multiple repos
 - Output parsing: Verify correct branch extraction from porcelain format
@@ -131,6 +161,10 @@ When making changes to `/Users/ahmed.tarek/code/wt/wt.zsh`, manually verify:
 6. Merge/rebase target correct branches
 7. Error messages display for invalid input
 8. Completion suggestions work in zsh
+9. `wt init` creates `.wtconfig` template
+10. Override flags (`--copy`, `--symlink`) work with `new` and `eject`
+11. `.wtconfig` integration works (copy/symlink actions applied)
+12. Override flags take precedence over `.wtconfig` defaults
 
 ## Integration Points to Test
 
@@ -141,9 +175,10 @@ When making changes to `/Users/ahmed.tarek/code/wt/wt.zsh`, manually verify:
 
 **With File System:**
 - Directory creation via `git worktree add`
-- Symlink creation for node_modules
-- File copy for .env.local
+- Symlink creation (from `.wtconfig` or `--symlink` flags)
+- File copy (from `.wtconfig` or `--copy` flags)
 - Directory removal via `git worktree remove`
+- `.wtconfig` parsing and reading
 
 **With Zsh:**
 - Function scoping (local variables)
@@ -154,7 +189,7 @@ When making changes to `/Users/ahmed.tarek/code/wt/wt.zsh`, manually verify:
 ## Notes on Testing This Codebase
 
 **Why No Framework:**
-This is a thin shell wrapper around git worktrees. A testing framework would add significant overhead for a ~450-line script. Manual testing of git commands is more practical.
+This is a thin shell wrapper around git worktrees. A testing framework would add significant overhead for a ~550-line script. Manual testing of git commands is more practical.
 
 **Recommended Additions (If Scaling):**
 If this grows significantly:
