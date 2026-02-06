@@ -18,7 +18,7 @@ function wt() {
       echo "Usage: wt <command> [args]"
       echo ""
       echo "Commands:"
-      echo "  new [--copy-node-modules] <name> [branch]   Create a new worktree"
+      echo "  new <name> [branch]                          Create a new worktree"
       echo "  goto <worktree>                              cd into a worktree"
       echo "  home                                         cd into the main worktree"
       echo "  eject [name]                                 Eject current branch into its own worktree"
@@ -32,20 +32,11 @@ function wt() {
 }
 
 function _wt_new() {
-  # Parse flags
-  local copy_nm=false
-  while [[ "$1" == --* ]]; do
-    case "$1" in
-      --copy-node-modules) copy_nm=true; shift ;;
-      *) echo "Unknown flag: $1"; return 1 ;;
-    esac
-  done
-
   local name="$1"
   local branch="${2:-$name}"
 
   if [[ -z "$name" ]]; then
-    echo "Usage: wt new [--copy-node-modules] <name> [branch]"
+    echo "Usage: wt new <name> [branch]"
     return 1
   fi
 
@@ -75,23 +66,7 @@ function _wt_new() {
     fi
   fi
 
-  # Copy .env.local if it exists
-  if [[ -f "${src_root}/.env.local" ]]; then
-    cp "${src_root}/.env.local" "${target_abs}/.env.local"
-    echo "Copied .env.local"
-  fi
-
-  # node_modules handling
-  if [[ -d "${src_root}/node_modules" ]]; then
-    if $copy_nm; then
-      echo "Copying node_modules (this may take a moment)..."
-      cp -r "${src_root}/node_modules" "${target_abs}/node_modules"
-      echo "Copied node_modules"
-    else
-      ln -s "${src_root}/node_modules" "${target_abs}/node_modules"
-      echo "Symlinked node_modules"
-    fi
-  fi
+  _wt_setup "$src_root" "$target_abs"
 
   cd "$target_abs"
   echo ""
@@ -239,16 +214,8 @@ function _wt_eject() {
     echo "Restored uncommitted changes in new worktree"
   fi
 
-  # 9. Copy .env.local and symlink node_modules
-  if [[ -f "${src_root}/.env.local" ]]; then
-    cp "${src_root}/.env.local" "${target_abs}/.env.local"
-    echo "Copied .env.local"
-  fi
-
-  if [[ -d "${src_root}/node_modules" ]]; then
-    ln -s "${src_root}/node_modules" "${target_abs}/node_modules"
-    echo "Symlinked node_modules"
-  fi
+  # 9. Apply .wtconfig setup
+  _wt_setup "$src_root" "$target_abs"
 
   # 10. cd into the new worktree
   cd "$target_abs"
@@ -347,6 +314,43 @@ function _wt_delete() {
 
 # --- Helpers ---
 
+# Apply .wtconfig actions (copy/symlink) from source to target worktree
+function _wt_setup() {
+  local src="$1" target="$2"
+  local config="${src}/.wtconfig"
+
+  [[ -f "$config" ]] || return 0
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    [[ "$line" =~ ^[[:space:]]*# ]] && continue
+    [[ -z "${line// /}" ]] && continue
+
+    local action="${line%% *}"
+    local path="${line#* }"
+    # trim whitespace
+    path="${path## }"
+    path="${path%% }"
+
+    case "$action" in
+      copy)
+        if [[ -e "${src}/${path}" ]]; then
+          cp -r "${src}/${path}" "${target}/${path}"
+          echo "Copied $path"
+        fi
+        ;;
+      symlink)
+        if [[ -e "${src}/${path}" ]]; then
+          ln -s "${src}/${path}" "${target}/${path}"
+          echo "Symlinked $path"
+        fi
+        ;;
+      *)
+        echo "Warning: unknown action '$action' in .wtconfig"
+        ;;
+    esac
+  done < "$config"
+}
+
 # Resolve a worktree name to its path
 # Matches against the directory basename suffix after the repo name
 function _wt_resolve_path() {
@@ -431,7 +435,6 @@ function _wt() {
   case "${words[2]}" in
     new)
       _arguments \
-        '--copy-node-modules[Copy node_modules instead of symlinking]' \
         '1:name:' \
         '2:branch:'
       ;;
