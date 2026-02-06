@@ -38,8 +38,11 @@
 
 **Environment:**
 - Configured via Git configuration and environment variables passed from parent shell
-- `.env.local` files are copied between worktrees (convention, not enforced)
-- No configuration files required for operation
+- `.wtconfig` file (optional) - Plain text file defining copy/symlink actions for worktree creation
+  - Created by `wt init` command
+  - Format: `<action> <path>` (e.g., `copy .env.local`, `symlink node_modules`)
+  - Read during worktree setup to automate file management
+- No configuration files required for basic operation
 
 **Build:**
 - No build step required
