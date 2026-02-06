@@ -7,11 +7,11 @@
 
 ### Codebase Map Refresh
 
-- [ ] **MAP-01**: ARCHITECTURE.md reflects current function structure (all 15+ functions)
-- [ ] **MAP-02**: CONVENTIONS.md documents current patterns (flag parsing, override mechanism)
-- [ ] **MAP-03**: STRUCTURE.md matches current file layout and line ranges
-- [ ] **MAP-04**: CONCERNS.md updated with current known issues (zsh reserved vars, etc.)
-- [ ] **MAP-05**: STACK.md, INTEGRATIONS.md, TESTING.md refreshed against current code
+- [x] **MAP-01**: ARCHITECTURE.md reflects current function structure (all 15+ functions)
+- [x] **MAP-02**: CONVENTIONS.md documents current patterns (flag parsing, override mechanism)
+- [x] **MAP-03**: STRUCTURE.md matches current file layout and line ranges
+- [x] **MAP-04**: CONCERNS.md updated with current known issues (zsh reserved vars, etc.)
+- [x] **MAP-05**: STACK.md, INTEGRATIONS.md, TESTING.md refreshed against current code
 
 ### README — Installation
 
@@ -54,11 +54,11 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MAP-01 | Phase 1 | Pending |
-| MAP-02 | Phase 1 | Pending |
-| MAP-03 | Phase 1 | Pending |
-| MAP-04 | Phase 1 | Pending |
-| MAP-05 | Phase 1 | Pending |
+| MAP-01 | Phase 1 | Complete |
+| MAP-02 | Phase 1 | Complete |
+| MAP-03 | Phase 1 | Complete |
+| MAP-04 | Phase 1 | Complete |
+| MAP-05 | Phase 1 | Complete |
 | DOC-01 | Phase 2 | Pending |
 | DOC-02 | Phase 2 | Pending |
 | DOC-03 | Phase 2 | Pending |

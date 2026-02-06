@@ -12,7 +12,7 @@ A two-phase documentation project: first refresh the internal codebase map to ma
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Internal Documentation Refresh** - Update codebase map files to match current code
+- [x] **Phase 1: Internal Documentation Refresh** - Update codebase map files to match current code
 - [ ] **Phase 2: User-Facing Documentation** - Write complete README.md with all features documented
 
 ## Phase Details
@@ -30,9 +30,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Update ARCHITECTURE.md and STRUCTURE.md with new functions and accurate line ranges
-- [ ] 01-02-PLAN.md — Update CONVENTIONS.md and CONCERNS.md with flag parsing patterns and current concerns
-- [ ] 01-03-PLAN.md — Update STACK.md, INTEGRATIONS.md, TESTING.md with current state
+- [x] 01-01-PLAN.md — Update ARCHITECTURE.md and STRUCTURE.md with new functions and accurate line ranges
+- [x] 01-02-PLAN.md — Update CONVENTIONS.md and CONCERNS.md with flag parsing patterns and current concerns
+- [x] 01-03-PLAN.md — Update STACK.md, INTEGRATIONS.md, TESTING.md with current state
 
 ### Phase 2: User-Facing Documentation
 **Goal**: Complete README.md enabling users to install, learn, and use every wt feature
@@ -56,5 +56,5 @@ Phases execute in numeric order: 1 → 2
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Internal Documentation Refresh | 0/3 | Not started | - |
+| 1. Internal Documentation Refresh | 3/3 | Complete | 2026-02-07 |
 | 2. User-Facing Documentation | 0/TBD | Not started | - |
