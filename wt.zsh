@@ -9,6 +9,7 @@ function wt() {
     new)    _wt_new "$@" ;;
     goto)   _wt_goto "$@" ;;
     home)   _wt_home ;;
+    eject)  _wt_eject "$@" ;;
     list)   _wt_list ;;
     merge)  _wt_merge "$@" ;;
     rebase) _wt_rebase "$@" ;;
@@ -20,6 +21,7 @@ function wt() {
       echo "  new [--copy-node-modules] <name> [branch]   Create a new worktree"
       echo "  goto <worktree>                              cd into a worktree"
       echo "  home                                         cd into the main worktree"
+      echo "  eject [name]                                 Eject current branch into its own worktree"
       echo "  list                                         List all worktrees"
       echo "  merge <worktree>                             Merge worktree's branch into current"
       echo "  rebase <worktree>                            Rebase current onto worktree's branch"
@@ -122,6 +124,137 @@ function _wt_home() {
     return 1
   fi
   cd "$main_path"
+}
+
+function _wt_eject() {
+  if ! git rev-parse --git-dir &>/dev/null; then
+    echo "Error: not inside a git repository"
+    return 1
+  fi
+
+  # 1. Get current branch — error on detached HEAD
+  local current_branch
+  current_branch="$(git branch --show-current)"
+  if [[ -z "$current_branch" ]]; then
+    echo "Error: detached HEAD — nothing to eject"
+    return 1
+  fi
+
+  local src_root
+  src_root="$(git rev-parse --show-toplevel)"
+  local repo_basename
+  repo_basename="$(git worktree list --porcelain 2>/dev/null | head -1 | sed 's/^worktree //')"
+  repo_basename="${repo_basename:t}"
+
+  # 2. Determine fallback branch
+  local home_path fallback_branch
+  home_path="$(git worktree list --porcelain 2>/dev/null | head -1 | sed 's/^worktree //')"
+
+  if [[ "$src_root" == "$home_path" ]]; then
+    # Home worktree — fall back to main/master
+    if git show-ref --verify --quiet refs/heads/main; then
+      fallback_branch="main"
+    elif git show-ref --verify --quiet refs/heads/master; then
+      fallback_branch="master"
+    else
+      echo "Error: neither 'main' nor 'master' branch exists"
+      return 1
+    fi
+  else
+    # Non-home worktree — fall back to branch matching worktree folder suffix
+    local dir_name="${src_root:t}"
+    # Strip repo basename prefix to get the suffix (e.g. "web-app-staging" → "staging")
+    local suffix="${dir_name#${repo_basename}-}"
+    if [[ "$suffix" == "$dir_name" ]]; then
+      # No prefix match — use full dir name
+      suffix="$dir_name"
+    fi
+    fallback_branch="$suffix"
+    if ! git show-ref --verify --quiet "refs/heads/${fallback_branch}"; then
+      echo "Error: fallback branch '${fallback_branch}' does not exist"
+      return 1
+    fi
+    if [[ "$fallback_branch" == "$current_branch" ]]; then
+      echo "Error: current branch is already '${fallback_branch}' — nothing to eject"
+      return 1
+    fi
+  fi
+
+  # 3. Error if current branch is the fallback
+  if [[ "$current_branch" == "$fallback_branch" ]]; then
+    echo "Error: already on '${fallback_branch}' — nothing to eject"
+    return 1
+  fi
+
+  # 4. Determine new worktree folder name
+  local name="${1:-${current_branch//\//-}}"
+  local target_abs="${src_root:h}/${repo_basename}-${name}"
+
+  if [[ -d "$target_abs" ]]; then
+    echo "Error: $target_abs already exists"
+    return 1
+  fi
+
+  echo "Ejecting branch '${current_branch}' → ${repo_basename}-${name}"
+
+  # 5. Stash uncommitted changes (including untracked)
+  local stash_msg="wt-eject: ${current_branch}"
+  local stash_before
+  stash_before="$(git stash list | wc -l)"
+  git stash push -u -m "$stash_msg" &>/dev/null
+  local stash_after
+  stash_after="$(git stash list | wc -l)"
+  local did_stash=false
+  if (( stash_after > stash_before )); then
+    did_stash=true
+    echo "Stashed uncommitted changes"
+  fi
+
+  # 6. Switch current worktree to the fallback branch
+  if ! git checkout "$fallback_branch" &>/dev/null; then
+    echo "Error: failed to switch to '${fallback_branch}'"
+    # Try to pop stash back before aborting
+    if $did_stash; then
+      git stash pop &>/dev/null
+    fi
+    return 1
+  fi
+  echo "Switched to '${fallback_branch}'"
+
+  # 7. Create new worktree for the ejected branch
+  if ! git worktree add "$target_abs" "$current_branch" &>/dev/null; then
+    echo "Error: failed to create worktree at $target_abs"
+    # Roll back: switch back to original branch, pop stash
+    git checkout "$current_branch" &>/dev/null
+    if $did_stash; then
+      git stash pop &>/dev/null
+    fi
+    return 1
+  fi
+  echo "Created worktree: ${repo_basename}-${name}"
+
+  # 8. Pop stash in the new worktree
+  if $did_stash; then
+    git -C "$target_abs" stash pop &>/dev/null
+    echo "Restored uncommitted changes in new worktree"
+  fi
+
+  # 9. Copy .env.local and symlink node_modules
+  if [[ -f "${src_root}/.env.local" ]]; then
+    cp "${src_root}/.env.local" "${target_abs}/.env.local"
+    echo "Copied .env.local"
+  fi
+
+  if [[ -d "${src_root}/node_modules" ]]; then
+    ln -s "${src_root}/node_modules" "${target_abs}/node_modules"
+    echo "Symlinked node_modules"
+  fi
+
+  # 10. cd into the new worktree
+  cd "$target_abs"
+  echo ""
+  echo "Ready: $(pwd)"
+  echo "Branch: $(git branch --show-current)"
 }
 
 function _wt_list() {
@@ -283,6 +416,7 @@ function _wt() {
     'new:Create a new worktree'
     'goto:cd into a worktree'
     'home:cd into the main worktree'
+    'eject:Eject current branch into its own worktree'
     'list:List all worktrees'
     'merge:Merge a worktree branch into current'
     'rebase:Rebase current onto a worktree branch'
