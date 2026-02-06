@@ -41,19 +41,21 @@ wt/
 ## Key File Locations
 
 **Entry Points:**
-- `wt.zsh`: Single-file implementation containing all command logic
+- `wt.zsh`: Single-file implementation containing all command logic (551 lines total)
 
 **Configuration:**
 - `.claude/settings.local.json`: Agent-specific settings
+- `.wtconfig`: Repository-level worktree setup configuration (created via `wt init`)
 
 **Documentation:**
 - `.planning/codebase/ARCHITECTURE.md`: Architectural patterns and layers
 - `.planning/codebase/STRUCTURE.md`: Directory layout and file organization (this file)
 
 **Core Logic:**
-- `wt.zsh` (main): Command dispatcher (lines 4-32)
-- `wt.zsh` (handlers): `_wt_new()`, `_wt_goto()`, `_wt_home()`, `_wt_eject()`, `_wt_list()`, `_wt_merge()`, `_wt_rebase()`, `_wt_delete()` (lines 34-346)
-- `wt.zsh` (helpers): `_wt_resolve_path()`, `_wt_resolve_branch()`, `_wt_list_names()` (lines 348-409)
+- `wt.zsh` (main): Command dispatcher (lines 4-34)
+- `wt.zsh` (handlers): `_wt_new()`, `_wt_goto()`, `_wt_home()`, `_wt_init()`, `_wt_eject()`, `_wt_list()`, `_wt_merge()`, `_wt_rebase()`, `_wt_delete()` (lines 36-364)
+- `wt.zsh` (helpers): `_wt_setup()`, `_wt_resolve_path()`, `_wt_resolve_branch()`, `_wt_list_names()` (lines 366-505)
+- `wt.zsh` (completions): `_wt()` completion function, `compdef` binding (lines 507-550)
 
 **Testing:**
 - Not present (manual testing via shell commands)
@@ -82,24 +84,24 @@ wt/
 ## Where to Add New Code
 
 **New Feature (Worktree Operation):**
-- Primary code: Add `_wt_<command>()` function in `wt.zsh` (after line 346)
-- Register in dispatcher: Add case in `wt()` function (lines 8-31)
-- Add completion: Add case in `_wt()` completion function (lines 431-443)
-- Helpers: Add new `_wt_<helper>()` if needed (before line 411)
+- Primary code: Add `_wt_<command>()` function in `wt.zsh` (before line 366)
+- Register in dispatcher: Add case in `wt()` function (lines 8-32)
+- Add completion: Add case in `_wt()` completion function (lines 528-547)
+- Helpers: Add new `_wt_<helper>()` if needed (lines 366-505)
 
 **New Subcommand (Example: `wt status`):**
-1. Implement: `function _wt_status() { ... }` in `wt.zsh` before line 411
-2. Register: Add `status) _wt_status "$@" ;;` in `wt()` case statement
-3. Complete: Add `'status:Show worktree status'` to `subcmds` array in `_wt()` function
-4. Document: Update help text in `wt()` function (lines 20-28)
+1. Implement: `function _wt_status() { ... }` in `wt.zsh` before line 366
+2. Register: Add `status) _wt_status "$@" ;;` in `wt()` case statement (lines 8-32)
+3. Complete: Add `'status:Show worktree status'` to `subcmds` array in `_wt()` function (lines 511-520)
+4. Document: Update help text in `wt()` function (lines 19-30)
 
 **Utility Helpers:**
-- Location: `wt.zsh` section "Helpers" (lines 348-409)
+- Location: `wt.zsh` section "Helpers" (lines 366-505)
 - Pattern: Prefix with `_wt_` for consistency
 - Convention: Extract reusable git/filesystem operations here
 
 **Shell Completion:**
-- Location: `wt.zsh` section "Zsh Completions" (lines 411-446)
+- Location: `wt.zsh` section "Zsh Completions" (lines 507-550)
 - Pattern: Extend `_wt()` function with new cases in the command switch
 - For dynamic arguments: Call helper function `_wt_list_names` or similar
 
@@ -116,26 +118,30 @@ wt/
 
 ## Code Organization Within wt.zsh
 
+**Total lines:** 551
+
 **Sections (in order):**
 
 1. **Shebang & Header** (lines 1-2): Script declaration and title
-2. **Main Dispatcher** (lines 4-32): `wt()` function - routes all user commands
-3. **Command Handlers** (lines 34-346): `_wt_*()` functions implementing each subcommand
-   - `_wt_new()`: Create worktree (lines 34-100)
-   - `_wt_goto()`: Navigate to worktree (lines 102-117)
-   - `_wt_home()`: Go to main worktree (lines 119-127)
-   - `_wt_eject()`: Eject branch into new worktree (lines 129-258)
-   - `_wt_list()`: List all worktrees (lines 260-292)
-   - `_wt_merge()`: Merge worktree branch (lines 294-310)
-   - `_wt_rebase()`: Rebase onto worktree branch (lines 312-328)
-   - `_wt_delete()`: Delete worktree (lines 330-346)
-4. **Helper Functions** (lines 348-409): `_wt_*()` utilities for path/branch resolution
-   - `_wt_resolve_path()`: Find worktree by name (lines 352-364)
-   - `_wt_resolve_branch()`: Find branch by worktree name (lines 367-384)
-   - `_wt_list_names()`: List worktree short names (lines 387-409)
-5. **Zsh Completions** (lines 411-446): Completion system configuration
-   - `_wt()`: Completion function (lines 413-444)
-   - `compdef`: Register completion (line 446)
+2. **Main Dispatcher** (lines 4-34): `wt()` function - routes all user commands
+3. **Command Handlers** (lines 36-364): `_wt_*()` functions implementing each subcommand
+   - `_wt_new()`: Create worktree with flag parsing (lines 36-86)
+   - `_wt_goto()`: Navigate to worktree (lines 88-103)
+   - `_wt_home()`: Go to main worktree (lines 105-113)
+   - `_wt_init()`: Create .wtconfig template (lines 115-144)
+   - `_wt_eject()`: Eject branch into new worktree with flag parsing (lines 146-276)
+   - `_wt_list()`: List all worktrees (lines 278-310)
+   - `_wt_merge()`: Merge worktree branch (lines 312-328)
+   - `_wt_rebase()`: Rebase onto worktree branch (lines 330-346)
+   - `_wt_delete()`: Delete worktree (lines 348-364)
+4. **Helper Functions** (lines 366-505): `_wt_*()` utilities for setup and path resolution
+   - `_wt_setup()`: Apply .wtconfig actions with override mechanism (lines 368-444)
+   - `_wt_resolve_path()`: Find worktree by name (lines 446-460)
+   - `_wt_resolve_branch()`: Find branch by worktree name (lines 462-480)
+   - `_wt_list_names()`: List worktree short names (lines 482-505)
+5. **Zsh Completions** (lines 507-550): Completion system configuration
+   - `_wt()`: Completion function with --copy/--symlink support (lines 509-548)
+   - `compdef`: Register completion (line 550)
 
 ---
 
