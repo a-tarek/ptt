@@ -9,6 +9,7 @@ function wt() {
     new)    _wt_new "$@" ;;
     goto)   _wt_goto "$@" ;;
     home)   _wt_home ;;
+    init)   _wt_init ;;
     eject)  _wt_eject "$@" ;;
     list)   _wt_list ;;
     merge)  _wt_merge "$@" ;;
@@ -21,6 +22,7 @@ function wt() {
       echo "  new <name> [branch]                          Create a new worktree"
       echo "  goto <worktree>                              cd into a worktree"
       echo "  home                                         cd into the main worktree"
+      echo "  init                                         Create .wtconfig template"
       echo "  eject [name]                                 Eject current branch into its own worktree"
       echo "  list                                         List all worktrees"
       echo "  merge <worktree>                             Merge worktree's branch into current"
@@ -99,6 +101,37 @@ function _wt_home() {
     return 1
   fi
   cd "$main_path"
+}
+
+function _wt_init() {
+  local root
+  root="$(git rev-parse --show-toplevel 2>/dev/null)"
+  if [[ -z "$root" ]]; then
+    echo "Error: not inside a git repository"
+    return 1
+  fi
+  local config="${root}/.wtconfig"
+  if [[ -f "$config" ]]; then
+    echo "Error: .wtconfig already exists"
+    return 1
+  fi
+  cat > "$config" << 'WTEOF'
+# .wtconfig — files to copy or symlink into new worktrees
+# Syntax: <action> <path>
+# Actions: copy, symlink
+
+# Node.js
+# copy .env.local
+# symlink node_modules
+
+# Python
+# copy .env
+# symlink .venv
+
+# Rust
+# symlink target
+WTEOF
+  echo "Created ${config}"
 }
 
 function _wt_eject() {
@@ -420,6 +453,7 @@ function _wt() {
     'new:Create a new worktree'
     'goto:cd into a worktree'
     'home:cd into the main worktree'
+    'init:Create .wtconfig template'
     'eject:Eject current branch into its own worktree'
     'list:List all worktrees'
     'merge:Merge a worktree branch into current'
