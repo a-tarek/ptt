@@ -15,6 +15,10 @@
 - Local filesystem only
   - Worktree directories stored in filesystem
   - Git metadata stored in `.git` directory
+  - `.wtconfig` (optional) - Plain text configuration file at repository root
+    - User-created via `wt init` command
+    - Read by wt during worktree creation
+    - Not a database, just static configuration
 
 **Caching:**
 - None - No caching layer
