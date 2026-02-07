@@ -41,9 +41,9 @@
 
 ### npm Distribution
 
-- [ ] **NPM-01**: Scoped npm package (@scope/wt) with platform-specific binaries
-- [ ] **NPM-02**: Platform detection (darwin-arm64, darwin-amd64, linux-amd64, linux-arm64)
-- [ ] **NPM-03**: goreleaser config for cross-compilation
+- [x] **NPM-01**: Scoped npm package (@scope/wt) with platform-specific binaries
+- [x] **NPM-02**: Platform detection (darwin-arm64, darwin-amd64, linux-amd64, linux-arm64)
+- [x] **NPM-03**: goreleaser config for cross-compilation
 
 ### Interactive Installer
 
@@ -99,9 +99,9 @@
 | COMP-02 | Phase 6 | Complete |
 | COMP-03 | Phase 6 | Complete |
 | COMP-04 | Phase 6 | Complete |
-| NPM-01 | Phase 7 | Pending |
-| NPM-02 | Phase 7 | Pending |
-| NPM-03 | Phase 7 | Pending |
+| NPM-01 | Phase 7 | Complete |
+| NPM-02 | Phase 7 | Complete |
+| NPM-03 | Phase 7 | Complete |
 | INST-01 | Phase 8 | Pending |
 | INST-02 | Phase 8 | Pending |
 | INST-03 | Phase 8 | Pending |
