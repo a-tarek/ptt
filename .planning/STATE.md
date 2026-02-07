@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** A single `wt` command that works in any shell on any platform with full autocompletion
-**Current focus:** Phase 6 - Shell Integration
+**Current focus:** Phase 7 - npm Distribution
 
 ## Current Position
 
-Phase: 6 of 9 (Shell Integration)
-Plan: 2 of 2 complete
-Status: Phase complete
-Last activity: 2026-02-07 — Completed Phase 6 (Shell Integration)
+Phase: 7 of 9 (npm Distribution)
+Plan: 1 of 2 complete
+Status: In progress
+Last activity: 2026-02-07 — Completed 07-01-PLAN.md
 
-Progress: [██████░░░░] 67% (6/9 phases complete)
+Progress: [███████░░░] 72% (13/18 total plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
-- Average duration: ~2.4 min per plan
-- Total execution time: ~0.77 hours
+- Total plans completed: 13
+- Average duration: ~2.3 min per plan
+- Total execution time: ~0.64 hours
 
 **By Phase:**
 
@@ -33,14 +33,14 @@ Progress: [██████░░░░] 67% (6/9 phases complete)
 | 4. Configuration System | 2/2 ✓ | 8 min | 4 min |
 | 5. Directory-Changing Commands | 3/3 ✓ | 9 min | 3 min |
 | 6. Shell Integration | 2/2 ✓ | 3 min | 1.5 min |
+| 7. npm Distribution | 1/2 in progress | 2 min | 2 min |
 
 **Recent Trend:**
-- Phase 6 (Shell Integration) COMPLETE
-- Plan 06-01 complete: shell wrapper infrastructure — detect.go, embed.go, wrapper scripts, shell-init command (2 min)
-- Plan 06-02 complete: dynamic worktree tab completions — ValidArgsFunction on goto/delete/merge/rebase (1 min)
-- All shell wrappers (bash/zsh/fish) embedded and output via `wt shell-init`
-- Tab completion queries git worktree list live on every tab press
-- Ready for Phase 7 (npm Distribution)
+- Phase 7 (npm Distribution) IN PROGRESS
+- Plan 07-01 complete: goreleaser config and npm packages — @potato scope, 4 platform targets, Node.js wrapper (2 min)
+- GoReleaser cross-compilation scaffolding in place
+- npm package structure follows esbuild/turbo optionalDependencies pattern
+- Ready for goreleaser installation and binary build
 
 ## Accumulated Context
 
@@ -50,9 +50,9 @@ Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
 - **Go over Node.js/bash**: Fast startup (~5ms vs ~150ms), single binary, cobra completions for free (✓ Implemented - 03-01)
-- **npm for distribution**: Download tracking, familiar install (npx), cross-platform binary delivery (Pending implementation)
+- **npm for distribution**: Download tracking, familiar install (npx), cross-platform binary delivery (✓ In progress - 07-01)
 - **Shell wrappers for cd**: Subprocess can't change parent directory — standard pattern (zoxide, nvm) (✓ Implemented - 06-01)
-- **Scoped npm package**: "wt" taken on npm; @scope/wt guarantees availability, CLI stays `wt` (Pending implementation)
+- **Scoped npm package**: "wt" taken on npm; @scope/wt guarantees availability, CLI stays `wt` (✓ Implemented - 07-01 with @potato scope)
 - **Keep wt.zsh as legacy**: Existing users shouldn't break, gradual migration (Pending implementation)
 - **Port only, no new features**: Clean port reduces risk, new features come after v2.0 (Pending implementation)
 
@@ -96,6 +96,12 @@ Recent decisions affecting current work:
 - **Single-arg completion limit**: Stop completing after first positional argument - no second arg exists (06-02)
 - **No completion for new/eject**: These commands create new names, not select existing ones (06-02)
 
+**Phase 7 Decisions:**
+- **@potato npm scope**: User chose @potato for all packages - guarantees npm availability, CLI remains `wt` (07-01)
+- **Platform naming**: Package names use Go arch (amd64), cpu field uses npm arch (x64) - follows ecosystem conventions (07-01)
+- **Node.js wrapper mapping**: Wrapper maps Node.js process.arch to Go arch names for package resolution (07-01)
+- **.gitignore exception**: Added !npm/bin/wt to allow wrapper script commit while blocking Go binary (07-01)
+
 ### Pending Todos
 
 None yet.
@@ -107,7 +113,7 @@ None yet — v2.0 roadmap created, ready to plan Phase 3.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed Phase 6 (Shell Integration) — all 2 plans done
+Stopped at: Completed 07-01-PLAN.md (GoReleaser and npm packages)
 Resume file: None
 
 ---
