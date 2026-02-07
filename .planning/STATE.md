@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 6 of 9 (Shell Integration)
-Plan: 2 of 3 complete
-Status: In progress
-Last activity: 2026-02-07 — Completed 06-02-PLAN.md (dynamic worktree tab completions)
+Plan: 2 of 2 complete
+Status: Phase complete
+Last activity: 2026-02-07 — Completed Phase 6 (Shell Integration)
 
 Progress: [██████░░░░] 67% (6/9 phases complete)
 
@@ -32,15 +32,15 @@ Progress: [██████░░░░] 67% (6/9 phases complete)
 | 3. Core Go Binary Foundation | 2/2 ✓ | 7 min | 3.5 min |
 | 4. Configuration System | 2/2 ✓ | 8 min | 4 min |
 | 5. Directory-Changing Commands | 3/3 ✓ | 9 min | 3 min |
-| 6. Shell Integration | 2/3 | 3 min | 1.5 min |
+| 6. Shell Integration | 2/2 ✓ | 3 min | 1.5 min |
 
 **Recent Trend:**
-- Phase 6 (Shell Integration) IN PROGRESS (2 of 3 complete)
-- Plan 06-01 complete: shell wrapper infrastructure (2 min)
-- Plan 06-02 complete: dynamic worktree tab completions (1 min)
-- Cobra ValidArgsFunction wired to goto, delete, merge, rebase
+- Phase 6 (Shell Integration) COMPLETE
+- Plan 06-01 complete: shell wrapper infrastructure — detect.go, embed.go, wrapper scripts, shell-init command (2 min)
+- Plan 06-02 complete: dynamic worktree tab completions — ValidArgsFunction on goto/delete/merge/rebase (1 min)
+- All shell wrappers (bash/zsh/fish) embedded and output via `wt shell-init`
 - Tab completion queries git worktree list live on every tab press
-- Ready for Phase 6 Plan 3 (shell wrapper functions)
+- Ready for Phase 7 (npm Distribution)
 
 ## Accumulated Context
 
@@ -107,7 +107,7 @@ None yet — v2.0 roadmap created, ready to plan Phase 3.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 06-02-PLAN.md (dynamic worktree tab completions)
+Stopped at: Completed Phase 6 (Shell Integration) — all 2 plans done
 Resume file: None
 
 ---

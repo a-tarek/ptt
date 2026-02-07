@@ -95,8 +95,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Shell wrapper infrastructure (detect, embed, bash/zsh/fish scripts) and wt shell-init command
-- [ ] 06-02-PLAN.md — Dynamic worktree name completions for goto/delete/merge/rebase and completion command
+- [x] 06-01-PLAN.md — Shell wrapper infrastructure (detect, embed, bash/zsh/fish scripts) and wt shell-init command
+- [x] 06-02-PLAN.md — Dynamic worktree name completions for goto/delete/merge/rebase and completion command
 
 #### Phase 7: npm Distribution
 **Goal**: Package Go binaries for multi-platform distribution via npm with automatic platform detection
@@ -152,7 +152,7 @@ Plans:
 | 3. Core Go Binary Foundation | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 4. Configuration System | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 5. Directory-Changing Commands | v2.0 | 3/3 | Complete | 2026-02-07 |
-| 6. Shell Integration | v2.0 | 0/2 | Not started | - |
+| 6. Shell Integration | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 7. npm Distribution | v2.0 | 0/TBD | Not started | - |
 | 8. Interactive Installer | v2.0 | 0/TBD | Not started | - |
 | 9. Polish & Testing | v2.0 | 0/TBD | Not started | - |

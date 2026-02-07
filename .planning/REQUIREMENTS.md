@@ -27,17 +27,17 @@
 
 ### Shell Integration
 
-- [ ] **SHELL-01**: CD directive protocol (binary outputs `CD:<path>`, wrapper handles cd)
-- [ ] **SHELL-02**: Bash wrapper function (bash 3.2 compatible)
-- [ ] **SHELL-03**: Zsh wrapper function
-- [ ] **SHELL-04**: Fish wrapper function
+- [x] **SHELL-01**: CD directive protocol (binary outputs path via --output-path, wrapper handles cd)
+- [x] **SHELL-02**: Bash wrapper function (bash 3.2 compatible)
+- [x] **SHELL-03**: Zsh wrapper function
+- [x] **SHELL-04**: Fish wrapper function
 
 ### Completions
 
-- [ ] **COMP-01**: `wt completion bash` generates bash completions
-- [ ] **COMP-02**: `wt completion zsh` generates zsh completions
-- [ ] **COMP-03**: `wt completion fish` generates fish completions
-- [ ] **COMP-04**: Dynamic worktree name completion for goto/merge/rebase/delete
+- [x] **COMP-01**: `wt completion bash` generates bash completions
+- [x] **COMP-02**: `wt completion zsh` generates zsh completions
+- [x] **COMP-03**: `wt completion fish` generates fish completions
+- [x] **COMP-04**: Dynamic worktree name completion for goto/merge/rebase/delete
 
 ### npm Distribution
 
@@ -91,14 +91,14 @@
 | INFRA-03 | Phase 3 | Complete |
 | INFRA-04 | Phase 3 | Complete |
 | INFRA-05 | Phase 3 | Complete |
-| SHELL-01 | Phase 6 | Pending |
-| SHELL-02 | Phase 6 | Pending |
-| SHELL-03 | Phase 6 | Pending |
-| SHELL-04 | Phase 6 | Pending |
-| COMP-01 | Phase 6 | Pending |
-| COMP-02 | Phase 6 | Pending |
-| COMP-03 | Phase 6 | Pending |
-| COMP-04 | Phase 6 | Pending |
+| SHELL-01 | Phase 6 | Complete |
+| SHELL-02 | Phase 6 | Complete |
+| SHELL-03 | Phase 6 | Complete |
+| SHELL-04 | Phase 6 | Complete |
+| COMP-01 | Phase 6 | Complete |
+| COMP-02 | Phase 6 | Complete |
+| COMP-03 | Phase 6 | Complete |
+| COMP-04 | Phase 6 | Complete |
 | NPM-01 | Phase 7 | Pending |
 | NPM-02 | Phase 7 | Pending |
 | NPM-03 | Phase 7 | Pending |
