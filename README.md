@@ -303,6 +303,83 @@ The system processes configuration in two phases:
 
 This allows you to maintain a standard configuration while making exceptions as needed.
 
+## Workflows
+
+### Working with Containers
+
+When using wt with Dockerized applications (docker-compose projects, etc.), each worktree may need its own container configuration. Here are practical patterns for managing containers across worktrees.
+
+#### Port Overrides
+
+**Problem:** Multiple worktrees running the same docker-compose service will conflict on port bindings.
+
+**Solution:** Copy `.env` (or docker-compose override file) per worktree so each can bind different ports.
+
+**Example:**
+
+```
+# .wtconfig
+copy .env
+copy docker-compose.override.yml
+```
+
+Then edit the copied `.env` in each worktree to use different ports:
+
+```bash
+# In main worktree: .env
+APP_PORT=3000
+DB_PORT=5432
+
+# In feature-auth worktree: .env
+APP_PORT=3001
+DB_PORT=5433
+```
+
+#### Environment Files
+
+**Problem:** Each worktree may need different environment variables (database names, API keys for different environments).
+
+**Solution:** Use the `copy` action for `.env` files so each worktree gets independent configuration.
+
+**Contrast with `symlink`:** A symlinked `.env` means all worktrees share the same configuration — usually NOT what you want for containerized apps. Copying allows per-worktree customization.
+
+#### Named Volumes
+
+**Problem:** Docker named volumes are global. Multiple worktrees using the same volume name will share data unexpectedly.
+
+**Solution:** Use worktree-specific volume names in the copied docker-compose override, or use relative bind mounts that naturally isolate per worktree directory.
+
+**Example in docker-compose.override.yml:**
+
+```yaml
+volumes:
+  db_data:
+    name: myapp-feature-auth-db  # Unique per worktree
+```
+
+#### Complete Example Workflow
+
+```zsh
+# Set up .wtconfig for Docker projects
+wt init
+# Edit .wtconfig:
+#   copy .env
+#   copy docker-compose.override.yml
+#   symlink node_modules
+
+# Create worktree with isolated config
+wt new feature-payments
+
+# Edit .env in the new worktree to use different ports
+# APP_PORT=3001 (instead of 3000)
+# DB_PORT=5433 (instead of 5432)
+
+# Start containers in the new worktree
+docker-compose up -d
+```
+
+This approach lets you run multiple worktrees simultaneously without port conflicts or data pollution between environments.
+
 ## Tab Completion
 
 wt includes built-in zsh tab completion. After sourcing `wt.zsh`, press Tab after `wt` to see available commands. Press Tab after `wt goto`, `wt merge`, `wt rebase`, or `wt delete` to complete worktree names.
