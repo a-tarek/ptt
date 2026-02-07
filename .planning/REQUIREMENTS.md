@@ -47,10 +47,10 @@
 
 ### Interactive Installer
 
-- [ ] **INST-01**: `npx @scope/wt install` detects shell from $SHELL
-- [ ] **INST-02**: Shows what will be added to rc file, requires confirmation
-- [ ] **INST-03**: Idempotent — detects existing installation
-- [ ] **INST-04**: Provides manual instructions if user declines
+- [x] **INST-01**: `npx @scope/wt install` detects shell from $SHELL
+- [x] **INST-02**: Shows what will be added to rc file, requires confirmation
+- [x] **INST-03**: Idempotent — detects existing installation
+- [x] **INST-04**: Provides manual instructions if user declines
 
 ## Future Requirements
 
@@ -102,10 +102,10 @@
 | NPM-01 | Phase 7 | Complete |
 | NPM-02 | Phase 7 | Complete |
 | NPM-03 | Phase 7 | Complete |
-| INST-01 | Phase 8 | Pending |
-| INST-02 | Phase 8 | Pending |
-| INST-03 | Phase 8 | Pending |
-| INST-04 | Phase 8 | Pending |
+| INST-01 | Phase 8 | Complete |
+| INST-02 | Phase 8 | Complete |
+| INST-03 | Phase 8 | Complete |
+| INST-04 | Phase 8 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 28 total
