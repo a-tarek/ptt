@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 5 of 9 (Directory-Changing Commands)
-Plan: 2 of 3 complete
-Status: In progress
-Last activity: 2026-02-07 — Completed 05-02-PLAN.md (wt new command)
+Plan: 3 of 3 complete
+Status: Phase complete
+Last activity: 2026-02-07 — Completed 05-03-PLAN.md (wt eject command)
 
-Progress: [████░░░░░░] 47% (4/9 phases complete + 2/3 of phase 5)
+Progress: [█████░░░░░] 56% (5/9 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
-- Average duration: ~2.5 min per plan
-- Total execution time: ~0.62 hours
+- Total plans completed: 13
+- Average duration: ~2.6 min per plan
+- Total execution time: ~0.69 hours
 
 **By Phase:**
 
@@ -31,14 +31,15 @@ Progress: [████░░░░░░] 47% (4/9 phases complete + 2/3 of pha
 | 2. User-Facing Documentation | 3 | - | ~2 min |
 | 3. Core Go Binary Foundation | 2/2 ✓ | 7 min | 3.5 min |
 | 4. Configuration System | 2/2 ✓ | 8 min | 4 min |
-| 5. Directory-Changing Commands | 2/3 | 5 min | 2.5 min |
+| 5. Directory-Changing Commands | 3/3 ✓ | 9 min | 3 min |
 
 **Recent Trend:**
-- Phase 5 (Directory-Changing Commands) in progress (2/3 complete)
-- Plan 05-01 complete: goto/home/merge/rebase + shared git helpers
-- Plan 05-02 complete: wt new command with config integration
-- Fixed bare repo detection bug (WorktreePath now checks home path)
-- Ready for Plan 05-03 (eject command)
+- Phase 5 (Directory-Changing Commands) COMPLETE
+- Plan 05-01 complete: goto/home/merge/rebase + shared git helpers (3 min)
+- Plan 05-02 complete: wt new command with config integration (2 min)
+- Plan 05-03 complete: wt eject command with stash handling (4 min)
+- All directory-changing commands ready for shell wrapper integration
+- Ready for Phase 6 (npm packaging and distribution)
 
 ## Accumulated Context
 
@@ -79,6 +80,9 @@ Recent decisions affecting current work:
 - **Config merge on top**: --copy/--symlink flags merge with file-based config, apply independently of --skip-config (05-02)
 - **Silent config skip**: Missing .wtconfig is silently skipped, not an error - only projects that need it create it (05-02)
 - **Bare detection via home path**: WorktreePath checks if home path is bare, not current directory - when in worktree of bare repo, IsBareRepository() returns false (05-02)
+- **Stash conflict non-fatal**: When stash pop has merge conflicts, print warning but don't fail - stash was still popped, user can resolve (05-03)
+- **Fallback branch detection**: Home worktree (srcRoot == homePath) uses main/master, non-home uses directory suffix (05-03)
+- **Multi-step rollback**: Each eject step has rollback path - pop stash, checkout back, remove worktree (05-03)
 
 ### Pending Todos
 
@@ -91,7 +95,7 @@ None yet — v2.0 roadmap created, ready to plan Phase 3.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 05-02-PLAN.md (wt new command) - Phase 5 in progress (2/3 complete)
+Stopped at: Completed 05-03-PLAN.md (wt eject command) - Phase 5 complete
 Resume file: None
 
 ---
