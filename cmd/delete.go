@@ -18,9 +18,10 @@ var (
 )
 
 var deleteCmd = &cobra.Command{
-	Use:   "delete <worktree>",
-	Short: "Remove a worktree",
-	Args:  cobra.ExactArgs(1),
+	Use:               "delete <worktree>",
+	Short:             "Remove a worktree",
+	Args:              cobra.ExactArgs(1),
+	ValidArgsFunction: worktreeNameCompletion,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name := args[0]
 

@@ -10,9 +10,10 @@ import (
 )
 
 var rebaseCmd = &cobra.Command{
-	Use:   "rebase <worktree>",
-	Short: "Rebase current onto worktree's branch",
-	Args:  cobra.ExactArgs(1),
+	Use:               "rebase <worktree>",
+	Short:             "Rebase current onto worktree's branch",
+	Args:              cobra.ExactArgs(1),
+	ValidArgsFunction: worktreeNameCompletion,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if !git.IsInsideGitRepo() {
 			return fmt.Errorf("not inside a git repository")
