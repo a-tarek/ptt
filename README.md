@@ -162,6 +162,44 @@ wt eject my-feature
 wt eject --copy .env.local --symlink node_modules
 ```
 
+### wt goto
+
+**Usage:** `wt goto <worktree>`
+
+Navigate to a worktree by name. Resolves the name by matching the directory suffix (e.g., `wt goto staging` matches `myapp-staging`).
+
+**Example:**
+
+```zsh
+wt goto feature-auth
+```
+
+### wt home
+
+**Usage:** `wt home`
+
+Navigate back to the main (first) worktree. Useful when working in a secondary worktree and wanting to return to the primary one.
+
+**Example:**
+
+```zsh
+wt home
+```
+
+### wt list
+
+**Usage:** `wt list`
+
+List all worktrees with their directory names and branches. The current worktree is marked with `*`.
+
+**Example output:**
+
+```
+* myapp                          main
+  myapp-feature-auth             feature-auth
+  myapp-hotfix                   hotfix
+```
+
 ## Tab Completion
 
 wt includes built-in zsh tab completion. After sourcing `wt.zsh`, press Tab after `wt` to see available commands. Press Tab after `wt goto`, `wt merge`, `wt rebase`, or `wt delete` to complete worktree names.
