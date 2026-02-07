@@ -1,32 +1,17 @@
-# Roadmap: wt Documentation Refresh
+# Roadmap: wt
 
-## Overview
+## Milestones
 
-A two-phase documentation project: first refresh the internal codebase map to match current wt.zsh features (new commands, override flags, .wtconfig support), then write comprehensive user-facing documentation in README.md. Phase 2 depends on Phase 1 to ensure user docs reference accurate internal knowledge.
+- ✅ **v1.0 Documentation** - Phases 1-2 (shipped 2026-02-07)
+- 🚧 **v2.0 Go Rewrite** - Phases 3-9 (in progress)
 
 ## Phases
 
-**Phase Numbering:**
-- Integer phases (1, 2): Planned milestone work
-- Decimal phases (1.1, 1.2): Urgent insertions (marked with INSERTED)
-
-Decimal phases appear between their surrounding integers in numeric order.
-
-- [x] **Phase 1: Internal Documentation Refresh** - Update codebase map files to match current code
-- [x] **Phase 2: User-Facing Documentation** - Write complete README.md with all features documented
-
-## Phase Details
+<details>
+<summary>✅ v1.0 Documentation (Phases 1-2) - SHIPPED 2026-02-07</summary>
 
 ### Phase 1: Internal Documentation Refresh
 **Goal**: Accurate codebase map reflecting all current wt.zsh features and structure
-**Depends on**: Nothing (first phase)
-**Requirements**: MAP-01, MAP-02, MAP-03, MAP-04, MAP-05
-**Success Criteria** (what must be TRUE):
-  1. ARCHITECTURE.md reflects all 15+ functions currently in wt.zsh
-  2. CONVENTIONS.md documents flag parsing patterns and override mechanism
-  3. STRUCTURE.md line ranges match current file layout
-  4. CONCERNS.md lists all known issues (zsh reserved vars, edge cases)
-  5. STACK.md, INTEGRATIONS.md, TESTING.md accurately reflect current state
 **Plans**: 3 plans
 
 Plans:
@@ -36,14 +21,6 @@ Plans:
 
 ### Phase 2: User-Facing Documentation
 **Goal**: Complete README.md enabling users to install, learn, and use every wt feature
-**Depends on**: Phase 1
-**Requirements**: DOC-01, DOC-02, DOC-03, DOC-04, DOC-05, DOC-06, DOC-07, DOC-08, DOC-09, DOC-10, DOC-11
-**Success Criteria** (what must be TRUE):
-  1. User can clone repo and source wt.zsh in .zshrc following README instructions
-  2. User can find complete usage for every command (new, eject, goto, home, list, merge, rebase, delete, init)
-  3. User understands all flags (--copy, --symlink) and their use cases
-  4. User can create and customize .wtconfig following documented format
-  5. User knows container/Docker workflows (port overrides, .env handling, named volumes)
 **Plans**: 3 plans
 
 Plans:
@@ -51,12 +28,133 @@ Plans:
 - [x] 02-02-PLAN.md — Add wt new, wt eject, wt goto, wt home, wt list command reference
 - [x] 02-03-PLAN.md — Add wt merge/rebase/delete, configuration section, and container workflow
 
+</details>
+
+### 🚧 v2.0 Go Rewrite (In Progress)
+
+**Milestone Goal:** Rewrite wt in Go for cross-platform, multi-shell support with npm distribution
+
+#### Phase 3: Core Go Binary Foundation
+**Goal**: Establish project structure with simple commands that don't require shell integration
+**Depends on**: Nothing (first phase of v2.0)
+**Requirements**: INFRA-03, INFRA-04, INFRA-05, CMD-06, CMD-04, CMD-09
+**Success Criteria** (what must be TRUE):
+  1. User can run `wt --version` and see version number
+  2. User can run `wt list` and see all worktrees with current marker
+  3. User can run `wt init` to create .wtconfig template
+  4. User can run `wt delete <worktree>` to remove a worktree
+  5. Binary returns proper exit codes (0=success, 1=error) with errors to stderr
+**Plans**: TBD
+
+Plans:
+- [ ] 03-01: TBD
+- [ ] 03-02: TBD
+
+#### Phase 4: Configuration System
+**Goal**: Parse .wtconfig and handle copy/symlink actions with CLI flag overrides
+**Depends on**: Phase 3
+**Requirements**: INFRA-01, INFRA-02
+**Success Criteria** (what must be TRUE):
+  1. User can create .wtconfig with copy/symlink actions
+  2. Binary correctly parses .wtconfig (handles comments, blank lines)
+  3. Override flags (--copy/--symlink) correctly merge with .wtconfig entries
+  4. Binary works correctly without .wtconfig (config-free operation)
+**Plans**: TBD
+
+Plans:
+- [ ] 04-01: TBD
+
+#### Phase 5: Directory-Changing Commands
+**Goal**: Implement all cd commands with structured output for shell wrapper coordination
+**Depends on**: Phase 4
+**Requirements**: CMD-01, CMD-02, CMD-03, CMD-05, CMD-07, CMD-08
+**Success Criteria** (what must be TRUE):
+  1. Binary outputs target path when invoked with --output-path flag
+  2. User can create new worktree with `wt new` (applying .wtconfig actions)
+  3. User can resolve worktree by suffix match (suffix-based name resolution works)
+  4. User can eject current branch with stash handling
+  5. User can merge and rebase worktree branches
+**Plans**: TBD
+
+Plans:
+- [ ] 05-01: TBD
+- [ ] 05-02: TBD
+
+#### Phase 6: Shell Integration
+**Goal**: Provide shell wrapper functions and completions for bash, zsh, and fish
+**Depends on**: Phase 5
+**Requirements**: SHELL-01, SHELL-02, SHELL-03, SHELL-04, COMP-01, COMP-02, COMP-03, COMP-04
+**Success Criteria** (what must be TRUE):
+  1. User can source bash wrapper and `wt goto <worktree>` changes directory in current shell
+  2. User can source zsh wrapper and cd commands work without breaking PATH lookups
+  3. User can source fish wrapper and cd commands work
+  4. User can tab-complete worktree names for goto/merge/rebase/delete
+  5. User can generate completions for their shell with `wt completion <shell>`
+**Plans**: TBD
+
+Plans:
+- [ ] 06-01: TBD
+- [ ] 06-02: TBD
+
+#### Phase 7: npm Distribution
+**Goal**: Package Go binaries for multi-platform distribution via npm with automatic platform detection
+**Depends on**: Phase 6
+**Requirements**: NPM-01, NPM-02, NPM-03
+**Success Criteria** (what must be TRUE):
+  1. User can `npm install @scope/wt` and get correct binary for their platform
+  2. Only the platform-specific binary is downloaded (not all platforms)
+  3. goreleaser config produces npm-compatible packages for all supported platforms
+  4. Binary is executable after npm install (chmod +x applied)
+**Plans**: TBD
+
+Plans:
+- [ ] 07-01: TBD
+- [ ] 07-02: TBD
+
+#### Phase 8: Interactive Installer
+**Goal**: Provide npx-based installer that safely modifies shell rc files with user confirmation
+**Depends on**: Phase 7
+**Requirements**: INST-01, INST-02, INST-03, INST-04
+**Success Criteria** (what must be TRUE):
+  1. User can run `npx @scope/wt install` and see detected shell
+  2. Installer shows what will be added to rc file before modifying
+  3. Running installer twice doesn't duplicate entries (idempotent)
+  4. User declining installation gets manual instructions
+  5. RC file modifications use marker blocks for safe uninstall
+**Plans**: TBD
+
+Plans:
+- [ ] 08-01: TBD
+- [ ] 08-02: TBD
+
+#### Phase 9: Polish & Testing
+**Goal**: Improve error messages, add CI/CD, and comprehensive testing across platforms
+**Depends on**: Phase 8
+**Requirements**: (No specific requirements - polish existing features)
+**Success Criteria** (what must be TRUE):
+  1. Error messages include actionable suggestions
+  2. CI/CD pipeline runs tests on Linux and macOS
+  3. Shell wrappers tested on bash 3.2, bash 5+, zsh 5.8+, fish 3.0+
+  4. README includes installation, usage, and troubleshooting
+**Plans**: TBD
+
+Plans:
+- [ ] 09-01: TBD
+
 ## Progress
 
-**Execution Order:**
-Phases execute in numeric order: 1 → 2
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Internal Documentation | v1.0 | 3/3 | Complete | 2026-02-07 |
+| 2. User-Facing Documentation | v1.0 | 3/3 | Complete | 2026-02-07 |
+| 3. Core Go Binary Foundation | v2.0 | 0/TBD | Not started | - |
+| 4. Configuration System | v2.0 | 0/TBD | Not started | - |
+| 5. Directory-Changing Commands | v2.0 | 0/TBD | Not started | - |
+| 6. Shell Integration | v2.0 | 0/TBD | Not started | - |
+| 7. npm Distribution | v2.0 | 0/TBD | Not started | - |
+| 8. Interactive Installer | v2.0 | 0/TBD | Not started | - |
+| 9. Polish & Testing | v2.0 | 0/TBD | Not started | - |
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Internal Documentation Refresh | 3/3 | Complete | 2026-02-07 |
-| 2. User-Facing Documentation | 3/3 | Complete | 2026-02-07 |
+---
+*Roadmap created: 2026-02-07*
+*v1.0 complete (phases 1-2), v2.0 phases 3-9 planned*

@@ -77,41 +77,41 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CMD-01 | TBD | Pending |
-| CMD-02 | TBD | Pending |
-| CMD-03 | TBD | Pending |
-| CMD-04 | TBD | Pending |
-| CMD-05 | TBD | Pending |
-| CMD-06 | TBD | Pending |
-| CMD-07 | TBD | Pending |
-| CMD-08 | TBD | Pending |
-| CMD-09 | TBD | Pending |
-| INFRA-01 | TBD | Pending |
-| INFRA-02 | TBD | Pending |
-| INFRA-03 | TBD | Pending |
-| INFRA-04 | TBD | Pending |
-| INFRA-05 | TBD | Pending |
-| SHELL-01 | TBD | Pending |
-| SHELL-02 | TBD | Pending |
-| SHELL-03 | TBD | Pending |
-| SHELL-04 | TBD | Pending |
-| COMP-01 | TBD | Pending |
-| COMP-02 | TBD | Pending |
-| COMP-03 | TBD | Pending |
-| COMP-04 | TBD | Pending |
-| NPM-01 | TBD | Pending |
-| NPM-02 | TBD | Pending |
-| NPM-03 | TBD | Pending |
-| INST-01 | TBD | Pending |
-| INST-02 | TBD | Pending |
-| INST-03 | TBD | Pending |
-| INST-04 | TBD | Pending |
+| CMD-01 | Phase 5 | Pending |
+| CMD-02 | Phase 5 | Pending |
+| CMD-03 | Phase 5 | Pending |
+| CMD-04 | Phase 3 | Pending |
+| CMD-05 | Phase 5 | Pending |
+| CMD-06 | Phase 3 | Pending |
+| CMD-07 | Phase 5 | Pending |
+| CMD-08 | Phase 5 | Pending |
+| CMD-09 | Phase 3 | Pending |
+| INFRA-01 | Phase 4 | Pending |
+| INFRA-02 | Phase 4 | Pending |
+| INFRA-03 | Phase 3 | Pending |
+| INFRA-04 | Phase 3 | Pending |
+| INFRA-05 | Phase 3 | Pending |
+| SHELL-01 | Phase 6 | Pending |
+| SHELL-02 | Phase 6 | Pending |
+| SHELL-03 | Phase 6 | Pending |
+| SHELL-04 | Phase 6 | Pending |
+| COMP-01 | Phase 6 | Pending |
+| COMP-02 | Phase 6 | Pending |
+| COMP-03 | Phase 6 | Pending |
+| COMP-04 | Phase 6 | Pending |
+| NPM-01 | Phase 7 | Pending |
+| NPM-02 | Phase 7 | Pending |
+| NPM-03 | Phase 7 | Pending |
+| INST-01 | Phase 8 | Pending |
+| INST-02 | Phase 8 | Pending |
+| INST-03 | Phase 8 | Pending |
+| INST-04 | Phase 8 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 28 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 28
+- Mapped to phases: 28 (100% coverage)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-07*
-*Last updated: 2026-02-07 after initial definition*
+*Last updated: 2026-02-07 with phase mappings*
