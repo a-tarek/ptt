@@ -59,10 +59,11 @@ Plans:
   2. Binary correctly parses .wtconfig (handles comments, blank lines)
   3. Override flags (--copy/--symlink) correctly merge with .wtconfig entries
   4. Binary works correctly without .wtconfig (config-free operation)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01-PLAN.md — Config parsing, validation, resolution, inline flags, and init command updates (TDD)
+- [ ] 04-02-PLAN.md — Setup action execution (copy/symlink/run) with rollback (TDD)
 
 #### Phase 5: Directory-Changing Commands
 **Goal**: Implement all cd commands with structured output for shell wrapper coordination
@@ -148,7 +149,7 @@ Plans:
 | 1. Internal Documentation | v1.0 | 3/3 | Complete | 2026-02-07 |
 | 2. User-Facing Documentation | v1.0 | 3/3 | Complete | 2026-02-07 |
 | 3. Core Go Binary Foundation | v2.0 | 2/2 | Complete | 2026-02-07 |
-| 4. Configuration System | v2.0 | 0/TBD | Not started | - |
+| 4. Configuration System | v2.0 | 0/2 | Not started | - |
 | 5. Directory-Changing Commands | v2.0 | 0/TBD | Not started | - |
 | 6. Shell Integration | v2.0 | 0/TBD | Not started | - |
 | 7. npm Distribution | v2.0 | 0/TBD | Not started | - |
