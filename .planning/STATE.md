@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 8 of 9 (Interactive Installer)
-Plan: 1 of 1 complete
+Plan: 2 of 2 complete
 Status: Phase complete
-Last activity: 2026-02-07 — Completed 08-01-PLAN.md
+Last activity: 2026-02-07 — Completed 08-02-PLAN.md
 
-Progress: [████████░] 83% (15/18 total plans complete)
+Progress: [████████░] 89% (16/18 total plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
+- Total plans completed: 16
 - Average duration: ~2.3 min per plan
-- Total execution time: ~0.70 hours
+- Total execution time: ~0.73 hours
 
 **By Phase:**
 
@@ -34,14 +34,16 @@ Progress: [████████░] 83% (15/18 total plans complete)
 | 5. Directory-Changing Commands | 3/3 ✓ | 9 min | 3 min |
 | 6. Shell Integration | 2/2 ✓ | 3 min | 1.5 min |
 | 7. npm Distribution | 2/2 ✓ | 7 min | 3.5 min |
-| 8. Interactive Installer | 1/1 ✓ | 4 min | 4 min |
+| 8. Interactive Installer | 2/2 ✓ | 6 min | 3 min |
 
 **Recent Trend:**
 - Phase 8 (Interactive Installer) COMPLETE ✓
 - Plan 08-01 complete: wt install command — guided walkthrough, RC file operations, v1 migration (4 min)
+- Plan 08-02 complete: wt uninstall command — clean removal path with confirmation flow (2 min)
 - Marker-based idempotent installation with backup/rollback
 - Conda/certbot-style markers for clear block management
 - V1 detection and safe migration (comment out old source lines)
+- Paired install/uninstall commands for complete lifecycle
 - Ready for Phase 9 (Remaining Features)
 
 ## Accumulated Context
@@ -112,6 +114,8 @@ Recent decisions affecting current work:
 - **V1 migration strategy**: Comment out old 'source wt.zsh' lines with [wt v2 migration] prefix for safety (08-01)
 - **Backup retention**: Keep .wt-backup file after successful install for user peace of mind (08-01)
 - **Idempotency check**: Simple HasMarkerBlock() marker presence check prevents duplicate installations (08-01)
+- **No v1 uncommenting on uninstall**: User can manually uncomment v1 lines if reverting - automatic uncommenting could be fragile (08-02)
+- **Uninstall only cleans rc file**: Does not run npm uninstall (self-destructive mid-execution), prints instructions instead (08-02)
 
 ### Pending Todos
 
@@ -124,7 +128,7 @@ None yet — v2.0 roadmap created, ready to plan Phase 3.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 08-01-PLAN.md (Interactive installer) - Phase 8 complete
+Stopped at: Completed 08-02-PLAN.md (Interactive installer) - Phase 8 complete
 Resume file: None
 
 ---
