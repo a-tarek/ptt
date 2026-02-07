@@ -9,18 +9,18 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 ## Current Position
 
-Phase: 1 of 2 (Internal Documentation Refresh) — COMPLETE
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-02-07 — Phase 1 execution complete (all 3 plans)
+Phase: 2 of 2 (User-Facing Documentation)
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-02-07 — Completed 02-01-PLAN.md
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 67%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: ~4 min
+- Total plans completed: 4
+- Average duration: ~3 min
 - Total execution time: ~0.2 hours
 
 **By Phase:**
@@ -28,10 +28,11 @@ Progress: [█████░░░░░] 50%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-internal-documentation-refresh | 3 | ~11 min | ~4 min |
+| 02-user-facing-documentation | 1 | ~1 min | ~1 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (3 min), 01-02 (5 min), 01-03 (3 min)
-- Trend: Baseline
+- Last 5 plans: 01-01 (3 min), 01-02 (5 min), 01-03 (3 min), 02-01 (1 min)
+- Trend: Fast execution
 
 *Updated after each plan completion*
 
@@ -45,7 +46,9 @@ Recent decisions affecting current work:
 - 01-01: Document full call chains (wt new → _wt_setup → .wtconfig → overrides)
 - 01-02: Document both descriptive and prescriptive conventions (describe pattern, state rule)
 - 01-02: Track reserved variable collision fix (path→entry) as preventive measure
-- Pending: Source-only install (simplest approach, no package manager overhead)
+- 02-01: Source-only install (simplest approach, no package manager overhead)
+- 02-01: Quick start shows 5-command workflow (init, new, goto, home, delete)
+- 02-01: Commands overview includes full usage synopsis from wt dispatcher
 - Pending: Include container tips in README (practical value for real-world usage with Docker apps)
 
 ### Pending Todos
@@ -58,6 +61,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-07
-Stopped at: Phase 1 complete, ready for Phase 2 planning
+Last session: 2026-02-07T05:34:21Z
+Stopped at: Completed 02-01-PLAN.md (Initial README)
 Resume file: None
