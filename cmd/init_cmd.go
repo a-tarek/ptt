@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/ahmedelarabyy/wt/internal/git"
 	"github.com/spf13/cobra"
@@ -25,6 +26,10 @@ const wtconfigTemplate = `# .wtconfig — actions to run when creating new workt
 # run npm install
 `
 
+var (
+	initName string
+)
+
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Create .wtconfig template",
@@ -34,23 +39,31 @@ var initCmd = &cobra.Command{
 			return fmt.Errorf("not inside a git repository")
 		}
 
-		// Get current directory
-		cwd, err := os.Getwd()
+		// Get repo root
+		repoRoot, err := git.CurrentWorktreeRoot()
 		if err != nil {
-			return fmt.Errorf("failed to get current directory: %w", err)
+			return fmt.Errorf("failed to get repo root: %w", err)
 		}
 
-		// Config path in current directory
-		configPath := cwd + "/.wtconfig"
+		// Determine config filename
+		var configFilename string
+		if initName != "" {
+			configFilename = ".wtconfig-" + initName
+		} else {
+			configFilename = ".wtconfig"
+		}
 
-		// Error if .wtconfig already exists
+		// Config path at repo root
+		configPath := filepath.Join(repoRoot, configFilename)
+
+		// Error if config already exists
 		if _, err := os.Stat(configPath); err == nil {
-			return fmt.Errorf(".wtconfig already exists")
+			return fmt.Errorf("%s already exists", configFilename)
 		}
 
 		// Write template
 		if err := os.WriteFile(configPath, []byte(wtconfigTemplate), 0644); err != nil {
-			return fmt.Errorf("failed to create .wtconfig: %w", err)
+			return fmt.Errorf("failed to create %s: %w", configFilename, err)
 		}
 
 		// Silent on success
@@ -60,4 +73,5 @@ var initCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(initCmd)
+	initCmd.Flags().StringVar(&initName, "name", "", "create named config variant (.wtconfig-{name})")
 }
