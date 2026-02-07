@@ -10,28 +10,28 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 2 of 2 (User-Facing Documentation)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-02-07 — Completed 02-02-PLAN.md
+Plan: 3 of 3 in current phase
+Status: Phase complete
+Last activity: 2026-02-07 — Completed 02-03-PLAN.md
 
-Progress: [████████░░] 83%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: ~2 min
-- Total execution time: ~0.2 hours
+- Total execution time: ~0.3 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-internal-documentation-refresh | 3 | ~11 min | ~4 min |
-| 02-user-facing-documentation | 2 | ~2 min | ~1 min |
+| 02-user-facing-documentation | 3 | ~4 min | ~1.3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (5 min), 01-03 (3 min), 02-01 (1 min), 02-02 (1 min)
+- Last 5 plans: 01-03 (3 min), 02-01 (1 min), 02-02 (1 min), 02-03 (2 min)
 - Trend: Fast execution
 
 *Updated after each plan completion*
@@ -52,7 +52,8 @@ Recent decisions affecting current work:
 - 02-02: Document flag override precedence (flags override .wtconfig for same path)
 - 02-02: Show one-off flag usage (paths not in .wtconfig)
 - 02-02: Explain eject fallback branch logic (main/master vs original branch)
-- Pending: Include container tips in README (practical value for real-world usage with Docker apps)
+- 02-03: Document .wtconfig with copy vs symlink guidance (users need clear examples)
+- 02-03: Include container workflow section (Docker users need multi-worktree patterns)
 
 ### Pending Todos
 
@@ -64,6 +65,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-07T05:37:44Z
-Stopped at: Completed 02-02-PLAN.md (Command Reference)
+Last session: 2026-02-07T06:06:47Z
+Stopped at: Completed 02-03-PLAN.md (Configuration and Workflows)
 Resume file: None
