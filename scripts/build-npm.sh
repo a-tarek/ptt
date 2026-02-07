@@ -17,18 +17,21 @@ echo ""
 echo "==> Staging binaries in npm platform directories..."
 
 # Map goreleaser output to npm platform directories
-# goreleaser uses _v1 suffix for amd64 builds (GOAMD64 default level)
-declare -A PLATFORM_MAP=(
-  ["darwin-arm64"]="dist/wt_darwin_arm64/wt"
-  ["darwin-amd64"]="dist/wt_darwin_amd64_v1/wt"
-  ["linux-arm64"]="dist/wt_linux_arm64/wt"
-  ["linux-amd64"]="dist/wt_linux_amd64_v1/wt"
+# goreleaser uses _v1 suffix for amd64, _v8.0 suffix for arm64 builds
+
+# Define platform mappings (platform|source_path)
+PLATFORMS=(
+  "darwin-arm64|dist/wt_darwin_arm64_v8.0/wt"
+  "darwin-amd64|dist/wt_darwin_amd64_v1/wt"
+  "linux-arm64|dist/wt_linux_arm64_v8.0/wt"
+  "linux-amd64|dist/wt_linux_amd64_v1/wt"
 )
 
 STAGED_COUNT=0
 
-for platform in "${!PLATFORM_MAP[@]}"; do
-  src="${PLATFORM_MAP[$platform]}"
+for entry in "${PLATFORMS[@]}"; do
+  platform="${entry%%|*}"
+  src="${entry##*|}"
   dest="npm/platforms/$platform/bin/wt"
 
   if [[ ! -f "$src" ]]; then
