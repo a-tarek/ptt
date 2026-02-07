@@ -111,7 +111,7 @@ Plans:
 
 Plans:
 - [x] 07-01-PLAN.md — GoReleaser cross-compilation config and npm package structure (main wrapper + 4 platform packages)
-- [ ] 07-02-PLAN.md — Build/publish automation scripts and local pipeline validation
+- [x] 07-02-PLAN.md — Build/publish automation scripts and local pipeline validation
 
 #### Phase 8: Interactive Installer
 **Goal**: Provide npx-based installer that safely modifies shell rc files with user confirmation
@@ -153,7 +153,7 @@ Plans:
 | 4. Configuration System | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 5. Directory-Changing Commands | v2.0 | 3/3 | Complete | 2026-02-07 |
 | 6. Shell Integration | v2.0 | 2/2 | Complete | 2026-02-07 |
-| 7. npm Distribution | v2.0 | 0/2 | Not started | - |
+| 7. npm Distribution | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 8. Interactive Installer | v2.0 | 0/TBD | Not started | - |
 | 9. Polish & Testing | v2.0 | 0/TBD | Not started | - |
 

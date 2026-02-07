@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 7 of 9 (npm Distribution)
-Plan: 1 of 2 complete
-Status: In progress
-Last activity: 2026-02-07 — Completed 07-01-PLAN.md
+Plan: 2 of 2 complete
+Status: Phase complete
+Last activity: 2026-02-07 — Completed 07-02-PLAN.md
 
-Progress: [███████░░░] 72% (13/18 total plans complete)
+Progress: [███████░░] 78% (14/18 total plans complete)
 
 ## Performance Metrics
 
@@ -33,14 +33,15 @@ Progress: [███████░░░] 72% (13/18 total plans complete)
 | 4. Configuration System | 2/2 ✓ | 8 min | 4 min |
 | 5. Directory-Changing Commands | 3/3 ✓ | 9 min | 3 min |
 | 6. Shell Integration | 2/2 ✓ | 3 min | 1.5 min |
-| 7. npm Distribution | 1/2 in progress | 2 min | 2 min |
+| 7. npm Distribution | 2/2 ✓ | 7 min | 3.5 min |
 
 **Recent Trend:**
-- Phase 7 (npm Distribution) IN PROGRESS
+- Phase 7 (npm Distribution) COMPLETE ✓
 - Plan 07-01 complete: goreleaser config and npm packages — @potato scope, 4 platform targets, Node.js wrapper (2 min)
-- GoReleaser cross-compilation scaffolding in place
-- npm package structure follows esbuild/turbo optionalDependencies pattern
-- Ready for goreleaser installation and binary build
+- Plan 07-02 complete: build/publish automation scripts — goreleaser integration, coordinated npm publishing (5 min)
+- Complete npm distribution pipeline validated end-to-end
+- All 4 platform binaries built and staged successfully
+- Ready for Phase 8 (Interactive Installer)
 
 ## Accumulated Context
 
@@ -101,6 +102,9 @@ Recent decisions affecting current work:
 - **Platform naming**: Package names use Go arch (amd64), cpu field uses npm arch (x64) - follows ecosystem conventions (07-01)
 - **Node.js wrapper mapping**: Wrapper maps Node.js process.arch to Go arch names for package resolution (07-01)
 - **.gitignore exception**: Added !npm/bin/wt to allow wrapper script commit while blocking Go binary (07-01)
+- **goreleaser path mapping**: Build script handles _v8.0 suffix for arm64 and _v1 for amd64 builds (07-02)
+- **jq-free version updates**: Publish script uses node -e for JSON manipulation, no jq dependency (07-02)
+- **Platform-first publishing**: Platform packages published before main package to satisfy dependency order (07-02)
 
 ### Pending Todos
 
@@ -113,7 +117,7 @@ None yet — v2.0 roadmap created, ready to plan Phase 3.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 07-01-PLAN.md (GoReleaser and npm packages)
+Stopped at: Completed 07-02-PLAN.md (Build and publish automation) - Phase 7 complete
 Resume file: None
 
 ---
