@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 5 of 9 (Directory-Changing Commands)
-Plan: 1 of 3 complete
+Plan: 2 of 3 complete
 Status: In progress
-Last activity: 2026-02-07 — Completed 05-01-PLAN.md (Simple Commands & Git Helpers)
+Last activity: 2026-02-07 — Completed 05-02-PLAN.md (wt new command)
 
-Progress: [████░░░░░░] 44% (4/9 phases complete + 1/3 of phase 5)
+Progress: [████░░░░░░] 47% (4/9 phases complete + 2/3 of phase 5)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: ~3 min per plan
-- Total execution time: ~0.58 hours
+- Total plans completed: 12
+- Average duration: ~2.5 min per plan
+- Total execution time: ~0.62 hours
 
 **By Phase:**
 
@@ -31,13 +31,14 @@ Progress: [████░░░░░░] 44% (4/9 phases complete + 1/3 of pha
 | 2. User-Facing Documentation | 3 | - | ~2 min |
 | 3. Core Go Binary Foundation | 2/2 ✓ | 7 min | 3.5 min |
 | 4. Configuration System | 2/2 ✓ | 8 min | 4 min |
-| 5. Directory-Changing Commands | 1/3 | 3 min | 3 min |
+| 5. Directory-Changing Commands | 2/3 | 5 min | 2.5 min |
 
 **Recent Trend:**
-- Phase 5 (Directory-Changing Commands) started
+- Phase 5 (Directory-Changing Commands) in progress (2/3 complete)
 - Plan 05-01 complete: goto/home/merge/rebase + shared git helpers
-- Shell coordination protocol established (--output-path)
-- Ready for Plan 05-02 (wt new command)
+- Plan 05-02 complete: wt new command with config integration
+- Fixed bare repo detection bug (WorktreePath now checks home path)
+- Ready for Plan 05-03 (eject command)
 
 ## Accumulated Context
 
@@ -75,6 +76,9 @@ Recent decisions affecting current work:
 - **--output-path protocol**: Hidden persistent flag outputs only path to stdout for shell wrapper coordination - confirmations always go to stderr (05-01)
 - **Auto-detect bare vs regular**: Use IsBareRepository() to determine nested vs sibling mode - no config needed, fixes v1.0 compounding bug (05-01)
 - **Already-there no-op**: Print message to stderr and exit 0 when already in target worktree - not an error condition (05-01)
+- **Config merge on top**: --copy/--symlink flags merge with file-based config, apply independently of --skip-config (05-02)
+- **Silent config skip**: Missing .wtconfig is silently skipped, not an error - only projects that need it create it (05-02)
+- **Bare detection via home path**: WorktreePath checks if home path is bare, not current directory - when in worktree of bare repo, IsBareRepository() returns false (05-02)
 
 ### Pending Todos
 
@@ -87,7 +91,7 @@ None yet — v2.0 roadmap created, ready to plan Phase 3.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 05-01-PLAN.md (Simple Commands & Git Helpers) - Phase 5 in progress
+Stopped at: Completed 05-02-PLAN.md (wt new command) - Phase 5 in progress (2/3 complete)
 Resume file: None
 
 ---
