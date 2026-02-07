@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** A single `wt` command that works in any shell on any platform with full autocompletion
-**Current focus:** Phase 3 - Core Go Binary Foundation (v2.0 Go rewrite begins)
+**Current focus:** Phase 4 - Configuration System (config parsing and setup actions)
 
 ## Current Position
 
-Phase: 3 of 9 (Core Go Binary Foundation)
-Plan: 2 of 2 complete
-Status: Phase complete
-Last activity: 2026-02-07 — Phase 3 complete (Core Go Binary Foundation)
+Phase: 4 of 9 (Configuration System)
+Plan: 1 of 2 complete
+Status: In progress
+Last activity: 2026-02-07 — Completed 04-01-PLAN.md (Config Parser & Validator)
 
-Progress: [███░░░░░░░] 33% (3/9 phases complete)
+Progress: [███░░░░░░░] 33% (3/9 phases complete, 1/2 plans in phase 4)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
+- Total plans completed: 9
 - Average duration: ~3 min per plan
-- Total execution time: ~0.40 hours
+- Total execution time: ~0.48 hours
 
 **By Phase:**
 
@@ -30,10 +30,11 @@ Progress: [███░░░░░░░] 33% (3/9 phases complete)
 | 1. Internal Documentation | 3 | - | ~2 min |
 | 2. User-Facing Documentation | 3 | - | ~2 min |
 | 3. Core Go Binary Foundation | 2/2 ✓ | 7 min | 3.5 min |
+| 4. Configuration System | 1/2 | 5 min | 5 min |
 
 **Recent Trend:**
-- v2.0 development started
-- Go binary foundation complete
+- Phase 4 (Configuration System) in progress
+- TDD approach with comprehensive test coverage
 
 ## Accumulated Context
 
@@ -51,11 +52,18 @@ Recent decisions affecting current work:
 
 **Phase 3 Decisions:**
 - **Dirty indicator (~)**: Used tilde for dirty status - widely understood, works without Unicode issues (03-01)
-- **.wtconfig location**: Created in current directory (not repo root) - supports per-directory configs (03-01)
+- **.wtconfig location**: Created in current directory (not repo root) - supports per-directory configs (03-01) [SUPERSEDED by 04-01]
 - **Silent success**: init command exits silently on success - follows git-style UX patterns (03-01)
 - **Suffix matching resolution**: Worktree names resolve via suffix match (e.g., "staging" matches "repo-staging") - user-friendly (03-02)
 - **Confirmation only for dirty**: Clean worktrees delete silently, dirty prompt for confirmation - balances safety with convenience (03-02)
 - **Conservative branch deletion**: --branch flag required to delete branch, not default - prevents accidental branch loss (03-02)
+
+**Phase 4 Decisions:**
+- **Config files at repo root**: .wtconfig and .wtconfig-* live at repo root, not cwd - matches v1.0 and supports multi-directory repos (04-01)
+- **SplitN for parsing**: Use SplitN(line, ' ', 2) not Split() to preserve spaces in run commands (04-01)
+- **Collected error reporting**: ValidateActions reports all errors at once, not fail-on-first - better UX (04-01)
+- **Bare name resolution**: Bare names like "ci" resolve to .wtconfig-ci, paths with "/" treated as exact - intuitive (04-01)
+- **Type-grouped flag order**: Inline flags ordered by type (copy, symlink, run) due to Cobra limitation - documented (04-01)
 
 ### Pending Todos
 
@@ -68,8 +76,8 @@ None yet — v2.0 roadmap created, ready to plan Phase 3.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Phase 3 complete, ready for Phase 4
-Resume file: .planning/phases/03-core-go-binary-foundation/.continue-here.md
+Stopped at: Completed 04-01-PLAN.md (Config Parser & Validator)
+Resume file: None
 
 ---
 *State initialized: 2026-02-07*
