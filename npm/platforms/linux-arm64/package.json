@@ -1,0 +1,11 @@
+{
+  "name": "@potato/wt-linux-arm64",
+  "version": "0.0.0",
+  "description": "Git worktree manager - Linux ARM64 binary",
+  "repository": "github:ahmedelarabyy/wt",
+  "license": "MIT",
+  "os": ["linux"],
+  "cpu": ["arm64"],
+  "bin": { "wt": "bin/wt" },
+  "files": ["bin/wt"]
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@potato/wt",
+  "version": "0.0.0",
+  "description": "Git worktree manager - fast, intuitive git worktree management",
+  "repository": "github:ahmedelarabyy/wt",
+  "license": "MIT",
+  "bin": { "wt": "bin/wt" },
+  "files": ["bin/wt"],
+  "optionalDependencies": {
+    "@potato/wt-darwin-arm64": "0.0.0",
+    "@potato/wt-darwin-amd64": "0.0.0",
+    "@potato/wt-linux-amd64": "0.0.0",
+    "@potato/wt-linux-arm64": "0.0.0"
+  },
+  "engines": { "node": ">=18" }
+}

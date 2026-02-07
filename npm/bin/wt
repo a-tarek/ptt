@@ -1,0 +1,52 @@
+#!/usr/bin/env node
+
+const { spawn } = require('child_process');
+const { resolve } = require('path');
+
+// Map Node.js platform/arch to package names
+const platformMap = {
+  'darwin-arm64': '@potato/wt-darwin-arm64',
+  'darwin-x64': '@potato/wt-darwin-amd64',
+  'linux-x64': '@potato/wt-linux-amd64',
+  'linux-arm64': '@potato/wt-linux-arm64',
+};
+
+const platformKey = `${process.platform}-${process.arch}`;
+const packageName = platformMap[platformKey];
+
+if (!packageName) {
+  console.error(`Unsupported platform: ${process.platform}-${process.arch}`);
+  console.error('Supported platforms: darwin-arm64, darwin-x64, linux-x64, linux-arm64');
+  process.exit(1);
+}
+
+// Resolve the platform-specific binary
+let binaryPath;
+try {
+  binaryPath = require.resolve(`${packageName}/bin/wt`);
+} catch (err) {
+  console.error(`Failed to find binary for ${packageName}`);
+  console.error(`This usually means the optional dependency failed to install.`);
+  console.error(`Try running: npm install ${packageName}`);
+  process.exit(1);
+}
+
+// Spawn the native binary with all arguments and I/O forwarded
+const child = spawn(binaryPath, process.argv.slice(2), {
+  stdio: 'inherit',
+});
+
+// Forward exit code
+child.on('exit', (code, signal) => {
+  if (signal) {
+    process.kill(process.pid, signal);
+  } else {
+    process.exit(code);
+  }
+});
+
+// Handle errors
+child.on('error', (err) => {
+  console.error(`Failed to execute wt: ${err.message}`);
+  process.exit(1);
+});

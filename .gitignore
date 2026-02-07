@@ -1,2 +1,3 @@
-# Binary
+# Binary (but not npm wrapper script)
 wt
+!npm/bin/wt

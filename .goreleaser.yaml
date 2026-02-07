@@ -1,0 +1,15 @@
+project_name: wt
+builds:
+  - id: wt
+    binary: wt
+    main: ./main.go
+    goos: [darwin, linux]
+    goarch: [amd64, arm64]
+    env: [CGO_ENABLED=0]
+    ldflags:
+      - -s -w
+      - -X github.com/ahmedelarabyy/wt/cmd.Version={{.Version}}
+archives:
+  - id: default
+    format: binary
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
