@@ -19,8 +19,8 @@
 
 ### Go Binary — Infrastructure
 
-- [ ] **INFRA-01**: .wtconfig parsing (copy/symlink actions, comments, blank lines)
-- [ ] **INFRA-02**: Override flag merging (--copy/--symlink override .wtconfig per-path)
+- [x] **INFRA-01**: .wtconfig parsing (copy/symlink actions, comments, blank lines)
+- [x] **INFRA-02**: Override flag merging (--copy/--symlink override .wtconfig per-path)
 - [x] **INFRA-03**: Worktree name resolution (suffix matching on directory basename)
 - [x] **INFRA-04**: `--help` and `--version` flags
 - [x] **INFRA-05**: Proper exit codes (0=success, 1=error), stderr for errors
@@ -86,8 +86,8 @@
 | CMD-07 | Phase 5 | Pending |
 | CMD-08 | Phase 5 | Pending |
 | CMD-09 | Phase 3 | Complete |
-| INFRA-01 | Phase 4 | Pending |
-| INFRA-02 | Phase 4 | Pending |
+| INFRA-01 | Phase 4 | Complete |
+| INFRA-02 | Phase 4 | Complete |
 | INFRA-03 | Phase 3 | Complete |
 | INFRA-04 | Phase 3 | Complete |
 | INFRA-05 | Phase 3 | Complete |
