@@ -84,9 +84,32 @@ func GetHomePath() (string, error) {
 // For regular repos: sibling mode (e.g., /code/wt-staging)
 // Returns error if the computed path already exists
 func WorktreePath(repoRoot string, name string) (string, error) {
-	isBare, err := IsBareRepository()
-	if err != nil {
-		return "", err
+	// Check if the home path is a bare repo by looking for .git suffix
+	// or by checking if it's in the worktree list as bare
+	isBare := false
+
+	// Method 1: Check if repo root ends with .git (common bare convention)
+	if strings.HasSuffix(repoRoot, ".git") {
+		isBare = true
+	} else {
+		// Method 2: Check worktree list for bare marker
+		cmd := exec.Command("git", "worktree", "list", "--porcelain")
+		output, err := cmd.Output()
+		if err == nil {
+			lines := strings.Split(string(output), "\n")
+			// First worktree entry
+			for _, line := range lines {
+				line = strings.TrimSpace(line)
+				if line == "bare" {
+					isBare = true
+					break
+				}
+				// Stop at first empty line (end of first entry)
+				if line == "" {
+					break
+				}
+			}
+		}
 	}
 
 	var targetPath string
