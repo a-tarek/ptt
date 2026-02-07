@@ -44,7 +44,7 @@ Plans:
   3. User can run `wt init` to create .wtconfig template
   4. User can run `wt delete <worktree>` to remove a worktree
   5. Binary returns proper exit codes (0=success, 1=error) with errors to stderr
-**Plans**: 4 plans
+**Plans**: 2 plans
 
 Plans:
 - [x] 03-01-PLAN.md — Go project scaffold with cobra, wt list, and wt init commands
@@ -147,7 +147,7 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 1. Internal Documentation | v1.0 | 3/3 | Complete | 2026-02-07 |
 | 2. User-Facing Documentation | v1.0 | 3/3 | Complete | 2026-02-07 |
-| 3. Core Go Binary Foundation | v2.0 | 2/4 | In progress | - |
+| 3. Core Go Binary Foundation | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 4. Configuration System | v2.0 | 0/TBD | Not started | - |
 | 5. Directory-Changing Commands | v2.0 | 0/TBD | Not started | - |
 | 6. Shell Integration | v2.0 | 0/TBD | Not started | - |

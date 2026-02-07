@@ -10,20 +10,20 @@
 - [ ] **CMD-01**: `wt new [--copy <path>] [--symlink <path>] <name> [branch]` creates worktree with optional config overrides
 - [ ] **CMD-02**: `wt goto <worktree>` outputs target path for shell wrapper cd
 - [ ] **CMD-03**: `wt home` outputs main worktree path for shell wrapper cd
-- [ ] **CMD-04**: `wt init` creates .wtconfig template with commented examples
+- [x] **CMD-04**: `wt init` creates .wtconfig template with commented examples
 - [ ] **CMD-05**: `wt eject [--copy <path>] [--symlink <path>] [name]` ejects branch with stash handling
-- [ ] **CMD-06**: `wt list` displays all worktrees with current marker
+- [x] **CMD-06**: `wt list` displays all worktrees with current marker
 - [ ] **CMD-07**: `wt merge <worktree>` merges worktree branch into current
 - [ ] **CMD-08**: `wt rebase <worktree>` rebases current onto worktree branch
-- [ ] **CMD-09**: `wt delete <worktree>` removes worktree
+- [x] **CMD-09**: `wt delete <worktree>` removes worktree
 
 ### Go Binary — Infrastructure
 
 - [ ] **INFRA-01**: .wtconfig parsing (copy/symlink actions, comments, blank lines)
 - [ ] **INFRA-02**: Override flag merging (--copy/--symlink override .wtconfig per-path)
-- [ ] **INFRA-03**: Worktree name resolution (suffix matching on directory basename)
-- [ ] **INFRA-04**: `--help` and `--version` flags
-- [ ] **INFRA-05**: Proper exit codes (0=success, 1=error), stderr for errors
+- [x] **INFRA-03**: Worktree name resolution (suffix matching on directory basename)
+- [x] **INFRA-04**: `--help` and `--version` flags
+- [x] **INFRA-05**: Proper exit codes (0=success, 1=error), stderr for errors
 
 ### Shell Integration
 
@@ -80,17 +80,17 @@
 | CMD-01 | Phase 5 | Pending |
 | CMD-02 | Phase 5 | Pending |
 | CMD-03 | Phase 5 | Pending |
-| CMD-04 | Phase 3 | Pending |
+| CMD-04 | Phase 3 | Complete |
 | CMD-05 | Phase 5 | Pending |
-| CMD-06 | Phase 3 | Pending |
+| CMD-06 | Phase 3 | Complete |
 | CMD-07 | Phase 5 | Pending |
 | CMD-08 | Phase 5 | Pending |
-| CMD-09 | Phase 3 | Pending |
+| CMD-09 | Phase 3 | Complete |
 | INFRA-01 | Phase 4 | Pending |
 | INFRA-02 | Phase 4 | Pending |
-| INFRA-03 | Phase 3 | Pending |
-| INFRA-04 | Phase 3 | Pending |
-| INFRA-05 | Phase 3 | Pending |
+| INFRA-03 | Phase 3 | Complete |
+| INFRA-04 | Phase 3 | Complete |
+| INFRA-05 | Phase 3 | Complete |
 | SHELL-01 | Phase 6 | Pending |
 | SHELL-02 | Phase 6 | Pending |
 | SHELL-03 | Phase 6 | Pending |
