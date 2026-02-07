@@ -123,11 +123,11 @@ Plans:
   3. Running installer twice doesn't duplicate entries (idempotent)
   4. User declining installation gets manual instructions
   5. RC file modifications use marker blocks for safe uninstall
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 08-01: TBD
-- [ ] 08-02: TBD
+- [ ] 08-01-PLAN.md — Installer package (RC file operations, marker blocks, v1 migration) and wt install command with guided walkthrough
+- [ ] 08-02-PLAN.md — wt uninstall command with confirmation and rc file cleanup
 
 #### Phase 9: Polish & Testing
 **Goal**: Improve error messages, add CI/CD, and comprehensive testing across platforms
@@ -154,7 +154,7 @@ Plans:
 | 5. Directory-Changing Commands | v2.0 | 3/3 | Complete | 2026-02-07 |
 | 6. Shell Integration | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 7. npm Distribution | v2.0 | 2/2 | Complete | 2026-02-07 |
-| 8. Interactive Installer | v2.0 | 0/TBD | Not started | - |
+| 8. Interactive Installer | v2.0 | 0/2 | Not started | - |
 | 9. Polish & Testing | v2.0 | 0/TBD | Not started | - |
 
 ---
