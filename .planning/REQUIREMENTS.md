@@ -1,81 +1,117 @@
-# Requirements: wt Documentation Refresh
+# Requirements: wt v2.0 Go Rewrite
 
 **Defined:** 2026-02-07
-**Core Value:** Accurate, complete documentation that matches the current codebase
+**Core Value:** A single `wt` command that works in any shell on any platform with full autocompletion
 
-## v1 Requirements
+## v2.0 Requirements
 
-### Codebase Map Refresh
+### Go Binary — Command Port
 
-- [x] **MAP-01**: ARCHITECTURE.md reflects current function structure (all 15+ functions)
-- [x] **MAP-02**: CONVENTIONS.md documents current patterns (flag parsing, override mechanism)
-- [x] **MAP-03**: STRUCTURE.md matches current file layout and line ranges
-- [x] **MAP-04**: CONCERNS.md updated with current known issues (zsh reserved vars, etc.)
-- [x] **MAP-05**: STACK.md, INTEGRATIONS.md, TESTING.md refreshed against current code
+- [ ] **CMD-01**: `wt new [--copy <path>] [--symlink <path>] <name> [branch]` creates worktree with optional config overrides
+- [ ] **CMD-02**: `wt goto <worktree>` outputs target path for shell wrapper cd
+- [ ] **CMD-03**: `wt home` outputs main worktree path for shell wrapper cd
+- [ ] **CMD-04**: `wt init` creates .wtconfig template with commented examples
+- [ ] **CMD-05**: `wt eject [--copy <path>] [--symlink <path>] [name]` ejects branch with stash handling
+- [ ] **CMD-06**: `wt list` displays all worktrees with current marker
+- [ ] **CMD-07**: `wt merge <worktree>` merges worktree branch into current
+- [ ] **CMD-08**: `wt rebase <worktree>` rebases current onto worktree branch
+- [ ] **CMD-09**: `wt delete <worktree>` removes worktree
 
-### README — Installation
+### Go Binary — Infrastructure
 
-- [ ] **DOC-01**: Clone/download instructions
-- [ ] **DOC-02**: Source-in-zshrc setup with example
+- [ ] **INFRA-01**: .wtconfig parsing (copy/symlink actions, comments, blank lines)
+- [ ] **INFRA-02**: Override flag merging (--copy/--symlink override .wtconfig per-path)
+- [ ] **INFRA-03**: Worktree name resolution (suffix matching on directory basename)
+- [ ] **INFRA-04**: `--help` and `--version` flags
+- [ ] **INFRA-05**: Proper exit codes (0=success, 1=error), stderr for errors
 
-### README — Command Reference
+### Shell Integration
 
-- [ ] **DOC-03**: `wt new` documented with all flags (`--copy`, `--symlink`), positional args, examples
-- [ ] **DOC-04**: `wt eject` documented with all flags, examples
-- [ ] **DOC-05**: `wt goto`, `wt home`, `wt list` documented
-- [ ] **DOC-06**: `wt merge`, `wt rebase`, `wt delete` documented
-- [ ] **DOC-07**: `wt init` documented
+- [ ] **SHELL-01**: CD directive protocol (binary outputs `CD:<path>`, wrapper handles cd)
+- [ ] **SHELL-02**: Bash wrapper function (bash 3.2 compatible)
+- [ ] **SHELL-03**: Zsh wrapper function
+- [ ] **SHELL-04**: Fish wrapper function
 
-### README — Configuration
+### Completions
 
-- [ ] **DOC-08**: `.wtconfig` format explained (syntax, actions, comments)
-- [ ] **DOC-09**: Override flags explained with examples (precedence, one-offs)
+- [ ] **COMP-01**: `wt completion bash` generates bash completions
+- [ ] **COMP-02**: `wt completion zsh` generates zsh completions
+- [ ] **COMP-03**: `wt completion fish` generates fish completions
+- [ ] **COMP-04**: Dynamic worktree name completion for goto/merge/rebase/delete
 
-### README — Workflows
+### npm Distribution
 
-- [ ] **DOC-10**: Container/Docker workflow section (port overrides, `.env` handling, named volumes)
-- [ ] **DOC-11**: Tab completion mentioned
+- [ ] **NPM-01**: Scoped npm package (@scope/wt) with platform-specific binaries
+- [ ] **NPM-02**: Platform detection (darwin-arm64, darwin-amd64, linux-amd64, linux-arm64)
+- [ ] **NPM-03**: goreleaser config for cross-compilation
 
-## v2 Requirements
+### Interactive Installer
 
-### Future Docs
+- [ ] **INST-01**: `npx @scope/wt install` detects shell from $SHELL
+- [ ] **INST-02**: Shows what will be added to rc file, requires confirmation
+- [ ] **INST-03**: Idempotent — detects existing installation
+- [ ] **INST-04**: Provides manual instructions if user declines
 
-- **DOC-12**: Plugin manager install docs (oh-my-zsh, zinit, antigen)
-- **DOC-13**: Man page generation
+## Future Requirements
+
+### Post-v2.0
+
+- **COLOR-01**: Colored output with NO_COLOR support
+- **CI-01**: Non-interactive mode flags for CI/scripting
+- **ERR-01**: Enhanced error messages with suggestions
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Code changes | Documentation only — no feature work |
-| Separate docs site | README.md is sufficient for a single-file tool |
+| Claude Code skill | Claude runs git commands natively, minimal added value |
+| PowerShell support | Focus on bash/zsh/fish; WSL covers Windows |
+| New features beyond wt.zsh | Port only — clean port reduces risk |
+| GUI installer | Terminal-based interactive installer is sufficient |
+| Git subcommand (`git wt`) | Standalone command is simpler mental model |
+| Auto-update mechanism | npm handles updates |
+| Interactive TUI | Commands are one-liners, TUI adds complexity |
+| go-git library | Shell out to git binary — simpler, respects user's git config |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MAP-01 | Phase 1 | Complete |
-| MAP-02 | Phase 1 | Complete |
-| MAP-03 | Phase 1 | Complete |
-| MAP-04 | Phase 1 | Complete |
-| MAP-05 | Phase 1 | Complete |
-| DOC-01 | Phase 2 | Pending |
-| DOC-02 | Phase 2 | Pending |
-| DOC-03 | Phase 2 | Pending |
-| DOC-04 | Phase 2 | Pending |
-| DOC-05 | Phase 2 | Pending |
-| DOC-06 | Phase 2 | Pending |
-| DOC-07 | Phase 2 | Pending |
-| DOC-08 | Phase 2 | Pending |
-| DOC-09 | Phase 2 | Pending |
-| DOC-10 | Phase 2 | Pending |
-| DOC-11 | Phase 2 | Pending |
+| CMD-01 | TBD | Pending |
+| CMD-02 | TBD | Pending |
+| CMD-03 | TBD | Pending |
+| CMD-04 | TBD | Pending |
+| CMD-05 | TBD | Pending |
+| CMD-06 | TBD | Pending |
+| CMD-07 | TBD | Pending |
+| CMD-08 | TBD | Pending |
+| CMD-09 | TBD | Pending |
+| INFRA-01 | TBD | Pending |
+| INFRA-02 | TBD | Pending |
+| INFRA-03 | TBD | Pending |
+| INFRA-04 | TBD | Pending |
+| INFRA-05 | TBD | Pending |
+| SHELL-01 | TBD | Pending |
+| SHELL-02 | TBD | Pending |
+| SHELL-03 | TBD | Pending |
+| SHELL-04 | TBD | Pending |
+| COMP-01 | TBD | Pending |
+| COMP-02 | TBD | Pending |
+| COMP-03 | TBD | Pending |
+| COMP-04 | TBD | Pending |
+| NPM-01 | TBD | Pending |
+| NPM-02 | TBD | Pending |
+| NPM-03 | TBD | Pending |
+| INST-01 | TBD | Pending |
+| INST-02 | TBD | Pending |
+| INST-03 | TBD | Pending |
+| INST-04 | TBD | Pending |
 
 **Coverage:**
-- v1 requirements: 16 total
-- Mapped to phases: 16
-- Unmapped: 0
+- v2.0 requirements: 28 total
+- Mapped to phases: 0 (pending roadmap)
+- Unmapped: 28
 
 ---
 *Requirements defined: 2026-02-07*
-*Last updated: 2026-02-07 after roadmap creation*
+*Last updated: 2026-02-07 after initial definition*
