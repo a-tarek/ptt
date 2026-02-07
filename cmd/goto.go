@@ -12,9 +12,10 @@ import (
 var outputPath bool
 
 var gotoCmd = &cobra.Command{
-	Use:   "goto <worktree>",
-	Short: "Switch to a worktree",
-	Args:  cobra.ExactArgs(1),
+	Use:               "goto <worktree>",
+	Short:             "Switch to a worktree",
+	Args:              cobra.ExactArgs(1),
+	ValidArgsFunction: worktreeNameCompletion,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if !git.IsInsideGitRepo() {
 			return fmt.Errorf("not inside a git repository")

@@ -10,9 +10,10 @@ import (
 )
 
 var mergeCmd = &cobra.Command{
-	Use:   "merge <worktree>",
-	Short: "Merge a worktree's branch into current",
-	Args:  cobra.ExactArgs(1),
+	Use:               "merge <worktree>",
+	Short:             "Merge a worktree's branch into current",
+	Args:              cobra.ExactArgs(1),
+	ValidArgsFunction: worktreeNameCompletion,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if !git.IsInsideGitRepo() {
 			return fmt.Errorf("not inside a git repository")
