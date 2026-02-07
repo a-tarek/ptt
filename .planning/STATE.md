@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** A single `wt` command that works in any shell on any platform with full autocompletion
-**Current focus:** Phase 7 - npm Distribution
+**Current focus:** Phase 8 - Interactive Installer
 
 ## Current Position
 
-Phase: 7 of 9 (npm Distribution)
-Plan: 2 of 2 complete
+Phase: 8 of 9 (Interactive Installer)
+Plan: 1 of 1 complete
 Status: Phase complete
-Last activity: 2026-02-07 — Completed 07-02-PLAN.md
+Last activity: 2026-02-07 — Completed 08-01-PLAN.md
 
-Progress: [███████░░] 78% (14/18 total plans complete)
+Progress: [████████░] 83% (15/18 total plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 15
 - Average duration: ~2.3 min per plan
-- Total execution time: ~0.64 hours
+- Total execution time: ~0.70 hours
 
 **By Phase:**
 
@@ -34,14 +34,15 @@ Progress: [███████░░] 78% (14/18 total plans complete)
 | 5. Directory-Changing Commands | 3/3 ✓ | 9 min | 3 min |
 | 6. Shell Integration | 2/2 ✓ | 3 min | 1.5 min |
 | 7. npm Distribution | 2/2 ✓ | 7 min | 3.5 min |
+| 8. Interactive Installer | 1/1 ✓ | 4 min | 4 min |
 
 **Recent Trend:**
-- Phase 7 (npm Distribution) COMPLETE ✓
-- Plan 07-01 complete: goreleaser config and npm packages — @potato scope, 4 platform targets, Node.js wrapper (2 min)
-- Plan 07-02 complete: build/publish automation scripts — goreleaser integration, coordinated npm publishing (5 min)
-- Complete npm distribution pipeline validated end-to-end
-- All 4 platform binaries built and staged successfully
-- Ready for Phase 8 (Interactive Installer)
+- Phase 8 (Interactive Installer) COMPLETE ✓
+- Plan 08-01 complete: wt install command — guided walkthrough, RC file operations, v1 migration (4 min)
+- Marker-based idempotent installation with backup/rollback
+- Conda/certbot-style markers for clear block management
+- V1 detection and safe migration (comment out old source lines)
+- Ready for Phase 9 (Remaining Features)
 
 ## Accumulated Context
 
@@ -106,6 +107,12 @@ Recent decisions affecting current work:
 - **jq-free version updates**: Publish script uses node -e for JSON manipulation, no jq dependency (07-02)
 - **Platform-first publishing**: Platform packages published before main package to satisfy dependency order (07-02)
 
+**Phase 8 Decisions:**
+- **Marker-block style**: Conda/certbot-style markers (# >>> wt >>> / # <<< wt <<<) for clear block identification (08-01)
+- **V1 migration strategy**: Comment out old 'source wt.zsh' lines with [wt v2 migration] prefix for safety (08-01)
+- **Backup retention**: Keep .wt-backup file after successful install for user peace of mind (08-01)
+- **Idempotency check**: Simple HasMarkerBlock() marker presence check prevents duplicate installations (08-01)
+
 ### Pending Todos
 
 None yet.
@@ -117,7 +124,7 @@ None yet — v2.0 roadmap created, ready to plan Phase 3.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 07-02-PLAN.md (Build and publish automation) - Phase 7 complete
+Stopped at: Completed 08-01-PLAN.md (Interactive installer) - Phase 8 complete
 Resume file: None
 
 ---
