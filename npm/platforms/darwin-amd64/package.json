@@ -1,0 +1,11 @@
+{
+  "name": "@potato/wt-darwin-amd64",
+  "version": "0.0.0",
+  "description": "Git worktree manager - macOS x64 binary",
+  "repository": "github:ahmedelarabyy/wt",
+  "license": "MIT",
+  "os": ["darwin"],
+  "cpu": ["x64"],
+  "bin": { "wt": "bin/wt" },
+  "files": ["bin/wt"]
+}
