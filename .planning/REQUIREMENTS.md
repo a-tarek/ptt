@@ -7,14 +7,14 @@
 
 ### Go Binary — Command Port
 
-- [ ] **CMD-01**: `wt new [--copy <path>] [--symlink <path>] <name> [branch]` creates worktree with optional config overrides
-- [ ] **CMD-02**: `wt goto <worktree>` outputs target path for shell wrapper cd
-- [ ] **CMD-03**: `wt home` outputs main worktree path for shell wrapper cd
+- [x] **CMD-01**: `wt new [--copy <path>] [--symlink <path>] <name> [branch]` creates worktree with optional config overrides
+- [x] **CMD-02**: `wt goto <worktree>` outputs target path for shell wrapper cd
+- [x] **CMD-03**: `wt home` outputs main worktree path for shell wrapper cd
 - [x] **CMD-04**: `wt init` creates .wtconfig template with commented examples
-- [ ] **CMD-05**: `wt eject [--copy <path>] [--symlink <path>] [name]` ejects branch with stash handling
+- [x] **CMD-05**: `wt eject [--copy <path>] [--symlink <path>] [name]` ejects branch with stash handling
 - [x] **CMD-06**: `wt list` displays all worktrees with current marker
-- [ ] **CMD-07**: `wt merge <worktree>` merges worktree branch into current
-- [ ] **CMD-08**: `wt rebase <worktree>` rebases current onto worktree branch
+- [x] **CMD-07**: `wt merge <worktree>` merges worktree branch into current
+- [x] **CMD-08**: `wt rebase <worktree>` rebases current onto worktree branch
 - [x] **CMD-09**: `wt delete <worktree>` removes worktree
 
 ### Go Binary — Infrastructure
@@ -77,14 +77,14 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CMD-01 | Phase 5 | Pending |
-| CMD-02 | Phase 5 | Pending |
-| CMD-03 | Phase 5 | Pending |
+| CMD-01 | Phase 5 | Complete |
+| CMD-02 | Phase 5 | Complete |
+| CMD-03 | Phase 5 | Complete |
 | CMD-04 | Phase 3 | Complete |
-| CMD-05 | Phase 5 | Pending |
+| CMD-05 | Phase 5 | Complete |
 | CMD-06 | Phase 3 | Complete |
-| CMD-07 | Phase 5 | Pending |
-| CMD-08 | Phase 5 | Pending |
+| CMD-07 | Phase 5 | Complete |
+| CMD-08 | Phase 5 | Complete |
 | CMD-09 | Phase 3 | Complete |
 | INFRA-01 | Phase 4 | Complete |
 | INFRA-02 | Phase 4 | Complete |

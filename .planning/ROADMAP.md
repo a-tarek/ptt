@@ -78,9 +78,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Shared git helpers + goto, home, merge, rebase commands
-- [ ] 05-02-PLAN.md — wt new command with config integration
-- [ ] 05-03-PLAN.md — wt eject command with stash handling and rollback
+- [x] 05-01-PLAN.md — Shared git helpers + goto, home, merge, rebase commands
+- [x] 05-02-PLAN.md — wt new command with config integration
+- [x] 05-03-PLAN.md — wt eject command with stash handling and rollback
 
 #### Phase 6: Shell Integration
 **Goal**: Provide shell wrapper functions and completions for bash, zsh, and fish
@@ -151,7 +151,7 @@ Plans:
 | 2. User-Facing Documentation | v1.0 | 3/3 | Complete | 2026-02-07 |
 | 3. Core Go Binary Foundation | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 4. Configuration System | v2.0 | 2/2 | Complete | 2026-02-07 |
-| 5. Directory-Changing Commands | v2.0 | 0/3 | Not started | - |
+| 5. Directory-Changing Commands | v2.0 | 3/3 | Complete | 2026-02-07 |
 | 6. Shell Integration | v2.0 | 0/TBD | Not started | - |
 | 7. npm Distribution | v2.0 | 0/TBD | Not started | - |
 | 8. Interactive Installer | v2.0 | 0/TBD | Not started | - |
