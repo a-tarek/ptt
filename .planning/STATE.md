@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 2 of 2 (User-Facing Documentation)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-07 — Completed 02-01-PLAN.md
+Last activity: 2026-02-07 — Completed 02-02-PLAN.md
 
-Progress: [██████░░░░] 67%
+Progress: [████████░░] 83%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: ~3 min
+- Total plans completed: 5
+- Average duration: ~2 min
 - Total execution time: ~0.2 hours
 
 **By Phase:**
@@ -28,10 +28,10 @@ Progress: [██████░░░░] 67%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-internal-documentation-refresh | 3 | ~11 min | ~4 min |
-| 02-user-facing-documentation | 1 | ~1 min | ~1 min |
+| 02-user-facing-documentation | 2 | ~2 min | ~1 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (3 min), 01-02 (5 min), 01-03 (3 min), 02-01 (1 min)
+- Last 5 plans: 01-02 (5 min), 01-03 (3 min), 02-01 (1 min), 02-02 (1 min)
 - Trend: Fast execution
 
 *Updated after each plan completion*
@@ -49,6 +49,9 @@ Recent decisions affecting current work:
 - 02-01: Source-only install (simplest approach, no package manager overhead)
 - 02-01: Quick start shows 5-command workflow (init, new, goto, home, delete)
 - 02-01: Commands overview includes full usage synopsis from wt dispatcher
+- 02-02: Document flag override precedence (flags override .wtconfig for same path)
+- 02-02: Show one-off flag usage (paths not in .wtconfig)
+- 02-02: Explain eject fallback branch logic (main/master vs original branch)
 - Pending: Include container tips in README (practical value for real-world usage with Docker apps)
 
 ### Pending Todos
@@ -61,6 +64,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-07T05:34:21Z
-Stopped at: Completed 02-01-PLAN.md (Initial README)
+Last session: 2026-02-07T05:37:44Z
+Stopped at: Completed 02-02-PLAN.md (Command Reference)
 Resume file: None
