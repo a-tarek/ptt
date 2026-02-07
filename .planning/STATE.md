@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** A single `wt` command that works in any shell on any platform with full autocompletion
-**Current focus:** Phase 5 - Directory-Changing Commands (goto, home, merge, rebase, new, eject)
+**Current focus:** Phase 6 - Shell Integration
 
 ## Current Position
 
-Phase: 5 of 9 (Directory-Changing Commands)
-Plan: 3 of 3 complete
+Phase: 6 of 9 (Shell Integration)
+Plan: 1 of 1 complete
 Status: Phase complete
-Last activity: 2026-02-07 — Completed 05-03-PLAN.md (wt eject command)
+Last activity: 2026-02-07 — Completed 06-01-PLAN.md (shell wrapper infrastructure)
 
-Progress: [█████░░░░░] 56% (5/9 phases complete)
+Progress: [██████░░░░] 67% (6/9 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
-- Average duration: ~2.6 min per plan
-- Total execution time: ~0.69 hours
+- Total plans completed: 14
+- Average duration: ~2.5 min per plan
+- Total execution time: ~0.75 hours
 
 **By Phase:**
 
@@ -32,14 +32,14 @@ Progress: [█████░░░░░] 56% (5/9 phases complete)
 | 3. Core Go Binary Foundation | 2/2 ✓ | 7 min | 3.5 min |
 | 4. Configuration System | 2/2 ✓ | 8 min | 4 min |
 | 5. Directory-Changing Commands | 3/3 ✓ | 9 min | 3 min |
+| 6. Shell Integration | 1/1 ✓ | 2 min | 2 min |
 
 **Recent Trend:**
-- Phase 5 (Directory-Changing Commands) COMPLETE
-- Plan 05-01 complete: goto/home/merge/rebase + shared git helpers (3 min)
-- Plan 05-02 complete: wt new command with config integration (2 min)
-- Plan 05-03 complete: wt eject command with stash handling (4 min)
-- All directory-changing commands ready for shell wrapper integration
-- Ready for Phase 6 (npm packaging and distribution)
+- Phase 6 (Shell Integration) COMPLETE
+- Plan 06-01 complete: shell wrapper infrastructure (2 min)
+- Shell detection, embedded bash/zsh/fish wrappers, wt shell-init command
+- Users can now add 'eval $(wt shell-init)' to rc files for cd coordination
+- Ready for Phase 7 (npm packaging and distribution)
 
 ## Accumulated Context
 
@@ -50,7 +50,7 @@ Recent decisions affecting current work:
 
 - **Go over Node.js/bash**: Fast startup (~5ms vs ~150ms), single binary, cobra completions for free (✓ Implemented - 03-01)
 - **npm for distribution**: Download tracking, familiar install (npx), cross-platform binary delivery (Pending implementation)
-- **Shell wrappers for cd**: Subprocess can't change parent directory — standard pattern (zoxide, nvm) (Pending implementation)
+- **Shell wrappers for cd**: Subprocess can't change parent directory — standard pattern (zoxide, nvm) (✓ Implemented - 06-01)
 - **Scoped npm package**: "wt" taken on npm; @scope/wt guarantees availability, CLI stays `wt` (Pending implementation)
 - **Keep wt.zsh as legacy**: Existing users shouldn't break, gradual migration (Pending implementation)
 - **Port only, no new features**: Clean port reduces risk, new features come after v2.0 (Pending implementation)
@@ -84,6 +84,12 @@ Recent decisions affecting current work:
 - **Fallback branch detection**: Home worktree (srcRoot == homePath) uses main/master, non-home uses directory suffix (05-03)
 - **Multi-step rollback**: Each eject step has rollback path - pop stash, checkout back, remove worktree (05-03)
 
+**Phase 6 Decisions:**
+- **POSIX-compatible bash wrapper**: Use [ ] not [[ ]] for bash 3.2+ compatibility (macOS default) - slightly more verbose but maximum compatibility (06-01)
+- **Identical bash and zsh wrappers**: POSIX constructs work in both shells - easier to maintain, reduced testing surface (06-01)
+- **Hidden shell-init command**: Set Hidden: true in cobra - plumbing command for rc files, follows git-style UX (06-01)
+- **Route all commands through wrapper**: Simpler mental model (like zoxide) - non-cd commands produce no output with --output-path, so wrapper is pass-through (06-01)
+
 ### Pending Todos
 
 None yet.
@@ -95,7 +101,7 @@ None yet — v2.0 roadmap created, ready to plan Phase 3.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 05-03-PLAN.md (wt eject command) - Phase 5 complete
+Stopped at: Completed 06-01-PLAN.md (shell wrapper infrastructure) - Phase 6 complete
 Resume file: None
 
 ---
