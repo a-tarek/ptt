@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 6 of 9 (Shell Integration)
-Plan: 1 of 1 complete
-Status: Phase complete
-Last activity: 2026-02-07 — Completed 06-01-PLAN.md (shell wrapper infrastructure)
+Plan: 2 of 3 complete
+Status: In progress
+Last activity: 2026-02-07 — Completed 06-02-PLAN.md (dynamic worktree tab completions)
 
 Progress: [██████░░░░] 67% (6/9 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
-- Average duration: ~2.5 min per plan
-- Total execution time: ~0.75 hours
+- Total plans completed: 15
+- Average duration: ~2.4 min per plan
+- Total execution time: ~0.77 hours
 
 **By Phase:**
 
@@ -32,14 +32,15 @@ Progress: [██████░░░░] 67% (6/9 phases complete)
 | 3. Core Go Binary Foundation | 2/2 ✓ | 7 min | 3.5 min |
 | 4. Configuration System | 2/2 ✓ | 8 min | 4 min |
 | 5. Directory-Changing Commands | 3/3 ✓ | 9 min | 3 min |
-| 6. Shell Integration | 1/1 ✓ | 2 min | 2 min |
+| 6. Shell Integration | 2/3 | 3 min | 1.5 min |
 
 **Recent Trend:**
-- Phase 6 (Shell Integration) COMPLETE
+- Phase 6 (Shell Integration) IN PROGRESS (2 of 3 complete)
 - Plan 06-01 complete: shell wrapper infrastructure (2 min)
-- Shell detection, embedded bash/zsh/fish wrappers, wt shell-init command
-- Users can now add 'eval $(wt shell-init)' to rc files for cd coordination
-- Ready for Phase 7 (npm packaging and distribution)
+- Plan 06-02 complete: dynamic worktree tab completions (1 min)
+- Cobra ValidArgsFunction wired to goto, delete, merge, rebase
+- Tab completion queries git worktree list live on every tab press
+- Ready for Phase 6 Plan 3 (shell wrapper functions)
 
 ## Accumulated Context
 
@@ -89,6 +90,11 @@ Recent decisions affecting current work:
 - **Identical bash and zsh wrappers**: POSIX constructs work in both shells - easier to maintain, reduced testing surface (06-01)
 - **Hidden shell-init command**: Set Hidden: true in cobra - plumbing command for rc files, follows git-style UX (06-01)
 - **Route all commands through wrapper**: Simpler mental model (like zoxide) - non-cd commands produce no output with --output-path, so wrapper is pass-through (06-01)
+- **Names-only completion**: Show worktree basenames only, no branch descriptions - cleaner UX, less visual noise (06-02)
+- **Live completion queries**: Query git worktree list on every tab press (no caching) - always accurate, ~5-10ms cost acceptable (06-02)
+- **NoFileComp directive**: Suppress file/directory completions for worktree args - only show worktree names (06-02)
+- **Single-arg completion limit**: Stop completing after first positional argument - no second arg exists (06-02)
+- **No completion for new/eject**: These commands create new names, not select existing ones (06-02)
 
 ### Pending Todos
 
@@ -101,7 +107,7 @@ None yet — v2.0 roadmap created, ready to plan Phase 3.
 ## Session Continuity
 
 Last session: 2026-02-07
-Stopped at: Completed 06-01-PLAN.md (shell wrapper infrastructure) - Phase 6 complete
+Stopped at: Completed 06-02-PLAN.md (dynamic worktree tab completions)
 Resume file: None
 
 ---
