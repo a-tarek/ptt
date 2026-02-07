@@ -200,6 +200,109 @@ List all worktrees with their directory names and branches. The current worktree
   myapp-hotfix                   hotfix
 ```
 
+### wt merge
+
+**Usage:** `wt merge <worktree>`
+
+Merge the specified worktree's branch into the current branch. Resolves the worktree name to its branch, then runs `git merge`.
+
+**Example:**
+
+```zsh
+# From main worktree, merge feature-auth's branch
+wt merge feature-auth
+```
+
+### wt rebase
+
+**Usage:** `wt rebase <worktree>`
+
+Rebase the current branch onto the specified worktree's branch. Resolves the worktree name to its branch, then runs `git rebase`.
+
+**Example:**
+
+```zsh
+# From feature branch, rebase onto main
+wt rebase main
+```
+
+### wt delete
+
+**Usage:** `wt delete <worktree>`
+
+Remove a worktree directory. The branch is kept — only the worktree checkout is removed. Uses `git worktree remove` under the hood.
+
+**Example:**
+
+```zsh
+wt delete feature-auth
+```
+
+## Configuration
+
+### .wtconfig
+
+A configuration file at the repository root that defines files to copy or symlink into new worktrees. Created with `wt init`.
+
+**Syntax:**
+
+```
+# Comment lines start with #
+<action> <path>
+```
+
+**Actions:**
+- `copy` — Duplicate the file or directory from the source worktree. Each worktree gets its own independent copy.
+- `symlink` — Create a symbolic link to the source file or directory. Changes affect all worktrees.
+
+**Full example:**
+
+```
+# .wtconfig — files to copy or symlink into new worktrees
+
+# Environment files (copy to allow per-worktree changes)
+copy .env
+copy .env.local
+
+# Dependencies (symlink to save disk space)
+symlink node_modules
+symlink .venv
+```
+
+**When to use copy vs symlink:**
+
+- **copy**: Use for files that differ between worktrees, such as environment variables or local configuration. Each worktree gets its own independent copy that can be modified without affecting other worktrees.
+
+- **symlink**: Use for large directories shared across worktrees, such as dependencies (node_modules, .venv) or build caches. Saves disk space but changes affect all worktrees.
+
+### Override Flags
+
+The `--copy` and `--symlink` flags on `wt new` and `wt eject` override `.wtconfig` defaults for specific paths. They can also specify paths not in `.wtconfig` for one-off operations.
+
+**Precedence:** CLI flags > .wtconfig defaults
+
+**Example scenarios:**
+
+```zsh
+# .wtconfig says "symlink .env" but you need a separate copy this time
+wt new feature-auth --copy .env
+
+# .wtconfig doesn't mention node_modules, but symlink it for this worktree
+wt new feature-auth --symlink node_modules
+
+# Override multiple paths
+wt new feature-auth --copy .env --copy .env.local --symlink node_modules
+```
+
+**How it works:**
+
+The system processes configuration in two phases:
+
+1. `.wtconfig` entries are processed first, with flag overrides taking precedence for the same path.
+2. Flag-only paths (not in `.wtconfig`) are then applied as one-off operations.
+
+This allows you to maintain a standard configuration while making exceptions as needed.
+
 ## Tab Completion
 
 wt includes built-in zsh tab completion. After sourcing `wt.zsh`, press Tab after `wt` to see available commands. Press Tab after `wt goto`, `wt merge`, `wt rebase`, or `wt delete` to complete worktree names.
