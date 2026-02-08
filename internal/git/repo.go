@@ -57,7 +57,8 @@ func GetRepoRoot() (string, error) {
 	return strings.TrimSpace(string(output)), nil
 }
 
-// GetHomePath returns the path of the first worktree (main checkout or bare repo root)
+// GetHomePath returns the path of the first non-bare worktree (main checkout)
+// For bare repos, returns the worktree matching the bare repo's HEAD branch
 func GetHomePath() (string, error) {
 	cmd := exec.Command("git", "worktree", "list", "--porcelain")
 	output, err := cmd.Output()
@@ -69,14 +70,95 @@ func GetHomePath() (string, error) {
 	}
 
 	lines := strings.Split(string(output), "\n")
-	for _, line := range lines {
+	var firstNonBareWorktree string
+	var bareRepoPath string
+	var bareRepoHEAD string
+
+	// Parse worktree list to find bare repo and all worktrees
+	type worktreeEntry struct {
+		path   string
+		branch string
+		isBare bool
+	}
+	var worktrees []worktreeEntry
+	var current worktreeEntry
+
+	for i, line := range lines {
 		line = strings.TrimSpace(line)
+
 		if strings.HasPrefix(line, "worktree ") {
-			return strings.TrimPrefix(line, "worktree "), nil
+			// Save previous entry if exists
+			if current.path != "" {
+				worktrees = append(worktrees, current)
+			}
+			// Start new entry
+			current = worktreeEntry{path: strings.TrimPrefix(line, "worktree ")}
+		} else if strings.HasPrefix(line, "HEAD ") {
+			current.branch = "" // HEAD without branch means detached
+		} else if strings.HasPrefix(line, "branch ") {
+			branchRef := strings.TrimPrefix(line, "branch ")
+			// Extract branch name from refs/heads/branchname
+			if strings.HasPrefix(branchRef, "refs/heads/") {
+				current.branch = strings.TrimPrefix(branchRef, "refs/heads/")
+			}
+		} else if line == "bare" {
+			current.isBare = true
+		} else if line == "" || i == len(lines)-1 {
+			// End of entry or end of output
+			if current.path != "" {
+				worktrees = append(worktrees, current)
+				current = worktreeEntry{}
+			}
 		}
 	}
 
-	return "", fmt.Errorf("no worktree found")
+	// Find bare repo and its HEAD
+	for _, wt := range worktrees {
+		if wt.isBare {
+			bareRepoPath = wt.path
+			break
+		}
+	}
+
+	// If we found a bare repo, determine which branch its HEAD points to
+	if bareRepoPath != "" {
+		headCmd := exec.Command("git", "-C", bareRepoPath, "symbolic-ref", "HEAD")
+		headOutput, err := headCmd.Output()
+		if err == nil {
+			headRef := strings.TrimSpace(string(headOutput))
+			if strings.HasPrefix(headRef, "refs/heads/") {
+				bareRepoHEAD = strings.TrimPrefix(headRef, "refs/heads/")
+			}
+		}
+
+		// Find the worktree that matches the bare repo's HEAD branch
+		if bareRepoHEAD != "" {
+			for _, wt := range worktrees {
+				if !wt.isBare && wt.branch == bareRepoHEAD {
+					return wt.path, nil
+				}
+			}
+		}
+	}
+
+	// Fallback: return first non-bare worktree
+	for _, wt := range worktrees {
+		if !wt.isBare {
+			if firstNonBareWorktree == "" {
+				firstNonBareWorktree = wt.path
+			}
+			// If no bare repo was found, the first worktree is the home
+			if bareRepoPath == "" {
+				return wt.path, nil
+			}
+		}
+	}
+
+	if firstNonBareWorktree != "" {
+		return firstNonBareWorktree, nil
+	}
+
+	return "", fmt.Errorf("no non-bare worktree found")
 }
 
 // WorktreePath computes the target path for a new worktree
