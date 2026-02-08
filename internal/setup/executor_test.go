@@ -114,15 +114,15 @@ func TestExecuteActionsStatusMessages(t *testing.T) {
 		{Type: config.ActionRun, Path: "echo done"},
 	}
 
-	// Capture stdout
-	oldStdout := os.Stdout
+	// Capture stderr (status messages go to stderr, not stdout)
+	oldStderr := os.Stderr
 	r, w, _ := os.Pipe()
-	os.Stdout = w
+	os.Stderr = w
 
 	err := ExecuteActions(srcDir, targetDir, actions)
 
 	w.Close()
-	os.Stdout = oldStdout
+	os.Stderr = oldStderr
 
 	var buf bytes.Buffer
 	io.Copy(&buf, r)
