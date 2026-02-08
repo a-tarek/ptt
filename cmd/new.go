@@ -158,7 +158,7 @@ var mkCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(mkCmd)
-	mkCmd.Flags().StringVar(&configFlag, "config", "", "use .wtconfig-<name> instead of default .wtconfig")
+	mkCmd.Flags().StringVar(&configFlag, "config", "", "use named config (.pttconfig/<name>)")
 	mkCmd.Flags().BoolVar(&skipConfig, "skip-config", false, "skip all config actions")
 	mkCmd.Flags().StringSliceVar(&copyFlags, "copy", []string{}, "inline copy overrides (repeatable)")
 	mkCmd.Flags().StringSliceVar(&symlinkFlags, "symlink", []string{}, "inline symlink overrides (repeatable)")
