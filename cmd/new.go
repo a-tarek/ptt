@@ -22,10 +22,11 @@ var (
 	runFlags       []string
 )
 
-var newCmd = &cobra.Command{
-	Use:   "new <name>",
-	Short: "Create a new worktree",
-	Args:  cobra.ExactArgs(1),
+var mkCmd = &cobra.Command{
+	Use:     "mk <name>",
+	Aliases: []string{"new"},
+	Short:   "Create a new worktree",
+	Args:    cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// 1. Check git repo
 		if !git.IsInsideGitRepo() {
@@ -156,10 +157,10 @@ var newCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(newCmd)
-	newCmd.Flags().StringVar(&configFlag, "config", "", "use .wtconfig-<name> instead of default .wtconfig")
-	newCmd.Flags().BoolVar(&skipConfig, "skip-config", false, "skip all config actions")
-	newCmd.Flags().StringSliceVar(&copyFlags, "copy", []string{}, "inline copy overrides (repeatable)")
-	newCmd.Flags().StringSliceVar(&symlinkFlags, "symlink", []string{}, "inline symlink overrides (repeatable)")
-	newCmd.Flags().StringSliceVar(&runFlags, "run", []string{}, "inline run commands (repeatable)")
+	rootCmd.AddCommand(mkCmd)
+	mkCmd.Flags().StringVar(&configFlag, "config", "", "use .wtconfig-<name> instead of default .wtconfig")
+	mkCmd.Flags().BoolVar(&skipConfig, "skip-config", false, "skip all config actions")
+	mkCmd.Flags().StringSliceVar(&copyFlags, "copy", []string{}, "inline copy overrides (repeatable)")
+	mkCmd.Flags().StringSliceVar(&symlinkFlags, "symlink", []string{}, "inline symlink overrides (repeatable)")
+	mkCmd.Flags().StringSliceVar(&runFlags, "run", []string{}, "inline run commands (repeatable)")
 }

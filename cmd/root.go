@@ -16,15 +16,14 @@ var rootCmd = &cobra.Command{
 A fast, intuitive git worktree manager.
 
 Commands:
-  new [flags] <name> [branch]                  Create a new worktree
-  goto <worktree>                              cd into a worktree
-  home                                         cd into the main worktree
-  init                                         Create .wtconfig template
-  eject [flags] [name]                         Eject current branch into its own worktree
-  list                                         List all worktrees
-  merge <worktree>                             Merge worktree's branch into current
-  rebase <worktree>                            Rebase current onto worktree's branch
-  delete <worktree>                            Remove a worktree (keeps branch)`,
+  mk [flags] <name>                            Create a new worktree
+  go [worktree]                                Navigate to a worktree (or home)
+  init                                         Create config template
+  eject [flags] [name]                         Eject current branch
+  ls                                           List all worktrees
+  merge <worktree>                             Merge worktree's branch
+  rebase <worktree>                            Rebase onto worktree's branch
+  rm <worktree>                                Remove a worktree`,
 	SilenceUsage:  true,
 	SilenceErrors: true,
 }
