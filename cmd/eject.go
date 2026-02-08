@@ -212,9 +212,9 @@ var ejectCmd = &cobra.Command{
 					}
 
 					if ejectConfigName == "" {
-						configName = ".wtconfig"
+						configName = ".pttconfig/default"
 					} else {
-						configName = ".wtconfig-" + ejectConfigName
+						configName = ".pttconfig/" + ejectConfigName
 					}
 				}
 			} else if !ejectSkipConfig && hasEjectInlineFlags && ejectConfigName != "" {
@@ -248,7 +248,7 @@ var ejectCmd = &cobra.Command{
 						return err
 					}
 
-					configName = ".wtconfig-" + ejectConfigName
+					configName = ".pttconfig/" + ejectConfigName
 				}
 			}
 
@@ -332,7 +332,7 @@ var ejectCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(ejectCmd)
-	ejectCmd.Flags().StringVar(&ejectConfigName, "config", "", "use .wtconfig-<name>")
+	ejectCmd.Flags().StringVar(&ejectConfigName, "config", "", "use named config (.pttconfig/<name>)")
 	ejectCmd.Flags().BoolVar(&ejectSkipConfig, "skip-config", false, "skip file-based config")
 	ejectCmd.Flags().StringSliceVar(&ejectCopyFlags, "copy", nil, "inline copy override")
 	ejectCmd.Flags().StringSliceVar(&ejectSymlinkFlags, "symlink", nil, "inline symlink override")
