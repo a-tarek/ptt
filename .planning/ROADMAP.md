@@ -30,6 +30,9 @@ Plans:
 
 </details>
 
+<details>
+<summary>✅ v2.0 Go Rewrite (Phases 3-9) - SHIPPED 2026-02-08</summary>
+
 ### ✅ v2.0 Go Rewrite (Complete)
 
 **Milestone Goal:** Rewrite wt in Go for cross-platform, multi-shell support with npm distribution
@@ -146,6 +149,17 @@ Plans:
 - [x] 09-03-PLAN.md — End-to-end shell wrapper tests with real git repos
 - [x] 09-04-PLAN.md — README rewrite for v2 (installation, commands, configuration, troubleshooting)
 
+</details>
+
+#### Phase 10: UAT Gap Closure
+**Goal**: Fix 3 bugs discovered during full UAT: shell wrapper binary resolution, stdout leak in setup executor, and fuzzy matching algorithm
+**Depends on**: Phase 9
+**Plans**: 2 plans
+
+Plans:
+- [ ] 10-01-PLAN.md — Fix stdout leak in setup executor + validate WIP shell wrapper changes
+- [ ] 10-02-PLAN.md — Fix fuzzy matching to use segment-aware scoring instead of pure Levenshtein
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -159,6 +173,7 @@ Plans:
 | 7. npm Distribution | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 8. Interactive Installer | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 9. Polish & Testing | v2.0 | 4/4 | Complete | 2026-02-08 |
+| 10. UAT Gap Closure | v2.0 | 0/2 | In Progress | - |
 
 ---
 *Roadmap created: 2026-02-07*
