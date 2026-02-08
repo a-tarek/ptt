@@ -65,7 +65,11 @@ var newCmd = &cobra.Command{
 			}
 		}
 
-		// 6. Handle config
+		// 6. Print creation message immediately
+		basename := filepath.Base(targetPath)
+		fmt.Fprintf(os.Stderr, "Created worktree %s (branch: %s)\n", basename, branchName)
+
+		// 7. Handle config
 		var appliedActions int
 		var configFileName string
 		hasInlineFlags := len(copyFlags) > 0 || len(symlinkFlags) > 0 || len(runFlags) > 0
@@ -149,9 +153,6 @@ var newCmd = &cobra.Command{
 		}
 
 		// 8. Confirmation messages to stderr
-		basename := filepath.Base(targetPath)
-		fmt.Fprintf(os.Stderr, "Created worktree %s (branch: %s)\n", basename, branchName)
-
 		if appliedActions > 0 && configFileName != "" {
 			fmt.Fprintf(os.Stderr, "Applied %s (%d actions)\n", configFileName, appliedActions)
 		} else if appliedActions > 0 {
