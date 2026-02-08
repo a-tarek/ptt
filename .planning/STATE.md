@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 9 of 9 (Polish & Testing)
-Plan: 2 of 3 complete
-Status: In progress
-Last activity: 2026-02-08 — Completed 09-02-PLAN.md
+Plan: 3 of 3 complete
+Status: Phase complete
+Last activity: 2026-02-08 — Completed 09-04-PLAN.md
 
-Progress: [█████████] 94% (17/18 total plans complete)
+Progress: [█████████] 100% (18/18 total plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
-- Average duration: ~2.2 min per plan
-- Total execution time: ~0.76 hours
+- Total plans completed: 18
+- Average duration: ~2.1 min per plan
+- Total execution time: ~0.78 hours
 
 **By Phase:**
 
@@ -35,15 +35,16 @@ Progress: [█████████] 94% (17/18 total plans complete)
 | 6. Shell Integration | 2/2 ✓ | 3 min | 1.5 min |
 | 7. npm Distribution | 2/2 ✓ | 7 min | 3.5 min |
 | 8. Interactive Installer | 2/2 ✓ | 6 min | 3 min |
-| 9. Polish & Testing | 2/3 | 2 min | 1 min |
+| 9. Polish & Testing | 3/3 ✓ | 4 min | 1.3 min |
 
 **Recent Trend:**
-- Phase 9 (Polish & Testing) IN PROGRESS
-- Plan 09-02 complete: GitHub Actions CI/CD — automated testing and release pipeline (1.6 min)
-- CI runs on every push with Linux + macOS matrix testing
-- Release workflow triggered by version tags (v*) for automated build + npm publish
-- Single command to release: git tag + push
-- Ready for final phase plan (shell tests)
+- Phase 9 (Polish & Testing) COMPLETE ✓
+- Plan 09-04 complete: README rewrite — complete v2 documentation (2 min)
+- 635-line comprehensive README in zoxide/starship style
+- All 9 commands documented with examples and behavior notes
+- Installation via npm, .wtconfig guidance, troubleshooting section
+- ALL PHASES COMPLETE — v2.0 ready for release
+- Total execution time: ~47 minutes across 18 plans
 
 ## Accumulated Context
 
@@ -122,6 +123,9 @@ Recent decisions affecting current work:
 - **Go version pinning**: Use exact version from go.mod (1.25.7) for predictable CI environment (09-02)
 - **Lean CI philosophy**: Only go vet, no golangci-lint - keep CI fast and simple (09-02)
 - **Single-command release**: Full automation on tag push - git tag v2.0.0 triggers complete pipeline (09-02)
+- **README complete rewrite**: Fresh v2 documentation with no v1 references, thorough walkthrough style (09-04)
+- **Copy vs symlink decision tree**: Documented when to use each with practical examples and decision table (09-04)
+- **Troubleshooting approach**: Cause → Solution pattern for 6 common issues with specific commands (09-04)
 
 ### Pending Todos
 
@@ -138,7 +142,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 09-02-PLAN.md (GitHub Actions CI/CD)
+Stopped at: Completed 09-04-PLAN.md (README rewrite) - ALL PHASES COMPLETE
 Resume file: None
 
 ---
