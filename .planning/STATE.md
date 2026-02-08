@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** A single `wt` command that works in any shell on any platform with full autocompletion
-**Current focus:** Phase 8 - Interactive Installer
+**Current focus:** Phase 9 - Polish & Testing
 
 ## Current Position
 
-Phase: 8 of 9 (Interactive Installer)
-Plan: 2 of 2 complete
-Status: Phase complete
-Last activity: 2026-02-07 — Completed 08-02-PLAN.md
+Phase: 9 of 9 (Polish & Testing)
+Plan: 2 of 3 complete
+Status: In progress
+Last activity: 2026-02-08 — Completed 09-02-PLAN.md
 
-Progress: [████████░] 89% (16/18 total plans complete)
+Progress: [█████████] 94% (17/18 total plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
-- Average duration: ~2.3 min per plan
-- Total execution time: ~0.73 hours
+- Total plans completed: 17
+- Average duration: ~2.2 min per plan
+- Total execution time: ~0.76 hours
 
 **By Phase:**
 
@@ -35,16 +35,15 @@ Progress: [████████░] 89% (16/18 total plans complete)
 | 6. Shell Integration | 2/2 ✓ | 3 min | 1.5 min |
 | 7. npm Distribution | 2/2 ✓ | 7 min | 3.5 min |
 | 8. Interactive Installer | 2/2 ✓ | 6 min | 3 min |
+| 9. Polish & Testing | 2/3 | 2 min | 1 min |
 
 **Recent Trend:**
-- Phase 8 (Interactive Installer) COMPLETE ✓
-- Plan 08-01 complete: wt install command — guided walkthrough, RC file operations, v1 migration (4 min)
-- Plan 08-02 complete: wt uninstall command — clean removal path with confirmation flow (2 min)
-- Marker-based idempotent installation with backup/rollback
-- Conda/certbot-style markers for clear block management
-- V1 detection and safe migration (comment out old source lines)
-- Paired install/uninstall commands for complete lifecycle
-- Ready for Phase 9 (Remaining Features)
+- Phase 9 (Polish & Testing) IN PROGRESS
+- Plan 09-02 complete: GitHub Actions CI/CD — automated testing and release pipeline (1.6 min)
+- CI runs on every push with Linux + macOS matrix testing
+- Release workflow triggered by version tags (v*) for automated build + npm publish
+- Single command to release: git tag + push
+- Ready for final phase plan (shell tests)
 
 ## Accumulated Context
 
@@ -117,18 +116,29 @@ Recent decisions affecting current work:
 - **No v1 uncommenting on uninstall**: User can manually uncomment v1 lines if reverting - automatic uncommenting could be fragile (08-02)
 - **Uninstall only cleans rc file**: Does not run npm uninstall (self-destructive mid-execution), prints instructions instead (08-02)
 
+**Phase 9 Decisions:**
+- **CI matrix OS**: Test on ubuntu-latest and macos-latest only - these are target platforms, Windows deferred (09-02)
+- **Coverage tracking**: Display coverage in output but don't enforce thresholds - visibility without build failures (09-02)
+- **Go version pinning**: Use exact version from go.mod (1.25.7) for predictable CI environment (09-02)
+- **Lean CI philosophy**: Only go vet, no golangci-lint - keep CI fast and simple (09-02)
+- **Single-command release**: Full automation on tag push - git tag v2.0.0 triggers complete pipeline (09-02)
+
 ### Pending Todos
 
 None yet.
 
 ### Blockers/Concerns
 
-None yet — v2.0 roadmap created, ready to plan Phase 3.
+**NPM_TOKEN secret required for first release:**
+- Release workflow needs NPM_TOKEN configured in repository settings
+- Without it, automated npm publish will fail
+- Documented in .github/workflows/release.yml comments
+- Recommendation: Test with beta tag (v2.0.0-beta.1) before v2.0.0
 
 ## Session Continuity
 
-Last session: 2026-02-07
-Stopped at: Completed 08-02-PLAN.md (Interactive installer) - Phase 8 complete
+Last session: 2026-02-08
+Stopped at: Completed 09-02-PLAN.md (GitHub Actions CI/CD)
 Resume file: None
 
 ---
