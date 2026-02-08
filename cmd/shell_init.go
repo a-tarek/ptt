@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/ahmedelarabyy/wt/internal/shell"
 	"github.com/spf13/cobra"
@@ -18,7 +20,18 @@ var shellInitCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		wrapper, err := shell.GetWrapper(shellType)
+
+		// Resolve absolute path to this binary
+		binPath, err := os.Executable()
+		if err != nil {
+			return fmt.Errorf("failed to resolve binary path: %w", err)
+		}
+		binPath, err = filepath.EvalSymlinks(binPath)
+		if err != nil {
+			return fmt.Errorf("failed to resolve binary symlinks: %w", err)
+		}
+
+		wrapper, err := shell.GetWrapper(shellType, binPath)
 		if err != nil {
 			return err
 		}

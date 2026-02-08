@@ -196,8 +196,9 @@ func WorktreePath(repoRoot string, name string) (string, error) {
 
 	var targetPath string
 	if isBare {
-		// Nested mode: worktree under bare repo root
-		targetPath = filepath.Join(repoRoot, name)
+		// Nested mode: worktree alongside home worktree under bare repo root
+		parentDir := filepath.Dir(repoRoot)
+		targetPath = filepath.Join(parentDir, name)
 	} else {
 		// Sibling mode: worktree as sibling to main checkout
 		parentDir := filepath.Dir(repoRoot)
