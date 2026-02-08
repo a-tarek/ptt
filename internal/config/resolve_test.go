@@ -165,3 +165,144 @@ func TestResolveConfigPath_DefaultConfig(t *testing.T) {
 		t.Errorf("expected %s, got %s", expected, resolved)
 	}
 }
+
+func TestResolveConfigPath_PttconfigDefault(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "wt-resolve-test-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// Create .pttconfig/default
+	pttconfigDir := filepath.Join(tmpDir, ".pttconfig")
+	if err := os.MkdirAll(pttconfigDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	configPath := filepath.Join(pttconfigDir, "default")
+	if err := os.WriteFile(configPath, []byte("copy .env"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	resolved, err := ResolveConfigPath(tmpDir, "")
+	if err != nil {
+		t.Fatalf("ResolveConfigPath failed: %v", err)
+	}
+
+	expected := filepath.Join(tmpDir, ".pttconfig", "default")
+	if resolved != expected {
+		t.Errorf("expected %s, got %s", expected, resolved)
+	}
+}
+
+func TestResolveConfigPath_PttconfigNamed(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "wt-resolve-test-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// Create .pttconfig/ci
+	pttconfigDir := filepath.Join(tmpDir, ".pttconfig")
+	if err := os.MkdirAll(pttconfigDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	configPath := filepath.Join(pttconfigDir, "ci")
+	if err := os.WriteFile(configPath, []byte("copy .env"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	resolved, err := ResolveConfigPath(tmpDir, "ci")
+	if err != nil {
+		t.Fatalf("ResolveConfigPath failed: %v", err)
+	}
+
+	expected := filepath.Join(tmpDir, ".pttconfig", "ci")
+	if resolved != expected {
+		t.Errorf("expected %s, got %s", expected, resolved)
+	}
+}
+
+func TestResolveConfigPath_FallbackToWtconfig(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "wt-resolve-test-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// Create only .wtconfig (no .pttconfig directory)
+	configPath := filepath.Join(tmpDir, ".wtconfig")
+	if err := os.WriteFile(configPath, []byte("copy .env"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	resolved, err := ResolveConfigPath(tmpDir, "")
+	if err != nil {
+		t.Fatalf("ResolveConfigPath failed: %v", err)
+	}
+
+	expected := filepath.Join(tmpDir, ".wtconfig")
+	if resolved != expected {
+		t.Errorf("expected %s, got %s", expected, resolved)
+	}
+}
+
+func TestResolveConfigPath_FallbackToWtconfigNamed(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "wt-resolve-test-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// Create only .wtconfig-ci (no .pttconfig directory)
+	configPath := filepath.Join(tmpDir, ".wtconfig-ci")
+	if err := os.WriteFile(configPath, []byte("copy .env"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	resolved, err := ResolveConfigPath(tmpDir, "ci")
+	if err != nil {
+		t.Fatalf("ResolveConfigPath failed: %v", err)
+	}
+
+	expected := filepath.Join(tmpDir, ".wtconfig-ci")
+	if resolved != expected {
+		t.Errorf("expected %s, got %s", expected, resolved)
+	}
+}
+
+func TestResolveConfigPath_PttconfigTakesPriority(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "wt-resolve-test-*")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// Create both .pttconfig/default and .wtconfig
+	pttconfigDir := filepath.Join(tmpDir, ".pttconfig")
+	if err := os.MkdirAll(pttconfigDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	pttConfigPath := filepath.Join(pttconfigDir, "default")
+	if err := os.WriteFile(pttConfigPath, []byte("# pttconfig"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	wtConfigPath := filepath.Join(tmpDir, ".wtconfig")
+	if err := os.WriteFile(wtConfigPath, []byte("# wtconfig"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	resolved, err := ResolveConfigPath(tmpDir, "")
+	if err != nil {
+		t.Fatalf("ResolveConfigPath failed: %v", err)
+	}
+
+	// Should resolve to .pttconfig/default, not .wtconfig
+	expected := filepath.Join(tmpDir, ".pttconfig", "default")
+	if resolved != expected {
+		t.Errorf("expected %s, got %s (priority not working)", expected, resolved)
+	}
+}
