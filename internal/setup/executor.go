@@ -7,7 +7,10 @@ import (
 	"path/filepath"
 
 	"github.com/ahmedelarabyy/wt/internal/config"
+	"github.com/fatih/color"
 )
+
+var actionLabel = color.New(color.FgCyan)
 
 // ExecuteActions runs all actions sequentially against the target worktree.
 // srcRoot is the source worktree (where files are copied/symlinked from).
@@ -38,7 +41,7 @@ func executeOne(srcRoot, targetRoot string, action config.Action) error {
 		if err := CopyPath(src, dest); err != nil {
 			return err
 		}
-		fmt.Fprintf(os.Stderr, "Copied %s\n", action.Path)
+		fmt.Fprintf(os.Stderr, "- %s %s\n", actionLabel.Sprint("copy:"), action.Path)
 
 	case config.ActionSymlink:
 		src := filepath.Join(srcRoot, action.Path)
@@ -46,10 +49,10 @@ func executeOne(srcRoot, targetRoot string, action config.Action) error {
 		if err := CreateSymlink(src, dest); err != nil {
 			return err
 		}
-		fmt.Fprintf(os.Stderr, "Symlinked %s\n", action.Path)
+		fmt.Fprintf(os.Stderr, "- %s %s\n", actionLabel.Sprint("symlink:"), action.Path)
 
 	case config.ActionRun:
-		fmt.Fprintf(os.Stderr, "Running %s...\n", action.Path)
+		fmt.Fprintf(os.Stderr, "- %s %s\n", actionLabel.Sprint("run:"), action.Path)
 		if err := RunCommand(targetRoot, action.Path); err != nil {
 			return err
 		}
