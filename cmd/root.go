@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ahmedelarabyy/wt/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +32,18 @@ Commands:
 // Execute runs the root command
 func Execute() error {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "error: %s\n", err)
+		// Extract subcommand name from args
+		cmd := ""
+		if len(os.Args) > 1 {
+			// os.Args[1] is the subcommand (e.g., "goto", "delete")
+			// Ignore if it starts with "-" (flag) or is "help"
+			arg := os.Args[1]
+			if arg != "" && arg[0] != '-' && arg != "help" {
+				cmd = arg
+			}
+		}
+
+		fmt.Fprintf(os.Stderr, "%s\n", ui.FormatError(err, cmd))
 		return err
 	}
 	return nil
