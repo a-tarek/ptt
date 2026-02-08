@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-08)
 
 **Core value:** A single `ptt` command that works in any shell on any platform with full autocompletion
-**Current focus:** v2.0 Pre-Release Rebrand — Phase 11 (Go Module + Binary Rename)
+**Current focus:** v2.0 Pre-Release Rebrand — Phase 12 (Command Restructure + Config Directory)
 
 ## Current Position
 
-Phase: 11 of 14 (Go Module + Binary Rename)
-Plan: 1 of 1 in current phase
+Phase: 12 of 14 (Command Restructure + Config Directory)
+Plan: 2 of 2 in current phase
 Status: Phase complete
-Last activity: 2026-02-08 — Completed 11-01-PLAN.md
+Last activity: 2026-02-08 — Completed 12-02-PLAN.md
 
-Progress: [#####################.] 27/32 plans (84%) — 27 complete + 5 rebrand remaining
+Progress: [######################.] 29/32 plans (91%) — 29 complete + 3 rebrand remaining
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 27
-- Average duration: ~2.9 min per plan
-- Total execution time: ~1.0 hours
+- Total plans completed: 29
+- Average duration: ~2.8 min per plan
+- Total execution time: ~1.3 hours
 
 **By Phase:**
 
@@ -38,10 +38,11 @@ Progress: [#####################.] 27/32 plans (84%) — 27 complete + 5 rebrand
 | 9. Polish & Testing | 4/4 | 14 min | 3.5 min |
 | 10. UAT Gap Closure | 2/2 | 6.2 min | 3.1 min |
 | 11. Go Module + Binary Rename | 1/1 | 6.9 min | 6.9 min |
+| 12. Command Restructure + Config Directory | 2/2 | 5 min | 2.5 min |
 
 **Recent Trend:**
-- Phase 11 (Go Module + Binary Rename) COMPLETE
-- 5 rebrand plans remaining (phases 11-14)
+- Phase 12 (Command Restructure + Config Directory) COMPLETE
+- 3 rebrand plans remaining (phases 13-14)
 
 ## Accumulated Context
 
@@ -69,9 +70,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 11-01-PLAN.md — Go module and binary renamed to ptt
+Stopped at: Completed 12-02-PLAN.md — Config directory migration complete
 Resume file: None
 
 ---
 *State initialized: 2026-02-07*
-*Updated: 2026-02-08 — completed Phase 11 (Go Module + Binary Rename)*
+*Updated: 2026-02-08 — completed Phase 12 (Command Restructure + Config Directory)*
