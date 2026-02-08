@@ -62,18 +62,18 @@
 
 ### Rebrand — Command Restructure
 
-- [ ] **RCMD-01**: `ptt mk <name>` creates worktree (alias: `new`)
-- [ ] **RCMD-02**: `ptt go <worktree>` navigates to worktree (alias: `goto`)
-- [ ] **RCMD-03**: `ptt go` (no args) navigates to home worktree (replaces `home` command)
-- [ ] **RCMD-04**: `ptt rm <worktree>` removes worktree (alias: `delete`)
-- [ ] **RCMD-05**: `ptt ls` is primary list command (alias: `list`)
+- [x] **RCMD-01**: `ptt mk <name>` creates worktree (alias: `new`)
+- [x] **RCMD-02**: `ptt go <worktree>` navigates to worktree (alias: `goto`)
+- [x] **RCMD-03**: `ptt go` (no args) navigates to home worktree (replaces `home` command)
+- [x] **RCMD-04**: `ptt rm <worktree>` removes worktree (alias: `delete`)
+- [x] **RCMD-05**: `ptt ls` is primary list command (alias: `list`)
 
 ### Rebrand — Config Directory
 
-- [ ] **CFG-01**: Config uses `.pttconfig/` directory structure
-- [ ] **CFG-02**: Default config resolves to `.pttconfig/default`
-- [ ] **CFG-03**: Named configs via `--config <name>` resolve to `.pttconfig/<name>`
-- [ ] **CFG-04**: `ptt init` creates `.pttconfig/` directory with `default` file
+- [x] **CFG-01**: Config uses `.pttconfig/` directory structure
+- [x] **CFG-02**: Default config resolves to `.pttconfig/default`
+- [x] **CFG-03**: Named configs via `--config <name>` resolve to `.pttconfig/<name>`
+- [x] **CFG-04**: `ptt init` creates `.pttconfig/` directory with `default` file
 
 ### Rebrand — Distribution & Docs
 
@@ -142,15 +142,15 @@
 | REN-03 | Phase 13 | Pending |
 | REN-04 | Phase 13 | Pending |
 | REN-05 | Phase 13 | Pending |
-| RCMD-01 | Phase 12 | Pending |
-| RCMD-02 | Phase 12 | Pending |
-| RCMD-03 | Phase 12 | Pending |
-| RCMD-04 | Phase 12 | Pending |
-| RCMD-05 | Phase 12 | Pending |
-| CFG-01 | Phase 12 | Pending |
-| CFG-02 | Phase 12 | Pending |
-| CFG-03 | Phase 12 | Pending |
-| CFG-04 | Phase 12 | Pending |
+| RCMD-01 | Phase 12 | Complete |
+| RCMD-02 | Phase 12 | Complete |
+| RCMD-03 | Phase 12 | Complete |
+| RCMD-04 | Phase 12 | Complete |
+| RCMD-05 | Phase 12 | Complete |
+| CFG-01 | Phase 12 | Complete |
+| CFG-02 | Phase 12 | Complete |
+| CFG-03 | Phase 12 | Complete |
+| CFG-04 | Phase 12 | Complete |
 | DIST-01 | Phase 13 | Pending |
 | DIST-02 | Phase 13 | Pending |
 | DIST-03 | Phase 13 | Pending |

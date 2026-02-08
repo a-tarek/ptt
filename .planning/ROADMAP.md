@@ -192,8 +192,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 12-01-PLAN.md — Command restructure: rename commands to mk/go/rm/ls with backward-compatible aliases
-- [ ] 12-02-PLAN.md — Config directory migration: .pttconfig/ structure with default and named configs
+- [x] 12-01-PLAN.md — Command restructure: rename commands to mk/go/rm/ls with backward-compatible aliases
+- [x] 12-02-PLAN.md — Config directory migration: .pttconfig/ structure with default and named configs
 
 #### Phase 13: Shell Wrappers + npm Distribution
 **Goal**: Shell integration and npm packages work under the ptt brand
@@ -239,7 +239,7 @@ Plans:
 | 9. Polish & Testing | v2.0 | 4/4 | Complete | 2026-02-08 |
 | 10. UAT Gap Closure | v2.0 | 2/2 | Complete | 2026-02-08 |
 | 11. Go Module + Binary Rename | Rebrand | 1/1 | Complete | 2026-02-08 |
-| 12. Command Restructure + Config Directory | Rebrand | 0/2 | Not started | - |
+| 12. Command Restructure + Config Directory | Rebrand | 2/2 | Complete | 2026-02-08 |
 | 13. Shell Wrappers + npm Distribution | Rebrand | 0/2 | Not started | - |
 | 14. Documentation | Rebrand | 0/1 | Not started | - |
 
