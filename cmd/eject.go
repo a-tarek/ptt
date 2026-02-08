@@ -171,12 +171,13 @@ var ejectCmd = &cobra.Command{
 		}
 
 		// 10. Apply config (same logic as wt new)
-		if !ejectSkipConfig || len(ejectCopyFlags) > 0 || len(ejectSymlinkFlags) > 0 || len(ejectRunFlags) > 0 {
+		hasEjectInlineFlags := len(ejectCopyFlags) > 0 || len(ejectSymlinkFlags) > 0 || len(ejectRunFlags) > 0
+		if !ejectSkipConfig || hasEjectInlineFlags {
 			var fileActions []config.Action
 			var configName string
 
-			// File-based config (unless --skip-config)
-			if !ejectSkipConfig {
+			// File-based config (unless --skip-config or inline flags override)
+			if !ejectSkipConfig && !hasEjectInlineFlags {
 				configPath, err := config.ResolveConfigPath(srcRoot, ejectConfigName)
 				if err == nil {
 					// Config file exists
@@ -189,7 +190,6 @@ var ejectCmd = &cobra.Command{
 							popCmd := exec.Command("git", "stash", "pop")
 							popCmd.Run()
 						}
-						// ExecuteActions would have removed the worktree, but we need to do it here
 						removeCmd := exec.Command("git", "worktree", "remove", "--force", targetPath)
 						removeCmd.Run()
 						os.RemoveAll(targetPath)
@@ -216,9 +216,42 @@ var ejectCmd = &cobra.Command{
 						configName = ".wtconfig-" + ejectConfigName
 					}
 				}
+			} else if !ejectSkipConfig && hasEjectInlineFlags && ejectConfigName != "" {
+				// --config with inline flags: load named config, then append inline flags
+				configPath, cfgErr := config.ResolveConfigPath(srcRoot, ejectConfigName)
+				if cfgErr == nil {
+					fileActions, err = config.ParseFile(configPath)
+					if err != nil {
+						checkoutBackCmd := exec.Command("git", "checkout", currentBranch)
+						checkoutBackCmd.Run()
+						if didStash {
+							popCmd := exec.Command("git", "stash", "pop")
+							popCmd.Run()
+						}
+						removeCmd := exec.Command("git", "worktree", "remove", "--force", targetPath)
+						removeCmd.Run()
+						os.RemoveAll(targetPath)
+						return err
+					}
+
+					if err := config.ValidateActions(srcRoot, fileActions); err != nil {
+						checkoutBackCmd := exec.Command("git", "checkout", currentBranch)
+						checkoutBackCmd.Run()
+						if didStash {
+							popCmd := exec.Command("git", "stash", "pop")
+							popCmd.Run()
+						}
+						removeCmd := exec.Command("git", "worktree", "remove", "--force", targetPath)
+						removeCmd.Run()
+						os.RemoveAll(targetPath)
+						return err
+					}
+
+					configName = ".wtconfig-" + ejectConfigName
+				}
 			}
 
-			// Flag-based actions (always apply)
+			// Flag-based actions
 			flagActions := config.BuildActionsFromFlags(ejectCopyFlags, ejectSymlinkFlags, ejectRunFlags)
 
 			// Check for duplicate paths
