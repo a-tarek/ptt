@@ -208,8 +208,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 13-01-PLAN.md — Shell wrapper and installer rebrand (ptt function name, marker blocks, rc file content)
-- [ ] 13-02-PLAN.md — npm package and CI/CD rebrand (package names, scopes, binary paths, workflow updates)
+- [x] 13-01-PLAN.md — Shell wrapper and installer rebrand (ptt function name, marker blocks, rc file content)
+- [x] 13-02-PLAN.md — npm package and CI/CD rebrand (package names, scopes, binary paths, workflow updates)
 
 #### Phase 14: Documentation
 **Goal**: README and user-facing docs reflect the ptt brand and new command names
@@ -240,7 +240,7 @@ Plans:
 | 10. UAT Gap Closure | v2.0 | 2/2 | Complete | 2026-02-08 |
 | 11. Go Module + Binary Rename | Rebrand | 1/1 | Complete | 2026-02-08 |
 | 12. Command Restructure + Config Directory | Rebrand | 2/2 | Complete | 2026-02-08 |
-| 13. Shell Wrappers + npm Distribution | Rebrand | 0/2 | Not started | - |
+| 13. Shell Wrappers + npm Distribution | Rebrand | 2/2 | Complete | 2026-02-08 |
 | 14. Documentation | Rebrand | 0/1 | Not started | - |
 
 ---

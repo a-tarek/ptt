@@ -56,9 +56,9 @@
 
 - [x] **REN-01**: Binary renamed from `wt` to `ptt`
 - [x] **REN-02**: Go module path updated to `github.com/a-tarek/ptt`
-- [ ] **REN-03**: npm packages renamed to `@a-tarek/ptt` and `@a-tarek/ptt-{platform}-{arch}`
-- [ ] **REN-04**: Shell wrapper functions use `ptt()` name
-- [ ] **REN-05**: RC file markers use `>>> ptt >>>` / `<<< ptt <<<` format
+- [x] **REN-03**: npm packages renamed to `@a-tarek/ptt` and `@a-tarek/ptt-{platform}-{arch}`
+- [x] **REN-04**: Shell wrapper functions use `ptt()` name
+- [x] **REN-05**: RC file markers use `>>> ptt >>>` / `<<< ptt <<<` format
 
 ### Rebrand — Command Restructure
 
@@ -77,9 +77,9 @@
 
 ### Rebrand — Distribution & Docs
 
-- [ ] **DIST-01**: npm package.json files updated for @a-tarek scope
-- [ ] **DIST-02**: Build/publish scripts reference ptt binary and @a-tarek packages
-- [ ] **DIST-03**: CI/CD workflows updated for ptt binary paths
+- [x] **DIST-01**: npm package.json files updated for @a-tarek scope
+- [x] **DIST-02**: Build/publish scripts reference ptt binary and @a-tarek packages
+- [x] **DIST-03**: CI/CD workflows updated for ptt binary paths
 - [ ] **DOCS-01**: README.md rewritten for ptt branding and new command names
 
 ## Future Requirements
@@ -139,9 +139,9 @@
 
 | REN-01 | Phase 11 | Complete |
 | REN-02 | Phase 11 | Complete |
-| REN-03 | Phase 13 | Pending |
-| REN-04 | Phase 13 | Pending |
-| REN-05 | Phase 13 | Pending |
+| REN-03 | Phase 13 | Complete |
+| REN-04 | Phase 13 | Complete |
+| REN-05 | Phase 13 | Complete |
 | RCMD-01 | Phase 12 | Complete |
 | RCMD-02 | Phase 12 | Complete |
 | RCMD-03 | Phase 12 | Complete |
@@ -151,9 +151,9 @@
 | CFG-02 | Phase 12 | Complete |
 | CFG-03 | Phase 12 | Complete |
 | CFG-04 | Phase 12 | Complete |
-| DIST-01 | Phase 13 | Pending |
-| DIST-02 | Phase 13 | Pending |
-| DIST-03 | Phase 13 | Pending |
+| DIST-01 | Phase 13 | Complete |
+| DIST-02 | Phase 13 | Complete |
+| DIST-03 | Phase 13 | Complete |
 | DOCS-01 | Phase 14 | Pending |
 
 **Coverage:**
