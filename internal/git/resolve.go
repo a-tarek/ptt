@@ -57,20 +57,73 @@ func levenshteinDistance(s1, s2 string) int {
 	return matrix[len(s1)][len(s2)]
 }
 
-// findClosestMatch returns the closest worktree name based on Levenshtein distance
-// Returns empty string if no close match found (distance > 3)
-func findClosestMatch(input string, worktrees []Worktree) string {
-	const maxDistance = 3
+// matchScore computes a score for how well input matches candidate
+// Higher score = better match. Returns 0 if no match.
+func matchScore(input, candidate string) int {
+	// Priority 1: Exact segment match (split on "-")
+	// "feat" matches segment in "wt-feat-1" -> score 100
+	segments := strings.Split(candidate, "-")
+	for _, seg := range segments {
+		if seg == input {
+			return 100
+		}
+	}
+
+	// Priority 2: Substring match
+	// "feat" is substring of "wt-feature" -> score 80
+	if strings.Contains(candidate, input) {
+		return 80
+	}
+
+	// Priority 3: Segment prefix match
+	// "fea" matches start of segment "feat" in "wt-feat-1" -> score 60
+	for _, seg := range segments {
+		if strings.HasPrefix(seg, input) {
+			return 60
+		}
+	}
+
+	// Priority 4: Input is a prefix of candidate
+	// "wt-f" matches start of "wt-feat-1" -> score 40
+	if strings.HasPrefix(candidate, input) {
+		return 40
+	}
+
+	// Priority 5: Levenshtein distance (for typos)
+	// "featur" vs "feature" -> distance 1 -> score 20
+	dist := levenshteinDistance(input, candidate)
+	maxDist := max(3, len(input)/2) // scale threshold with input length
+	if dist <= maxDist {
+		return 20 - dist // closer = higher score (max 20, min 17 for dist=3)
+	}
+
+	// Also check Levenshtein against individual segments
+	// "fea" vs "feat" -> distance 1 -> score 15
+	for _, seg := range segments {
+		dist := levenshteinDistance(input, seg)
+		if dist <= 2 {
+			return 15 - dist
+		}
+	}
+
+	return 0 // no match
+}
+
+// FindClosestMatch returns the closest worktree name using segment-aware scoring
+// Returns empty string if no close match found (score = 0)
+func FindClosestMatch(input string, worktrees []Worktree) string {
+	input = strings.ToLower(input)
 	var bestMatch string
-	bestDistance := maxDistance + 1
+	bestScore := 0 // higher is better
 
 	for _, wt := range worktrees {
 		basename := filepath.Base(wt.Path)
-		distance := levenshteinDistance(input, basename)
-
-		if distance <= maxDistance && distance < bestDistance {
-			bestDistance = distance
-			bestMatch = basename
+		basenameOriginal := basename
+		basename = strings.ToLower(basename)
+		score := matchScore(input, basename)
+		if score > bestScore {
+			bestScore = score
+			bestMatch = basenameOriginal // preserve original case
 		}
 	}
 
@@ -97,7 +150,7 @@ func ResolveWorktree(name string) (*Worktree, error) {
 
 	if len(matches) == 0 {
 		// Try to find a close match using fuzzy matching
-		suggestion := findClosestMatch(name, worktrees)
+		suggestion := FindClosestMatch(name, worktrees)
 		if suggestion != "" {
 			return nil, fmt.Errorf("worktree '%s' not found. Did you mean '%s'?", name, suggestion)
 		}
