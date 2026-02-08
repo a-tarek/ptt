@@ -130,7 +130,7 @@ Plans:
 - [x] 08-02-PLAN.md — wt uninstall command with confirmation and rc file cleanup
 
 #### Phase 9: Polish & Testing
-**Goal**: Improve error messages, add CI/CD, and comprehensive testing across platforms
+**Goal**: Improve error messages with actionable suggestions, add CI/CD pipeline, comprehensive shell testing, and rewrite README for v2
 **Depends on**: Phase 8
 **Requirements**: (No specific requirements - polish existing features)
 **Success Criteria** (what must be TRUE):
@@ -138,10 +138,13 @@ Plans:
   2. CI/CD pipeline runs tests on Linux and macOS
   3. Shell wrappers tested on bash 3.2, bash 5+, zsh 5.8+, fish 3.0+
   4. README includes installation, usage, and troubleshooting
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 09-01: TBD
+- [ ] 09-01-PLAN.md — Enhanced error messages with fuzzy matching, color output, and help footer
+- [ ] 09-02-PLAN.md — GitHub Actions CI/CD pipeline (test matrix + release automation)
+- [ ] 09-03-PLAN.md — End-to-end shell wrapper tests with real git repos
+- [ ] 09-04-PLAN.md — README rewrite for v2 (installation, commands, configuration, troubleshooting)
 
 ## Progress
 
@@ -155,7 +158,7 @@ Plans:
 | 6. Shell Integration | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 7. npm Distribution | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 8. Interactive Installer | v2.0 | 2/2 | Complete | 2026-02-07 |
-| 9. Polish & Testing | v2.0 | 0/TBD | Not started | - |
+| 9. Polish & Testing | v2.0 | 0/4 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-07*
