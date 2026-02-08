@@ -11,7 +11,7 @@ import (
 func RunCommand(workDir, command string) error {
 	cmd := exec.Command("sh", "-c", command)
 	cmd.Dir = workDir
-	cmd.Stdout = os.Stdout
+	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {

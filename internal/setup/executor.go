@@ -38,7 +38,7 @@ func executeOne(srcRoot, targetRoot string, action config.Action) error {
 		if err := CopyPath(src, dest); err != nil {
 			return err
 		}
-		fmt.Printf("Copied %s\n", action.Path)
+		fmt.Fprintf(os.Stderr, "Copied %s\n", action.Path)
 
 	case config.ActionSymlink:
 		src := filepath.Join(srcRoot, action.Path)
@@ -46,10 +46,10 @@ func executeOne(srcRoot, targetRoot string, action config.Action) error {
 		if err := CreateSymlink(src, dest); err != nil {
 			return err
 		}
-		fmt.Printf("Symlinked %s\n", action.Path)
+		fmt.Fprintf(os.Stderr, "Symlinked %s\n", action.Path)
 
 	case config.ActionRun:
-		fmt.Printf("Running %s...\n", action.Path)
+		fmt.Fprintf(os.Stderr, "Running %s...\n", action.Path)
 		if err := RunCommand(targetRoot, action.Path); err != nil {
 			return err
 		}
