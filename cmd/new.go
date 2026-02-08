@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/ahmedelarabyy/wt/internal/config"
-
 	"github.com/ahmedelarabyy/wt/internal/git"
 	"github.com/ahmedelarabyy/wt/internal/setup"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -53,31 +53,11 @@ var newCmd = &cobra.Command{
 		// 4. Determine branch name
 		branchName := name
 
-		// 5. Create worktree
-		// Try creating new branch first
-		createCmd := exec.Command("git", "worktree", "add", targetPath, "-b", branchName)
-		output, err := createCmd.CombinedOutput()
-		if err != nil {
-			// Branch might already exist, try without -b
-			createCmd = exec.Command("git", "worktree", "add", targetPath, branchName)
-			output, err = createCmd.CombinedOutput()
-			if err != nil {
-				return fmt.Errorf("failed to create worktree: %s", strings.TrimSpace(string(output)))
-			}
-		}
-
-		// 6. Print creation message immediately
-		basename := filepath.Base(targetPath)
-		fmt.Fprintf(os.Stderr, "Created worktree %s (branch: %s)\n", basename, branchName)
-
-		// 7. Handle config
-		var appliedActions int
-		var configFileName string
+		// 5. Validate and build config actions (before creating worktree)
+		var allActions []config.Action
 		hasInlineFlags := len(copyFlags) > 0 || len(symlinkFlags) > 0 || len(runFlags) > 0
 
 		if !skipConfig || hasInlineFlags {
-			var allActions []config.Action
-
 			// Load file-based config (unless --skip-config or inline flags override)
 			if !skipConfig && !hasInlineFlags {
 				var configPath string
@@ -89,7 +69,7 @@ var newCmd = &cobra.Command{
 
 				// If config file found, parse and validate
 				if err == nil {
-					configFileName = filepath.Base(configPath)
+	
 					actions, parseErr := config.ParseFile(configPath)
 					if parseErr != nil {
 						return parseErr
@@ -107,7 +87,7 @@ var newCmd = &cobra.Command{
 				// --config with inline flags: load named config, then append inline flags
 				configPath, cfgErr := config.ResolveConfigPath(homePath, configFlag)
 				if cfgErr == nil {
-					configFileName = filepath.Base(configPath)
+	
 					actions, parseErr := config.ParseFile(configPath)
 					if parseErr != nil {
 						return parseErr
@@ -122,9 +102,8 @@ var newCmd = &cobra.Command{
 				}
 			}
 
-			// Add inline flag actions
+			// Validate inline flags
 			if hasInlineFlags {
-				// Check for duplicates within flags
 				if err := config.CheckDuplicatePaths(copyFlags, symlinkFlags); err != nil {
 					return err
 				}
@@ -132,42 +111,36 @@ var newCmd = &cobra.Command{
 				flagActions := config.BuildActionsFromFlags(copyFlags, symlinkFlags, runFlags, os.Args)
 				allActions = append(allActions, flagActions...)
 			}
+		}
 
-			// Execute all actions
-			if len(allActions) > 0 {
-				if err := setup.ExecuteActions(currentWorktreeRoot, targetPath, allActions); err != nil {
-					return err
-				}
-				appliedActions = len(allActions)
+		// 6. Create worktree (all validation passed)
+		createCmd := exec.Command("git", "worktree", "add", targetPath, "-b", branchName)
+		output, err := createCmd.CombinedOutput()
+		if err != nil {
+			// Branch might already exist, try without -b
+			createCmd = exec.Command("git", "worktree", "add", targetPath, branchName)
+			output, err = createCmd.CombinedOutput()
+			if err != nil {
+				return fmt.Errorf("failed to create worktree: %s", strings.TrimSpace(string(output)))
 			}
 		}
 
-		// 7. Check dirty status after config actions
-		dirty, err := git.IsDirty(targetPath)
-		if err != nil {
-			return err
+		// 7. Print status and execute actions
+		basename := filepath.Base(targetPath)
+		label := color.New(color.FgCyan)
+		fmt.Fprintf(os.Stderr, "- %s %s\n", label.Sprint("create:"), basename)
+
+		if len(allActions) > 0 {
+			if err := setup.ExecuteActions(currentWorktreeRoot, targetPath, allActions); err != nil {
+				return err
+			}
 		}
 
-		dirtyStr := "clean"
-		if dirty {
-			dirtyStr = "dirty"
-		}
+		fmt.Fprintf(os.Stderr, "- %s %s\n", label.Sprint("cd:"), basename)
 
-		// 8. Confirmation messages to stderr
-		if appliedActions > 0 && configFileName != "" {
-			fmt.Fprintf(os.Stderr, "Applied %s (%d actions)\n", configFileName, appliedActions)
-		} else if appliedActions > 0 {
-			fmt.Fprintf(os.Stderr, "Applied %d inline actions\n", appliedActions)
-		}
-
-		fmt.Fprintf(os.Stderr, "Switched to %s (branch: %s, %s)\n", basename, branchName, dirtyStr)
-
-		// 9. Output path to stdout if flag is set
+		// 8. Output path to stdout for shell wrapper
 		if outputPath {
 			fmt.Println(targetPath)
-		} else {
-			// Also print confirmation to stdout when not using --output-path
-			fmt.Printf("Switched to %s (branch: %s, %s)\n", basename, branchName, dirtyStr)
 		}
 
 		return nil

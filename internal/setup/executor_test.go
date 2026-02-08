@@ -133,14 +133,14 @@ func TestExecuteActionsStatusMessages(t *testing.T) {
 	}
 
 	// Verify status messages
-	if !strings.Contains(output, "Copied .env") {
-		t.Errorf("output missing 'Copied .env': %q", output)
+	if !strings.Contains(output, "copy: .env") {
+		t.Errorf("output missing 'copy: .env': %q", output)
 	}
-	if !strings.Contains(output, "Symlinked node_modules") {
-		t.Errorf("output missing 'Symlinked node_modules': %q", output)
+	if !strings.Contains(output, "symlink: node_modules") {
+		t.Errorf("output missing 'symlink: node_modules': %q", output)
 	}
-	if !strings.Contains(output, "Running echo done...") {
-		t.Errorf("output missing 'Running echo done...': %q", output)
+	if !strings.Contains(output, "run: echo done") {
+		t.Errorf("output missing 'run: echo done': %q", output)
 	}
 }
 
