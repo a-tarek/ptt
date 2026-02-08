@@ -7,26 +7,29 @@ import (
 	"path/filepath"
 
 	"github.com/ahmedelarabyy/wt/internal/config"
-	"github.com/fatih/color"
+	"github.com/ahmedelarabyy/wt/internal/ui"
 )
-
-var actionLabel = color.New(color.FgCyan)
 
 // ExecuteActions runs all actions sequentially against the target worktree.
 // srcRoot is the source worktree (where files are copied/symlinked from).
 // targetRoot is the new worktree (where files land and commands run).
+// tasks is the TaskList tracking all planned steps; offset is the index of the
+// first action within that list.
 // If any action fails, the entire worktree is rolled back.
-func ExecuteActions(srcRoot, targetRoot string, actions []config.Action) error {
+func ExecuteActions(srcRoot, targetRoot string, actions []config.Action, tasks *ui.TaskList, offset int) error {
 	if len(actions) == 0 {
 		return nil
 	}
 
-	for _, action := range actions {
+	for i, action := range actions {
 		if err := executeOne(srcRoot, targetRoot, action); err != nil {
+			tasks.MarkFailed(offset + i)
+			tasks.FailRemaining(offset + i + 1)
 			// Rollback: remove entire worktree
 			rollbackWorktree(targetRoot)
 			return err
 		}
+		tasks.MarkDone(offset + i)
 	}
 
 	return nil
@@ -41,7 +44,6 @@ func executeOne(srcRoot, targetRoot string, action config.Action) error {
 		if err := CopyPath(src, dest); err != nil {
 			return err
 		}
-		fmt.Fprintf(os.Stderr, "- %s %s\n", actionLabel.Sprint("copy:"), action.Path)
 
 	case config.ActionSymlink:
 		src := filepath.Join(srcRoot, action.Path)
@@ -49,10 +51,8 @@ func executeOne(srcRoot, targetRoot string, action config.Action) error {
 		if err := CreateSymlink(src, dest); err != nil {
 			return err
 		}
-		fmt.Fprintf(os.Stderr, "- %s %s\n", actionLabel.Sprint("symlink:"), action.Path)
 
 	case config.ActionRun:
-		fmt.Fprintf(os.Stderr, "- %s %s\n", actionLabel.Sprint("run:"), action.Path)
 		if err := RunCommand(targetRoot, action.Path); err != nil {
 			return err
 		}
@@ -69,12 +69,9 @@ func rollbackWorktree(targetRoot string) {
 	fmt.Fprintf(os.Stderr, "Error occurred, rolling back worktree...\n")
 
 	// Try to remove the worktree using git
-	// Note: This assumes we're being called from the context of the wt command
-	// which will handle setting the correct working directory for git commands
 	removeCmd := exec.Command("git", "worktree", "remove", "--force", targetRoot)
 	if err := removeCmd.Run(); err != nil {
 		// Git worktree remove failed - try direct directory removal
-		// This is a fallback for edge cases
 		if err := os.RemoveAll(targetRoot); err != nil {
 			fmt.Fprintf(os.Stderr, "WARNING: rollback failed: %v\n", err)
 			fmt.Fprintf(os.Stderr, "Manual cleanup: git worktree remove --force %s\n", targetRoot)

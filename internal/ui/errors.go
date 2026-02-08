@@ -9,6 +9,8 @@ import (
 var (
 	red    = color.New(color.FgRed)
 	yellow = color.New(color.FgYellow)
+	green  = color.New(color.FgGreen)
+	cyan   = color.New(color.FgCyan)
 )
 
 // FormatError formats an error message with color and help footer

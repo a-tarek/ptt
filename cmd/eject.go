@@ -10,6 +10,7 @@ import (
 	"github.com/ahmedelarabyy/wt/internal/config"
 	"github.com/ahmedelarabyy/wt/internal/git"
 	"github.com/ahmedelarabyy/wt/internal/setup"
+	"github.com/ahmedelarabyy/wt/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -273,7 +274,11 @@ var ejectCmd = &cobra.Command{
 
 			// Execute if we have any actions
 			if len(allActions) > 0 {
-				if err := setup.ExecuteActions(srcRoot, targetPath, allActions); err != nil {
+				ejectTasks := ui.NewTaskList()
+				for _, a := range allActions {
+					ejectTasks.Add(a.Type+":", a.Path)
+				}
+				if err := setup.ExecuteActions(srcRoot, targetPath, allActions, ejectTasks, 0); err != nil {
 					// ExecuteActions already removed the worktree directory via rollback
 					// We also need to undo the branch switch and stash
 					checkoutBackCmd := exec.Command("git", "checkout", currentBranch)
