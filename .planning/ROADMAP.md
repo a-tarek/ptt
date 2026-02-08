@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Documentation** - Phases 1-2 (shipped 2026-02-07)
-- 🚧 **v2.0 Go Rewrite** - Phases 3-9 (in progress)
+- ✅ **v2.0 Go Rewrite** - Phases 3-9 (shipped 2026-02-08)
 
 ## Phases
 
@@ -30,7 +30,7 @@ Plans:
 
 </details>
 
-### 🚧 v2.0 Go Rewrite (In Progress)
+### ✅ v2.0 Go Rewrite (Complete)
 
 **Milestone Goal:** Rewrite wt in Go for cross-platform, multi-shell support with npm distribution
 
@@ -141,10 +141,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — Enhanced error messages with fuzzy matching, color output, and help footer
-- [ ] 09-02-PLAN.md — GitHub Actions CI/CD pipeline (test matrix + release automation)
-- [ ] 09-03-PLAN.md — End-to-end shell wrapper tests with real git repos
-- [ ] 09-04-PLAN.md — README rewrite for v2 (installation, commands, configuration, troubleshooting)
+- [x] 09-01-PLAN.md — Enhanced error messages with fuzzy matching, color output, and help footer
+- [x] 09-02-PLAN.md — GitHub Actions CI/CD pipeline (test matrix + release automation)
+- [x] 09-03-PLAN.md — End-to-end shell wrapper tests with real git repos
+- [x] 09-04-PLAN.md — README rewrite for v2 (installation, commands, configuration, troubleshooting)
 
 ## Progress
 
@@ -158,7 +158,7 @@ Plans:
 | 6. Shell Integration | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 7. npm Distribution | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 8. Interactive Installer | v2.0 | 2/2 | Complete | 2026-02-07 |
-| 9. Polish & Testing | v2.0 | 0/4 | Not started | - |
+| 9. Polish & Testing | v2.0 | 4/4 | Complete | 2026-02-08 |
 
 ---
 *Roadmap created: 2026-02-07*
