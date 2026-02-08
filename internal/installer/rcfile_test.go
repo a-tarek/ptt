@@ -19,9 +19,9 @@ func TestHasMarkerBlock(t *testing.T) {
 		{
 			name: "has marker block",
 			content: `some config
-# >>> wt >>>
-eval "$(wt shell-init)"
-# <<< wt <<<
+# >>> ptt >>>
+eval "$(ptt shell-init)"
+# <<< ptt <<<
 more config`,
 			want: true,
 		},
@@ -35,8 +35,8 @@ alias ll='ls -la'`,
 		{
 			name: "has begin marker only",
 			content: `some config
-# >>> wt >>>
-eval "$(wt shell-init)"`,
+# >>> ptt >>>
+eval "$(ptt shell-init)"`,
 			want: true,
 		},
 	}
@@ -138,13 +138,13 @@ func TestCommentOutLines(t *testing.T) {
 			name:    "comment single line",
 			lines:   []string{"line1", "line2", "line3"},
 			indices: []int{1},
-			want:    []string{"line1", "# [wt v2 migration] line2", "line3"},
+			want:    []string{"line1", "# [ptt migration] line2", "line3"},
 		},
 		{
 			name:    "comment multiple lines",
 			lines:   []string{"line1", "line2", "line3", "line4"},
 			indices: []int{0, 2},
-			want:    []string{"# [wt v2 migration] line1", "line2", "# [wt v2 migration] line3", "line4"},
+			want:    []string{"# [ptt migration] line1", "line2", "# [ptt migration] line3", "line4"},
 		},
 		{
 			name:    "no indices",
@@ -252,9 +252,9 @@ func TestRemoveMarkerBlock(t *testing.T) {
 		{
 			name: "has marker block in middle",
 			content: `export PATH=$PATH:/usr/local/bin
-# >>> wt >>>
-eval "$(wt shell-init)"
-# <<< wt <<<
+# >>> ptt >>>
+eval "$(ptt shell-init)"
+# <<< ptt <<<
 alias ll='ls -la'`,
 			want: `export PATH=$PATH:/usr/local/bin
 
@@ -263,17 +263,17 @@ alias ll='ls -la'`,
 		{
 			name: "has marker block at end",
 			content: `export PATH=$PATH:/usr/local/bin
-# >>> wt >>>
-eval "$(wt shell-init)"
-# <<< wt <<<`,
+# >>> ptt >>>
+eval "$(ptt shell-init)"
+# <<< ptt <<<`,
 			want: `export PATH=$PATH:/usr/local/bin
 `,
 		},
 		{
 			name: "has marker block at start",
-			content: `# >>> wt >>>
-eval "$(wt shell-init)"
-# <<< wt <<<
+			content: `# >>> ptt >>>
+eval "$(ptt shell-init)"
+# <<< ptt <<<
 export PATH=$PATH:/usr/local/bin`,
 			want: `
 export PATH=$PATH:/usr/local/bin`,
@@ -295,9 +295,9 @@ func TestMarkerBlock(t *testing.T) {
 		shellType string
 		wantEval  string
 	}{
-		{"bash", `eval "$(wt shell-init)"`},
-		{"zsh", `eval "$(wt shell-init)"`},
-		{"fish", `wt shell-init | source`},
+		{"bash", `eval "$(ptt shell-init)"`},
+		{"zsh", `eval "$(ptt shell-init)"`},
+		{"fish", `ptt shell-init | source`},
 	}
 
 	for _, tt := range tests {
@@ -318,7 +318,7 @@ func TestMarkerBlock(t *testing.T) {
 			}
 
 			// Check has managed comment
-			if !strings.Contains(got, "Managed by wt installer") {
+			if !strings.Contains(got, "Managed by ptt installer") {
 				t.Errorf("MarkerBlock(%s) missing managed comment", tt.shellType)
 			}
 		})
@@ -330,9 +330,9 @@ func TestEvalLine(t *testing.T) {
 		shellType string
 		want      string
 	}{
-		{"bash", `eval "$(wt shell-init)"`},
-		{"zsh", `eval "$(wt shell-init)"`},
-		{"fish", `wt shell-init | source`},
+		{"bash", `eval "$(ptt shell-init)"`},
+		{"zsh", `eval "$(ptt shell-init)"`},
+		{"fish", `ptt shell-init | source`},
 	}
 
 	for _, tt := range tests {

@@ -12,32 +12,32 @@ import (
 )
 
 var (
-	wtBinaryPath string
-	buildOnce    sync.Once
+	pttBinaryPath string
+	buildOnce     sync.Once
 )
 
-// buildWtBinary compiles the wt binary once and returns its path.
+// buildPttBinary compiles the ptt binary once and returns its path.
 // Uses sync.Once to ensure we only build once per test run.
-func buildWtBinary(t *testing.T) string {
+func buildPttBinary(t *testing.T) string {
 	t.Helper()
 	buildOnce.Do(func() {
-		tmpDir, err := os.MkdirTemp("", "wt-test-*")
+		tmpDir, err := os.MkdirTemp("", "ptt-test-*")
 		if err != nil {
 			t.Fatalf("Failed to create temp dir for binary: %v", err)
 		}
 		// Note: Don't clean up tmpDir - it's used by all tests
 
-		wtBinaryPath = filepath.Join(tmpDir, "wt")
+		pttBinaryPath = filepath.Join(tmpDir, "ptt")
 		projectRoot := filepath.Join("..", "..")
 
-		cmd := exec.Command("go", "build", "-o", wtBinaryPath, ".")
+		cmd := exec.Command("go", "build", "-o", pttBinaryPath, ".")
 		cmd.Dir = projectRoot
 		output, err := cmd.CombinedOutput()
 		if err != nil {
-			t.Fatalf("Failed to build wt binary: %v\nOutput: %s", err, output)
+			t.Fatalf("Failed to build ptt binary: %v\nOutput: %s", err, output)
 		}
 	})
-	return wtBinaryPath
+	return pttBinaryPath
 }
 
 // runSetup executes the setup.sh script to create git fixtures.
@@ -73,7 +73,7 @@ func TestBashWrapperGoto(t *testing.T) {
 		t.Skip("bash not available")
 	}
 
-	tmpBin := buildWtBinary(t)
+	tmpBin := buildPttBinary(t)
 	tmpDir := t.TempDir()
 	runSetup(t, tmpDir)
 
@@ -81,7 +81,7 @@ func TestBashWrapperGoto(t *testing.T) {
 		export SHELL="%s"
 		eval "$('%s' shell-init)"
 		cd "%s/main"
-		wt goto feature
+		ptt goto feature
 		echo "RESULT_PWD=$PWD"
 	`, bashPath, tmpBin, tmpDir)
 
@@ -113,7 +113,7 @@ func TestBashWrapperHome(t *testing.T) {
 		t.Skip("bash not available")
 	}
 
-	tmpBin := buildWtBinary(t)
+	tmpBin := buildPttBinary(t)
 	tmpDir := t.TempDir()
 	runSetup(t, tmpDir)
 
@@ -121,7 +121,7 @@ func TestBashWrapperHome(t *testing.T) {
 		export SHELL="%s"
 		eval "$('%s' shell-init)"
 		cd "%s/feature"
-		wt home
+		ptt home
 		echo "RESULT_PWD=$PWD"
 	`, bashPath, tmpBin, tmpDir)
 
@@ -153,7 +153,7 @@ func TestBashWrapperNew(t *testing.T) {
 		t.Skip("bash not available")
 	}
 
-	tmpBin := buildWtBinary(t)
+	tmpBin := buildPttBinary(t)
 	tmpDir := t.TempDir()
 	runSetup(t, tmpDir)
 
@@ -161,7 +161,7 @@ func TestBashWrapperNew(t *testing.T) {
 		export SHELL="%s"
 		eval "$('%s' shell-init)"
 		cd "%s/main"
-		wt new test-branch
+		ptt new test-branch
 		echo "RESULT_PWD=$PWD"
 	`, bashPath, tmpBin, tmpDir)
 
@@ -193,7 +193,7 @@ func TestBashWrapperPassthrough(t *testing.T) {
 		t.Skip("bash not available")
 	}
 
-	tmpBin := buildWtBinary(t)
+	tmpBin := buildPttBinary(t)
 	tmpDir := t.TempDir()
 	runSetup(t, tmpDir)
 
@@ -201,7 +201,7 @@ func TestBashWrapperPassthrough(t *testing.T) {
 		export SHELL="%s"
 		eval "$('%s' shell-init)"
 		cd "%s/main"
-		wt list
+		ptt list
 	`, bashPath, tmpBin, tmpDir)
 
 	cmd := exec.Command(bashPath, "-c", script)
@@ -212,7 +212,7 @@ func TestBashWrapperPassthrough(t *testing.T) {
 
 	// list output should contain worktree names
 	if !strings.Contains(string(output), "main") {
-		t.Errorf("Expected 'wt list' output to contain 'main', got: %s", output)
+		t.Errorf("Expected 'ptt list' output to contain 'main', got: %s", output)
 	}
 }
 
@@ -227,7 +227,7 @@ func TestZshWrapperGoto(t *testing.T) {
 		t.Skip("zsh not available")
 	}
 
-	tmpBin := buildWtBinary(t)
+	tmpBin := buildPttBinary(t)
 	tmpDir := t.TempDir()
 	runSetup(t, tmpDir)
 
@@ -235,7 +235,7 @@ func TestZshWrapperGoto(t *testing.T) {
 		export SHELL="%s"
 		eval "$('%s' shell-init)"
 		cd "%s/main"
-		wt goto feature
+		ptt goto feature
 		echo "RESULT_PWD=$PWD"
 	`, zshPath, tmpBin, tmpDir)
 
@@ -267,7 +267,7 @@ func TestZshWrapperHome(t *testing.T) {
 		t.Skip("zsh not available")
 	}
 
-	tmpBin := buildWtBinary(t)
+	tmpBin := buildPttBinary(t)
 	tmpDir := t.TempDir()
 	runSetup(t, tmpDir)
 
@@ -275,7 +275,7 @@ func TestZshWrapperHome(t *testing.T) {
 		export SHELL="%s"
 		eval "$('%s' shell-init)"
 		cd "%s/feature"
-		wt home
+		ptt home
 		echo "RESULT_PWD=$PWD"
 	`, zshPath, tmpBin, tmpDir)
 
@@ -307,7 +307,7 @@ func TestZshWrapperNew(t *testing.T) {
 		t.Skip("zsh not available")
 	}
 
-	tmpBin := buildWtBinary(t)
+	tmpBin := buildPttBinary(t)
 	tmpDir := t.TempDir()
 	runSetup(t, tmpDir)
 
@@ -315,7 +315,7 @@ func TestZshWrapperNew(t *testing.T) {
 		export SHELL="%s"
 		eval "$('%s' shell-init)"
 		cd "%s/main"
-		wt new test-branch
+		ptt new test-branch
 		echo "RESULT_PWD=$PWD"
 	`, zshPath, tmpBin, tmpDir)
 
@@ -347,7 +347,7 @@ func TestZshWrapperPassthrough(t *testing.T) {
 		t.Skip("zsh not available")
 	}
 
-	tmpBin := buildWtBinary(t)
+	tmpBin := buildPttBinary(t)
 	tmpDir := t.TempDir()
 	runSetup(t, tmpDir)
 
@@ -355,7 +355,7 @@ func TestZshWrapperPassthrough(t *testing.T) {
 		export SHELL="%s"
 		eval "$('%s' shell-init)"
 		cd "%s/main"
-		wt list
+		ptt list
 	`, zshPath, tmpBin, tmpDir)
 
 	cmd := exec.Command(zshPath, "-c", script)
@@ -380,7 +380,7 @@ func TestFishWrapperGoto(t *testing.T) {
 		t.Skip("fish not available")
 	}
 
-	tmpBin := buildWtBinary(t)
+	tmpBin := buildPttBinary(t)
 	tmpDir := t.TempDir()
 	runSetup(t, tmpDir)
 
@@ -388,7 +388,7 @@ func TestFishWrapperGoto(t *testing.T) {
 		set -x SHELL "%s"
 		eval (%s shell-init)
 		cd "%s/main"
-		wt goto feature
+		ptt goto feature
 		echo "RESULT_PWD=$PWD"
 	`, fishPath, tmpBin, tmpDir)
 
@@ -420,7 +420,7 @@ func TestFishWrapperHome(t *testing.T) {
 		t.Skip("fish not available")
 	}
 
-	tmpBin := buildWtBinary(t)
+	tmpBin := buildPttBinary(t)
 	tmpDir := t.TempDir()
 	runSetup(t, tmpDir)
 
@@ -428,7 +428,7 @@ func TestFishWrapperHome(t *testing.T) {
 		set -x SHELL "%s"
 		eval (%s shell-init)
 		cd "%s/feature"
-		wt home
+		ptt home
 		echo "RESULT_PWD=$PWD"
 	`, fishPath, tmpBin, tmpDir)
 
@@ -460,7 +460,7 @@ func TestFishWrapperNew(t *testing.T) {
 		t.Skip("fish not available")
 	}
 
-	tmpBin := buildWtBinary(t)
+	tmpBin := buildPttBinary(t)
 	tmpDir := t.TempDir()
 	runSetup(t, tmpDir)
 
@@ -468,7 +468,7 @@ func TestFishWrapperNew(t *testing.T) {
 		set -x SHELL "%s"
 		eval (%s shell-init)
 		cd "%s/main"
-		wt new test-branch
+		ptt new test-branch
 		echo "RESULT_PWD=$PWD"
 	`, fishPath, tmpBin, tmpDir)
 
