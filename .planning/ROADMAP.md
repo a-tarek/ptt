@@ -157,8 +157,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 10-01-PLAN.md — Fix stdout leak in setup executor + validate WIP shell wrapper changes
-- [ ] 10-02-PLAN.md — Fix fuzzy matching to use segment-aware scoring instead of pure Levenshtein
+- [x] 10-01-PLAN.md — Fix stdout leak in setup executor + validate WIP shell wrapper changes
+- [x] 10-02-PLAN.md — Fix fuzzy matching to use segment-aware scoring instead of pure Levenshtein
 
 ## Progress
 
@@ -173,7 +173,7 @@ Plans:
 | 7. npm Distribution | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 8. Interactive Installer | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 9. Polish & Testing | v2.0 | 4/4 | Complete | 2026-02-08 |
-| 10. UAT Gap Closure | v2.0 | 0/2 | In Progress | - |
+| 10. UAT Gap Closure | v2.0 | 2/2 | Complete | 2026-02-08 |
 
 ---
 *Roadmap created: 2026-02-07*
