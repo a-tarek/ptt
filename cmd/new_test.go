@@ -72,12 +72,12 @@ func TestNewCommandCreatesWorktree(t *testing.T) {
 		t.Fatalf("Failed to change to main worktree: %v", err)
 	}
 
-	// Execute wt new staging
-	rootCmd.SetArgs([]string{"new", "staging"})
+	// Execute ptt mk staging
+	rootCmd.SetArgs([]string{"mk", "staging"})
 	defer rootCmd.SetArgs([]string{}) // Reset args
 
 	if err := rootCmd.Execute(); err != nil {
-		t.Fatalf("wt new failed: %v", err)
+		t.Fatalf("ptt mk failed: %v", err)
 	}
 
 	// Verify worktree directory exists
@@ -120,12 +120,12 @@ func TestNewCommandExistingBranch(t *testing.T) {
 		t.Fatalf("Failed to create feature branch: %v\n%s", err, output)
 	}
 
-	// Execute wt new feature (should use existing branch)
-	rootCmd.SetArgs([]string{"new", "feature"})
+	// Execute ptt mk feature (should use existing branch)
+	rootCmd.SetArgs([]string{"mk", "feature"})
 	defer rootCmd.SetArgs([]string{})
 
 	if err := rootCmd.Execute(); err != nil {
-		t.Fatalf("wt new failed with existing branch: %v", err)
+		t.Fatalf("ptt mk failed with existing branch: %v", err)
 	}
 
 	// Verify worktree directory exists
@@ -163,12 +163,12 @@ func TestNewCommandWithSkipConfig(t *testing.T) {
 		t.Fatalf("Failed to change to main worktree: %v", err)
 	}
 
-	// Execute wt new --skip-config staging
-	rootCmd.SetArgs([]string{"new", "--skip-config", "staging"})
+	// Execute ptt mk --skip-config staging
+	rootCmd.SetArgs([]string{"mk", "--skip-config", "staging"})
 	defer rootCmd.SetArgs([]string{})
 
 	if err := rootCmd.Execute(); err != nil {
-		t.Fatalf("wt new failed: %v", err)
+		t.Fatalf("ptt mk failed: %v", err)
 	}
 
 	// Verify .env was NOT copied
@@ -201,8 +201,8 @@ func TestNewCommandAlreadyExists(t *testing.T) {
 		t.Fatalf("Failed to change to main worktree: %v", err)
 	}
 
-	// Execute wt new staging (should fail)
-	rootCmd.SetArgs([]string{"new", "staging"})
+	// Execute ptt mk staging (should fail)
+	rootCmd.SetArgs([]string{"mk", "staging"})
 	defer rootCmd.SetArgs([]string{})
 
 	err = rootCmd.Execute()
