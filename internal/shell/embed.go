@@ -15,7 +15,7 @@ var wrapperZsh string
 //go:embed templates/wrapper.fish
 var wrapperFish string
 
-const binPlaceholder = "__WT_BIN__"
+const binPlaceholder = "__PTT_BIN__"
 
 // GetWrapper returns the embedded wrapper script for the given shell,
 // with the binary path injected.
