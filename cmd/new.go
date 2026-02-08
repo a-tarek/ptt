@@ -18,6 +18,7 @@ var (
 	skipConfig     bool
 	copyFlags      []string
 	symlinkFlags   []string
+	runFlags       []string
 )
 
 var newCmd = &cobra.Command{
@@ -68,7 +69,7 @@ var newCmd = &cobra.Command{
 		var appliedActions int
 		var configFileName string
 
-		if !skipConfig || len(copyFlags) > 0 || len(symlinkFlags) > 0 {
+		if !skipConfig || len(copyFlags) > 0 || len(symlinkFlags) > 0 || len(runFlags) > 0 {
 			var allActions []config.Action
 
 			// Load file-based config (unless --skip-config)
@@ -99,13 +100,13 @@ var newCmd = &cobra.Command{
 			}
 
 			// Add inline flag actions
-			if len(copyFlags) > 0 || len(symlinkFlags) > 0 {
+			if len(copyFlags) > 0 || len(symlinkFlags) > 0 || len(runFlags) > 0 {
 				// Check for duplicates within flags
 				if err := config.CheckDuplicatePaths(copyFlags, symlinkFlags); err != nil {
 					return err
 				}
 
-				flagActions := config.BuildActionsFromFlags(copyFlags, symlinkFlags, nil)
+				flagActions := config.BuildActionsFromFlags(copyFlags, symlinkFlags, runFlags)
 				allActions = append(allActions, flagActions...)
 			}
 
@@ -159,4 +160,5 @@ func init() {
 	newCmd.Flags().BoolVar(&skipConfig, "skip-config", false, "skip all config actions")
 	newCmd.Flags().StringSliceVar(&copyFlags, "copy", []string{}, "inline copy overrides (repeatable)")
 	newCmd.Flags().StringSliceVar(&symlinkFlags, "symlink", []string{}, "inline symlink overrides (repeatable)")
+	newCmd.Flags().StringSliceVar(&runFlags, "run", []string{}, "inline run commands (repeatable)")
 }

@@ -18,6 +18,7 @@ var (
 	ejectSkipConfig  bool
 	ejectCopyFlags   []string
 	ejectSymlinkFlags []string
+	ejectRunFlags    []string
 )
 
 var ejectCmd = &cobra.Command{
@@ -170,7 +171,7 @@ var ejectCmd = &cobra.Command{
 		}
 
 		// 10. Apply config (same logic as wt new)
-		if !ejectSkipConfig || len(ejectCopyFlags) > 0 || len(ejectSymlinkFlags) > 0 {
+		if !ejectSkipConfig || len(ejectCopyFlags) > 0 || len(ejectSymlinkFlags) > 0 || len(ejectRunFlags) > 0 {
 			var fileActions []config.Action
 			var configName string
 
@@ -218,7 +219,7 @@ var ejectCmd = &cobra.Command{
 			}
 
 			// Flag-based actions (always apply)
-			flagActions := config.BuildActionsFromFlags(ejectCopyFlags, ejectSymlinkFlags, nil)
+			flagActions := config.BuildActionsFromFlags(ejectCopyFlags, ejectSymlinkFlags, ejectRunFlags)
 
 			// Check for duplicate paths
 			if err := config.CheckDuplicatePaths(ejectCopyFlags, ejectSymlinkFlags); err != nil {
@@ -297,4 +298,5 @@ func init() {
 	ejectCmd.Flags().BoolVar(&ejectSkipConfig, "skip-config", false, "skip file-based config")
 	ejectCmd.Flags().StringSliceVar(&ejectCopyFlags, "copy", nil, "inline copy override")
 	ejectCmd.Flags().StringSliceVar(&ejectSymlinkFlags, "symlink", nil, "inline symlink override")
+	ejectCmd.Flags().StringSliceVar(&ejectRunFlags, "run", []string{}, "inline run commands (repeatable)")
 }
