@@ -5,5 +5,5 @@ var Version = "dev"
 
 func init() {
 	rootCmd.Version = Version
-	rootCmd.SetVersionTemplate("wt version {{.Version}}\n")
+	rootCmd.SetVersionTemplate("ptt version {{.Version}}\n")
 }

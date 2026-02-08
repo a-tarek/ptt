@@ -3,7 +3,7 @@ package cmd
 import (
 	"path/filepath"
 
-	"github.com/ahmedelarabyy/wt/internal/git"
+	"github.com/a-tarek/ptt/internal/git"
 	"github.com/spf13/cobra"
 )
 

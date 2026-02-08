@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ahmedelarabyy/wt/internal/config"
-	"github.com/ahmedelarabyy/wt/internal/ui"
+	"github.com/a-tarek/ptt/internal/config"
+	"github.com/a-tarek/ptt/internal/ui"
 )
 
 func buildTaskList(actions []config.Action) *ui.TaskList {

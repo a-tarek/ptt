@@ -1,7 +1,7 @@
-# Requirements: wt v2.0 Go Rewrite
+# Requirements: ptt v2.0
 
 **Defined:** 2026-02-07
-**Core Value:** A single `wt` command that works in any shell on any platform with full autocompletion
+**Core Value:** A single `ptt` command that works in any shell on any platform with full autocompletion
 
 ## v2.0 Requirements
 
@@ -51,6 +51,36 @@
 - [x] **INST-02**: Shows what will be added to rc file, requires confirmation
 - [x] **INST-03**: Idempotent — detects existing installation
 - [x] **INST-04**: Provides manual instructions if user declines
+
+### Rebrand — Global Rename
+
+- [ ] **REN-01**: Binary renamed from `wt` to `ptt`
+- [ ] **REN-02**: Go module path updated to `github.com/a-tarek/ptt`
+- [ ] **REN-03**: npm packages renamed to `@a-tarek/ptt` and `@a-tarek/ptt-{platform}-{arch}`
+- [ ] **REN-04**: Shell wrapper functions use `ptt()` name
+- [ ] **REN-05**: RC file markers use `>>> ptt >>>` / `<<< ptt <<<` format
+
+### Rebrand — Command Restructure
+
+- [ ] **RCMD-01**: `ptt mk <name>` creates worktree (alias: `new`)
+- [ ] **RCMD-02**: `ptt go <worktree>` navigates to worktree (alias: `goto`)
+- [ ] **RCMD-03**: `ptt go` (no args) navigates to home worktree (replaces `home` command)
+- [ ] **RCMD-04**: `ptt rm <worktree>` removes worktree (alias: `delete`)
+- [ ] **RCMD-05**: `ptt ls` is primary list command (alias: `list`)
+
+### Rebrand — Config Directory
+
+- [ ] **CFG-01**: Config uses `.pttconfig/` directory structure
+- [ ] **CFG-02**: Default config resolves to `.pttconfig/default`
+- [ ] **CFG-03**: Named configs via `--config <name>` resolve to `.pttconfig/<name>`
+- [ ] **CFG-04**: `ptt init` creates `.pttconfig/` directory with `default` file
+
+### Rebrand — Distribution & Docs
+
+- [ ] **DIST-01**: npm package.json files updated for @a-tarek scope
+- [ ] **DIST-02**: Build/publish scripts reference ptt binary and @a-tarek packages
+- [ ] **DIST-03**: CI/CD workflows updated for ptt binary paths
+- [ ] **DOCS-01**: README.md rewritten for ptt branding and new command names
 
 ## Future Requirements
 
@@ -107,11 +137,31 @@
 | INST-03 | Phase 8 | Complete |
 | INST-04 | Phase 8 | Complete |
 
+| REN-01 | Phase 11 | Pending |
+| REN-02 | Phase 11 | Pending |
+| REN-03 | Phase 13 | Pending |
+| REN-04 | Phase 13 | Pending |
+| REN-05 | Phase 13 | Pending |
+| RCMD-01 | Phase 12 | Pending |
+| RCMD-02 | Phase 12 | Pending |
+| RCMD-03 | Phase 12 | Pending |
+| RCMD-04 | Phase 12 | Pending |
+| RCMD-05 | Phase 12 | Pending |
+| CFG-01 | Phase 12 | Pending |
+| CFG-02 | Phase 12 | Pending |
+| CFG-03 | Phase 12 | Pending |
+| CFG-04 | Phase 12 | Pending |
+| DIST-01 | Phase 13 | Pending |
+| DIST-02 | Phase 13 | Pending |
+| DIST-03 | Phase 13 | Pending |
+| DOCS-01 | Phase 14 | Pending |
+
 **Coverage:**
-- v2.0 requirements: 28 total
-- Mapped to phases: 28 (100% coverage)
+- v2.0 original requirements: 28 total (all complete)
+- v2.0 rebrand requirements: 18 total
+- Mapped to phases: 18 (100% coverage)
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-07*
-*Last updated: 2026-02-07 with phase mappings*
+*Last updated: 2026-02-08 with rebrand requirements and phase mappings*

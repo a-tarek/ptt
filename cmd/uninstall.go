@@ -6,25 +6,25 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ahmedelarabyy/wt/internal/installer"
-	"github.com/ahmedelarabyy/wt/internal/shell"
+	"github.com/a-tarek/ptt/internal/installer"
+	"github.com/a-tarek/ptt/internal/shell"
 	"github.com/spf13/cobra"
 )
 
 var uninstallCmd = &cobra.Command{
 	Use:   "uninstall",
-	Short: "Remove wt shell integration",
-	Long: `Remove wt shell integration by removing the wt configuration block from your shell's RC file.
+	Short: "Remove ptt shell integration",
+	Long: `Remove ptt shell integration by removing the ptt configuration block from your shell's RC file.
 
 This command will:
   • Detect your current shell
-  • Check for existing wt installation
+  • Check for existing ptt installation
   • Show you exactly what will be removed
   • Safely modify your RC file with backup
   • Provide instructions for complete uninstallation
 
-Note: This only removes the RC file integration. To fully uninstall wt,
-you'll need to also run: npm uninstall -g @potato/wt`,
+Note: This only removes the RC file integration. To fully uninstall ptt,
+you'll need to also run: npm uninstall -g @a-tarek/ptt`,
 	Args: cobra.NoArgs,
 	RunE: runUninstall,
 }
@@ -34,8 +34,8 @@ func init() {
 }
 
 func runUninstall(cmd *cobra.Command, args []string) error {
-	fmt.Println("wt uninstall — Remove Shell Integration")
-	fmt.Println("========================================")
+	fmt.Println("ptt uninstall — Remove Shell Integration")
+	fmt.Println("=========================================")
 	fmt.Println()
 
 	// Step 1: Detect shell and rc file
@@ -73,7 +73,7 @@ func runUninstall(cmd *cobra.Command, args []string) error {
 
 	// Step 2: Check for existing installation
 	if !installer.HasMarkerBlock(content) {
-		fmt.Printf("wt is not configured in %s\n", displayPath)
+		fmt.Printf("ptt is not configured in %s\n", displayPath)
 		fmt.Println("No changes needed.")
 		return nil
 	}
@@ -116,11 +116,11 @@ func runUninstall(cmd *cobra.Command, args []string) error {
 
 	// Step 5: Success
 	fmt.Println()
-	fmt.Println("Done! wt shell integration has been removed.")
+	fmt.Println("Done! ptt shell integration has been removed.")
 	fmt.Println()
 	fmt.Println("To complete uninstallation:")
 	fmt.Println("  1. Restart your terminal (or run: source " + displayPath + ")")
-	fmt.Println("  2. Run: npm uninstall -g @potato/wt")
+	fmt.Println("  2. Run: npm uninstall -g @a-tarek/ptt")
 
 	return nil
 }

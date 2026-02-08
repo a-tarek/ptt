@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ahmedelarabyy/wt/internal/config"
-	"github.com/ahmedelarabyy/wt/internal/git"
-	"github.com/ahmedelarabyy/wt/internal/setup"
-	"github.com/ahmedelarabyy/wt/internal/ui"
+	"github.com/a-tarek/ptt/internal/config"
+	"github.com/a-tarek/ptt/internal/git"
+	"github.com/a-tarek/ptt/internal/setup"
+	"github.com/a-tarek/ptt/internal/ui"
 	"github.com/spf13/cobra"
 )
 

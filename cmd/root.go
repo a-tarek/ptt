@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ahmedelarabyy/wt/internal/ui"
+	"github.com/a-tarek/ptt/internal/ui"
 	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "wt",
+	Use:   "ptt",
 	Short: "Git worktree manager",
-	Long: `wt — Git Worktree Manager
+	Long: `ptt — Git Worktree Manager
 
 A fast, intuitive git worktree manager.
 

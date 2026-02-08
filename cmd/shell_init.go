@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ahmedelarabyy/wt/internal/shell"
+	"github.com/a-tarek/ptt/internal/shell"
 	"github.com/spf13/cobra"
 )
 
@@ -13,7 +13,7 @@ var shellInitCmd = &cobra.Command{
 	Use:    "shell-init",
 	Hidden: true,
 	Short:  "Output shell wrapper function for eval",
-	Long:   "Outputs shell-specific wrapper code. Add to your rc file:\n  eval $(wt shell-init)",
+	Long:   "Outputs shell-specific wrapper code. Add to your rc file:\n  eval $(ptt shell-init)",
 	Args:   cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		shellType, err := shell.DetectShell()

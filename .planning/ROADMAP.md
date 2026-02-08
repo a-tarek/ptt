@@ -1,9 +1,10 @@
-# Roadmap: wt
+# Roadmap: ptt
 
 ## Milestones
 
 - ✅ **v1.0 Documentation** - Phases 1-2 (shipped 2026-02-07)
-- ✅ **v2.0 Go Rewrite** - Phases 3-9 (shipped 2026-02-08)
+- ✅ **v2.0 Go Rewrite** - Phases 3-10 (shipped 2026-02-08)
+- 📋 **v2.0 Pre-Release Rebrand** - Phases 11-14 (planned)
 
 ## Phases
 
@@ -31,7 +32,7 @@ Plans:
 </details>
 
 <details>
-<summary>✅ v2.0 Go Rewrite (Phases 3-9) - SHIPPED 2026-02-08</summary>
+<summary>✅ v2.0 Go Rewrite (Phases 3-10) - SHIPPED 2026-02-08</summary>
 
 ### ✅ v2.0 Go Rewrite (Complete)
 
@@ -149,8 +150,6 @@ Plans:
 - [x] 09-03-PLAN.md — End-to-end shell wrapper tests with real git repos
 - [x] 09-04-PLAN.md — README rewrite for v2 (installation, commands, configuration, troubleshooting)
 
-</details>
-
 #### Phase 10: UAT Gap Closure
 **Goal**: Fix 3 bugs discovered during full UAT: shell wrapper binary resolution, stdout leak in setup executor, and fuzzy matching algorithm
 **Depends on**: Phase 9
@@ -159,6 +158,71 @@ Plans:
 Plans:
 - [x] 10-01-PLAN.md — Fix stdout leak in setup executor + validate WIP shell wrapper changes
 - [x] 10-02-PLAN.md — Fix fuzzy matching to use segment-aware scoring instead of pure Levenshtein
+
+</details>
+
+### v2.0 Pre-Release Rebrand (Phases 11-14)
+
+**Milestone Goal:** Rebrand wt to ptt, restructure commands for better UX, and update distribution before first public release.
+
+#### Phase 11: Go Module + Binary Rename
+**Goal**: The Go binary builds and runs as `ptt` with the new module path
+**Depends on**: Phase 10
+**Requirements**: REN-01, REN-02
+**Success Criteria** (what must be TRUE):
+  1. User can run `ptt --version` and see version output
+  2. User can run `ptt list` and see worktrees (existing commands work under new binary name)
+  3. `go build` succeeds with module path `github.com/a-tarek/ptt`
+  4. All existing tests pass under the new module path
+**Plans**: 1 plan
+
+Plans:
+- [ ] 11-01-PLAN.md — Update Go module path, all import statements, binary name in command definitions, and build/CI configs
+
+#### Phase 12: Command Restructure + Config Directory
+**Goal**: Users interact with the new command names and directory-based config
+**Depends on**: Phase 11
+**Requirements**: RCMD-01, RCMD-02, RCMD-03, RCMD-04, RCMD-05, CFG-01, CFG-02, CFG-03, CFG-04
+**Success Criteria** (what must be TRUE):
+  1. User can run `ptt mk <name>` to create a worktree (and `ptt new` still works as alias)
+  2. User can run `ptt go <worktree>` to navigate and `ptt go` (no args) to go home
+  3. User can run `ptt rm <worktree>` to remove a worktree (and `ptt delete` still works as alias)
+  4. User can run `ptt ls` to list worktrees (and `ptt list` still works as alias)
+  5. User can run `ptt init` which creates `.pttconfig/default`, and `--config <name>` resolves to `.pttconfig/<name>`
+**Plans**: 2 plans
+
+Plans:
+- [ ] 12-01-PLAN.md — Command restructure: rename commands to mk/go/rm/ls with backward-compatible aliases
+- [ ] 12-02-PLAN.md — Config directory migration: .pttconfig/ structure with default and named configs
+
+#### Phase 13: Shell Wrappers + npm Distribution
+**Goal**: Shell integration and npm packages work under the ptt brand
+**Depends on**: Phase 12
+**Requirements**: REN-03, REN-04, REN-05, DIST-01, DIST-02, DIST-03
+**Success Criteria** (what must be TRUE):
+  1. User can source shell wrapper and the `ptt` function is available (bash/zsh/fish)
+  2. RC file markers use `>>> ptt >>>` / `<<< ptt <<<` format
+  3. User can `npm install @a-tarek/ptt` and get the correct platform binary
+  4. Build and publish scripts produce `ptt` binary under `@a-tarek` scope
+  5. CI/CD workflow builds and releases the `ptt` binary (not `wt`)
+**Plans**: 2 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — Shell wrapper and installer rebrand (ptt function name, marker blocks, rc file content)
+- [ ] 13-02-PLAN.md — npm package and CI/CD rebrand (package names, scopes, binary paths, workflow updates)
+
+#### Phase 14: Documentation
+**Goal**: README and user-facing docs reflect the ptt brand and new command names
+**Depends on**: Phase 13
+**Requirements**: DOCS-01
+**Success Criteria** (what must be TRUE):
+  1. README.md shows `ptt` in all examples, installation instructions, and command reference
+  2. README.md documents the new command names (mk, go, rm, ls) with their aliases
+  3. README.md installation instructions reference `@a-tarek/ptt`
+**Plans**: 1 plan
+
+Plans:
+- [ ] 14-01-PLAN.md — README rewrite for ptt branding, new command names, and @a-tarek scope
 
 ## Progress
 
@@ -174,7 +238,11 @@ Plans:
 | 8. Interactive Installer | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 9. Polish & Testing | v2.0 | 4/4 | Complete | 2026-02-08 |
 | 10. UAT Gap Closure | v2.0 | 2/2 | Complete | 2026-02-08 |
+| 11. Go Module + Binary Rename | Rebrand | 0/1 | Not started | - |
+| 12. Command Restructure + Config Directory | Rebrand | 0/2 | Not started | - |
+| 13. Shell Wrappers + npm Distribution | Rebrand | 0/2 | Not started | - |
+| 14. Documentation | Rebrand | 0/1 | Not started | - |
 
 ---
 *Roadmap created: 2026-02-07*
-*v1.0 complete (phases 1-2), v2.0 phases 3-9 planned*
+*v1.0 complete (phases 1-2), v2.0 complete (phases 3-10), rebrand phases 11-14 planned*
