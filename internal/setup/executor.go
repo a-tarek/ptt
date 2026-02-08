@@ -6,8 +6,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/ahmedelarabyy/wt/internal/config"
-	"github.com/ahmedelarabyy/wt/internal/ui"
+	"github.com/a-tarek/ptt/internal/config"
+	"github.com/a-tarek/ptt/internal/ui"
 )
 
 // ExecuteActions runs all actions sequentially against the target worktree.

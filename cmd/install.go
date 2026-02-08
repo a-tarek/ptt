@@ -7,19 +7,19 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ahmedelarabyy/wt/internal/installer"
-	"github.com/ahmedelarabyy/wt/internal/shell"
+	"github.com/a-tarek/ptt/internal/installer"
+	"github.com/a-tarek/ptt/internal/shell"
 	"github.com/spf13/cobra"
 )
 
 var installCmd = &cobra.Command{
 	Use:   "install",
-	Short: "Set up wt shell integration",
-	Long: `Set up wt shell integration by adding the wt configuration block to your shell's RC file.
+	Short: "Set up ptt shell integration",
+	Long: `Set up ptt shell integration by adding the ptt configuration block to your shell's RC file.
 
 This command will:
   • Detect your current shell
-  • Check for existing wt installations
+  • Check for existing ptt installations
   • Show you exactly what will be added
   • Migrate from wt v1 if needed
   • Safely modify your RC file with backup
@@ -36,7 +36,7 @@ func init() {
 func runInstall(cmd *cobra.Command, args []string) error {
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Println("wt install — Shell Integration Setup")
+	fmt.Println("ptt install — Shell Integration Setup")
 	fmt.Println("=====================================")
 	fmt.Println()
 
@@ -46,7 +46,7 @@ func runInstall(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n\n", err)
 		fmt.Fprintf(os.Stderr, "To set up manually, add this to your shell's RC file:\n\n")
-		fmt.Fprintf(os.Stderr, "  eval \"$(wt shell-init)\"\n\n")
+		fmt.Fprintf(os.Stderr, "  eval \"$(ptt shell-init)\"\n\n")
 		return err
 	}
 	fmt.Printf("  Detected: %s\n\n", shellType)
@@ -83,7 +83,7 @@ func runInstall(cmd *cobra.Command, args []string) error {
 
 	// Step 3: Check for existing installation
 	if installer.HasMarkerBlock(content) {
-		fmt.Printf("wt is already configured in %s\n", displayPath)
+		fmt.Printf("ptt is already configured in %s\n", displayPath)
 		fmt.Println("No changes needed.")
 		return nil
 	}
@@ -179,7 +179,7 @@ func runInstall(cmd *cobra.Command, args []string) error {
 
 	// Step 7: Success
 	fmt.Println()
-	fmt.Printf("Done! wt has been configured for %s.\n\n", shellType)
+	fmt.Printf("Done! ptt has been configured for %s.\n\n", shellType)
 	fmt.Println("To activate, either:")
 	fmt.Println("  • Restart your terminal")
 
