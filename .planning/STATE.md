@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-08)
 
 **Core value:** A single `ptt` command that works in any shell on any platform with full autocompletion
-**Current focus:** v2.0 Pre-Release Rebrand — Phase 12 (Command Restructure + Config Directory)
+**Current focus:** v2.0 Pre-Release Rebrand — Phase 13 (Shell Wrappers + npm Distribution)
 
 ## Current Position
 
-Phase: 12 of 14 (Command Restructure + Config Directory)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-02-08 — Completed 12-02-PLAN.md
+Phase: 13 of 14 (Shell Wrappers + npm Distribution)
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-08 — Completed 13-01-PLAN.md
 
-Progress: [######################.] 29/32 plans (91%) — 29 complete + 3 rebrand remaining
+Progress: [#######################] 30/32 plans (94%) — 30 complete + 2 rebrand remaining
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 29
-- Average duration: ~2.8 min per plan
-- Total execution time: ~1.3 hours
+- Total plans completed: 30
+- Average duration: ~2.7 min per plan
+- Total execution time: ~1.4 hours
 
 **By Phase:**
 
@@ -39,10 +39,11 @@ Progress: [######################.] 29/32 plans (91%) — 29 complete + 3 rebran
 | 10. UAT Gap Closure | 2/2 | 6.2 min | 3.1 min |
 | 11. Go Module + Binary Rename | 1/1 | 6.9 min | 6.9 min |
 | 12. Command Restructure + Config Directory | 2/2 | 5 min | 2.5 min |
+| 13. Shell Wrappers + npm Distribution | 1/2 | 3.4 min | 3.4 min |
 
 **Recent Trend:**
-- Phase 12 (Command Restructure + Config Directory) COMPLETE
-- 3 rebrand plans remaining (phases 13-14)
+- Phase 13 Plan 01 (Shell wrapper rebrand) COMPLETE — 3.4 min
+- Phase 13 Plan 02 (npm package rebrand) remaining
 
 ## Accumulated Context
 
@@ -70,9 +71,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 12-02-PLAN.md — Config directory migration complete
+Stopped at: Completed 13-01-PLAN.md — Shell wrapper rebrand complete
 Resume file: None
 
 ---
 *State initialized: 2026-02-07*
-*Updated: 2026-02-08 — completed Phase 12 (Command Restructure + Config Directory)*
+*Updated: 2026-02-08 — completed 13-01 (Shell wrapper rebrand)*
