@@ -3,6 +3,7 @@ package shell
 import (
 	_ "embed"
 	"fmt"
+	"strings"
 )
 
 //go:embed templates/wrapper.bash
@@ -14,17 +15,22 @@ var wrapperZsh string
 //go:embed templates/wrapper.fish
 var wrapperFish string
 
-// GetWrapper returns the embedded wrapper script for the given shell.
+const binPlaceholder = "__WT_BIN__"
+
+// GetWrapper returns the embedded wrapper script for the given shell,
+// with the binary path injected.
 // Supported shells: bash, zsh, fish.
-func GetWrapper(shellName string) (string, error) {
+func GetWrapper(shellName string, binaryPath string) (string, error) {
+	var template string
 	switch shellName {
 	case "bash":
-		return wrapperBash, nil
+		template = wrapperBash
 	case "zsh":
-		return wrapperZsh, nil
+		template = wrapperZsh
 	case "fish":
-		return wrapperFish, nil
+		template = wrapperFish
 	default:
 		return "", fmt.Errorf("unsupported shell: %s (supported: bash, zsh, fish)", shellName)
 	}
+	return strings.ReplaceAll(template, binPlaceholder, binaryPath), nil
 }

@@ -2,12 +2,13 @@ package shell_test
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
+
+	"os"
 )
 
 var (
@@ -50,17 +51,6 @@ func runSetup(t *testing.T, tmpDir string) {
 	}
 }
 
-// wrapperPath returns the absolute path to the wrapper script for the given shell.
-func wrapperPath(t *testing.T, shell string) string {
-	t.Helper()
-	projectRoot := filepath.Join("..", "..")
-	absPath, err := filepath.Abs(filepath.Join(projectRoot, "internal", "shell", "templates", fmt.Sprintf("wrapper.%s", shell)))
-	if err != nil {
-		t.Fatalf("Failed to resolve wrapper path: %v", err)
-	}
-	return absPath
-}
-
 // parsePWD extracts the PWD from command output in the format "RESULT_PWD=/path/to/dir".
 func parsePWD(output string) (string, error) {
 	lines := strings.Split(strings.TrimSpace(output), "\n")
@@ -88,12 +78,12 @@ func TestBashWrapperGoto(t *testing.T) {
 	runSetup(t, tmpDir)
 
 	script := fmt.Sprintf(`
-		export PATH="%s:$PATH"
-		source "%s"
+		export SHELL="%s"
+		eval "$('%s' shell-init)"
 		cd "%s/main"
 		wt goto feature
 		echo "RESULT_PWD=$PWD"
-	`, filepath.Dir(tmpBin), wrapperPath(t, "bash"), tmpDir)
+	`, bashPath, tmpBin, tmpDir)
 
 	cmd := exec.Command(bashPath, "-c", script)
 	output, err := cmd.CombinedOutput()
@@ -128,12 +118,12 @@ func TestBashWrapperHome(t *testing.T) {
 	runSetup(t, tmpDir)
 
 	script := fmt.Sprintf(`
-		export PATH="%s:$PATH"
-		source "%s"
+		export SHELL="%s"
+		eval "$('%s' shell-init)"
 		cd "%s/feature"
 		wt home
 		echo "RESULT_PWD=$PWD"
-	`, filepath.Dir(tmpBin), wrapperPath(t, "bash"), tmpDir)
+	`, bashPath, tmpBin, tmpDir)
 
 	cmd := exec.Command(bashPath, "-c", script)
 	output, err := cmd.CombinedOutput()
@@ -168,12 +158,12 @@ func TestBashWrapperNew(t *testing.T) {
 	runSetup(t, tmpDir)
 
 	script := fmt.Sprintf(`
-		export PATH="%s:$PATH"
-		source "%s"
+		export SHELL="%s"
+		eval "$('%s' shell-init)"
 		cd "%s/main"
 		wt new test-branch
 		echo "RESULT_PWD=$PWD"
-	`, filepath.Dir(tmpBin), wrapperPath(t, "bash"), tmpDir)
+	`, bashPath, tmpBin, tmpDir)
 
 	cmd := exec.Command(bashPath, "-c", script)
 	output, err := cmd.CombinedOutput()
@@ -189,6 +179,40 @@ func TestBashWrapperNew(t *testing.T) {
 	expectedSuffix := "/test-branch"
 	if !strings.HasSuffix(pwd, expectedSuffix) {
 		t.Errorf("Expected PWD to end with %q, got: %s", expectedSuffix, pwd)
+	}
+}
+
+// TestBashWrapperPassthrough tests that non-cd commands pass through correctly.
+func TestBashWrapperPassthrough(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping shell e2e test in short mode")
+	}
+
+	bashPath, err := exec.LookPath("bash")
+	if err != nil {
+		t.Skip("bash not available")
+	}
+
+	tmpBin := buildWtBinary(t)
+	tmpDir := t.TempDir()
+	runSetup(t, tmpDir)
+
+	script := fmt.Sprintf(`
+		export SHELL="%s"
+		eval "$('%s' shell-init)"
+		cd "%s/main"
+		wt list
+	`, bashPath, tmpBin, tmpDir)
+
+	cmd := exec.Command(bashPath, "-c", script)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("Command failed: %v\nOutput: %s", err, output)
+	}
+
+	// list output should contain worktree names
+	if !strings.Contains(string(output), "main") {
+		t.Errorf("Expected 'wt list' output to contain 'main', got: %s", output)
 	}
 }
 
@@ -208,12 +232,12 @@ func TestZshWrapperGoto(t *testing.T) {
 	runSetup(t, tmpDir)
 
 	script := fmt.Sprintf(`
-		export PATH="%s:$PATH"
-		source "%s"
+		export SHELL="%s"
+		eval "$('%s' shell-init)"
 		cd "%s/main"
 		wt goto feature
 		echo "RESULT_PWD=$PWD"
-	`, filepath.Dir(tmpBin), wrapperPath(t, "zsh"), tmpDir)
+	`, zshPath, tmpBin, tmpDir)
 
 	cmd := exec.Command(zshPath, "-c", script)
 	output, err := cmd.CombinedOutput()
@@ -248,12 +272,12 @@ func TestZshWrapperHome(t *testing.T) {
 	runSetup(t, tmpDir)
 
 	script := fmt.Sprintf(`
-		export PATH="%s:$PATH"
-		source "%s"
+		export SHELL="%s"
+		eval "$('%s' shell-init)"
 		cd "%s/feature"
 		wt home
 		echo "RESULT_PWD=$PWD"
-	`, filepath.Dir(tmpBin), wrapperPath(t, "zsh"), tmpDir)
+	`, zshPath, tmpBin, tmpDir)
 
 	cmd := exec.Command(zshPath, "-c", script)
 	output, err := cmd.CombinedOutput()
@@ -288,12 +312,12 @@ func TestZshWrapperNew(t *testing.T) {
 	runSetup(t, tmpDir)
 
 	script := fmt.Sprintf(`
-		export PATH="%s:$PATH"
-		source "%s"
+		export SHELL="%s"
+		eval "$('%s' shell-init)"
 		cd "%s/main"
 		wt new test-branch
 		echo "RESULT_PWD=$PWD"
-	`, filepath.Dir(tmpBin), wrapperPath(t, "zsh"), tmpDir)
+	`, zshPath, tmpBin, tmpDir)
 
 	cmd := exec.Command(zshPath, "-c", script)
 	output, err := cmd.CombinedOutput()
@@ -309,6 +333,39 @@ func TestZshWrapperNew(t *testing.T) {
 	expectedSuffix := "/test-branch"
 	if !strings.HasSuffix(pwd, expectedSuffix) {
 		t.Errorf("Expected PWD to end with %q, got: %s", expectedSuffix, pwd)
+	}
+}
+
+// TestZshWrapperPassthrough tests that non-cd commands pass through correctly in zsh.
+func TestZshWrapperPassthrough(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping shell e2e test in short mode")
+	}
+
+	zshPath, err := exec.LookPath("zsh")
+	if err != nil {
+		t.Skip("zsh not available")
+	}
+
+	tmpBin := buildWtBinary(t)
+	tmpDir := t.TempDir()
+	runSetup(t, tmpDir)
+
+	script := fmt.Sprintf(`
+		export SHELL="%s"
+		eval "$('%s' shell-init)"
+		cd "%s/main"
+		wt list
+	`, zshPath, tmpBin, tmpDir)
+
+	cmd := exec.Command(zshPath, "-c", script)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("Command failed: %v\nOutput: %s", err, output)
+	}
+
+	if !strings.Contains(string(output), "main") {
+		t.Errorf("Expected 'wt list' output to contain 'main', got: %s", output)
 	}
 }
 
@@ -328,12 +385,12 @@ func TestFishWrapperGoto(t *testing.T) {
 	runSetup(t, tmpDir)
 
 	script := fmt.Sprintf(`
-		set -x PATH "%s" $PATH
-		source "%s"
+		set -x SHELL "%s"
+		eval (%s shell-init)
 		cd "%s/main"
 		wt goto feature
 		echo "RESULT_PWD=$PWD"
-	`, filepath.Dir(tmpBin), wrapperPath(t, "fish"), tmpDir)
+	`, fishPath, tmpBin, tmpDir)
 
 	cmd := exec.Command(fishPath, "-c", script)
 	output, err := cmd.CombinedOutput()
@@ -368,12 +425,12 @@ func TestFishWrapperHome(t *testing.T) {
 	runSetup(t, tmpDir)
 
 	script := fmt.Sprintf(`
-		set -x PATH "%s" $PATH
-		source "%s"
+		set -x SHELL "%s"
+		eval (%s shell-init)
 		cd "%s/feature"
 		wt home
 		echo "RESULT_PWD=$PWD"
-	`, filepath.Dir(tmpBin), wrapperPath(t, "fish"), tmpDir)
+	`, fishPath, tmpBin, tmpDir)
 
 	cmd := exec.Command(fishPath, "-c", script)
 	output, err := cmd.CombinedOutput()
@@ -408,12 +465,12 @@ func TestFishWrapperNew(t *testing.T) {
 	runSetup(t, tmpDir)
 
 	script := fmt.Sprintf(`
-		set -x PATH "%s" $PATH
-		source "%s"
+		set -x SHELL "%s"
+		eval (%s shell-init)
 		cd "%s/main"
 		wt new test-branch
 		echo "RESULT_PWD=$PWD"
-	`, filepath.Dir(tmpBin), wrapperPath(t, "fish"), tmpDir)
+	`, fishPath, tmpBin, tmpDir)
 
 	cmd := exec.Command(fishPath, "-c", script)
 	output, err := cmd.CombinedOutput()
