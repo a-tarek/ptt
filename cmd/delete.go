@@ -17,8 +17,9 @@ var (
 	deleteBranch bool
 )
 
-var deleteCmd = &cobra.Command{
-	Use:               "delete <worktree>",
+var rmCmd = &cobra.Command{
+	Use:               "rm <worktree>",
+	Aliases:           []string{"delete"},
 	Short:             "Remove a worktree",
 	Args:              cobra.ExactArgs(1),
 	ValidArgsFunction: worktreeNameCompletion,
@@ -110,7 +111,7 @@ var deleteCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(deleteCmd)
-	deleteCmd.Flags().BoolVarP(&forceDelete, "force", "f", false, "skip confirmation for dirty worktrees")
-	deleteCmd.Flags().BoolVarP(&deleteBranch, "branch", "b", false, "also delete the branch after removing worktree")
+	rootCmd.AddCommand(rmCmd)
+	rmCmd.Flags().BoolVarP(&forceDelete, "force", "f", false, "skip confirmation for dirty worktrees")
+	rmCmd.Flags().BoolVarP(&deleteBranch, "branch", "b", false, "also delete the branch after removing worktree")
 }

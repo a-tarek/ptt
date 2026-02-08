@@ -54,8 +54,8 @@
 
 ### Rebrand — Global Rename
 
-- [ ] **REN-01**: Binary renamed from `wt` to `ptt`
-- [ ] **REN-02**: Go module path updated to `github.com/a-tarek/ptt`
+- [x] **REN-01**: Binary renamed from `wt` to `ptt`
+- [x] **REN-02**: Go module path updated to `github.com/a-tarek/ptt`
 - [ ] **REN-03**: npm packages renamed to `@a-tarek/ptt` and `@a-tarek/ptt-{platform}-{arch}`
 - [ ] **REN-04**: Shell wrapper functions use `ptt()` name
 - [ ] **REN-05**: RC file markers use `>>> ptt >>>` / `<<< ptt <<<` format
@@ -137,8 +137,8 @@
 | INST-03 | Phase 8 | Complete |
 | INST-04 | Phase 8 | Complete |
 
-| REN-01 | Phase 11 | Pending |
-| REN-02 | Phase 11 | Pending |
+| REN-01 | Phase 11 | Complete |
+| REN-02 | Phase 11 | Complete |
 | REN-03 | Phase 13 | Pending |
 | REN-04 | Phase 13 | Pending |
 | REN-05 | Phase 13 | Pending |

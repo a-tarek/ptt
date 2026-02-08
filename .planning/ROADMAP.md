@@ -177,7 +177,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 11-01-PLAN.md — Update Go module path, all import statements, binary name in command definitions, and build/CI configs
+- [x] 11-01-PLAN.md — Update Go module path, all import statements, binary name in command definitions, and build/CI configs
 
 #### Phase 12: Command Restructure + Config Directory
 **Goal**: Users interact with the new command names and directory-based config
@@ -238,7 +238,7 @@ Plans:
 | 8. Interactive Installer | v2.0 | 2/2 | Complete | 2026-02-07 |
 | 9. Polish & Testing | v2.0 | 4/4 | Complete | 2026-02-08 |
 | 10. UAT Gap Closure | v2.0 | 2/2 | Complete | 2026-02-08 |
-| 11. Go Module + Binary Rename | Rebrand | 0/1 | Not started | - |
+| 11. Go Module + Binary Rename | Rebrand | 1/1 | Complete | 2026-02-08 |
 | 12. Command Restructure + Config Directory | Rebrand | 0/2 | Not started | - |
 | 13. Shell Wrappers + npm Distribution | Rebrand | 0/2 | Not started | - |
 | 14. Documentation | Rebrand | 0/1 | Not started | - |

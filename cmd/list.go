@@ -11,9 +11,9 @@ import (
 
 var showAllPaths bool
 
-var listCmd = &cobra.Command{
-	Use:     "list",
-	Aliases: []string{"ls"},
+var lsCmd = &cobra.Command{
+	Use:     "ls",
+	Aliases: []string{"list"},
 	Short:   "List all worktrees",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Check if inside git repo
@@ -111,6 +111,6 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(listCmd)
-	listCmd.Flags().BoolVarP(&showAllPaths, "all", "a", false, "show full paths")
+	rootCmd.AddCommand(lsCmd)
+	lsCmd.Flags().BoolVarP(&showAllPaths, "all", "a", false, "show full paths")
 }
