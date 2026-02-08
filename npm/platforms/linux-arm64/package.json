@@ -1,11 +1,11 @@
 {
-  "name": "@potato/wt-linux-arm64",
+  "name": "@a-tarek/ptt-linux-arm64",
   "version": "0.0.0",
-  "description": "Git worktree manager - Linux ARM64 binary",
-  "repository": "github:ahmedelarabyy/wt",
+  "description": "ptt: a potato worktree manager - Linux ARM64 binary",
+  "repository": "github:a-tarek/ptt",
   "license": "MIT",
   "os": ["linux"],
   "cpu": ["arm64"],
-  "bin": { "wt": "bin/wt" },
-  "files": ["bin/wt"]
+  "bin": { "ptt": "bin/ptt" },
+  "files": ["bin/ptt"]
 }
