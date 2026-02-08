@@ -12,16 +12,16 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 Phase: 9 of 9 (Polish & Testing)
 Plan: 3 of 3 complete
 Status: Phase complete
-Last activity: 2026-02-08 — Completed 09-04-PLAN.md
+Last activity: 2026-02-08 — Completed 09-03-PLAN.md
 
-Progress: [█████████] 100% (18/18 total plans complete)
+Progress: [█████████] 94% (17/18 total plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18
-- Average duration: ~2.1 min per plan
-- Total execution time: ~0.78 hours
+- Total plans completed: 17
+- Average duration: ~2.6 min per plan
+- Total execution time: ~0.73 hours
 
 **By Phase:**
 
@@ -35,16 +35,16 @@ Progress: [█████████] 100% (18/18 total plans complete)
 | 6. Shell Integration | 2/2 ✓ | 3 min | 1.5 min |
 | 7. npm Distribution | 2/2 ✓ | 7 min | 3.5 min |
 | 8. Interactive Installer | 2/2 ✓ | 6 min | 3 min |
-| 9. Polish & Testing | 3/3 ✓ | 4 min | 1.3 min |
+| 9. Polish & Testing | 3/3 ✓ | 11 min | 3.7 min |
 
 **Recent Trend:**
-- Phase 9 (Polish & Testing) COMPLETE ✓
-- Plan 09-04 complete: README rewrite — complete v2 documentation (2 min)
-- 635-line comprehensive README in zoxide/starship style
-- All 9 commands documented with examples and behavior notes
-- Installation via npm, .wtconfig guidance, troubleshooting section
-- ALL PHASES COMPLETE — v2.0 ready for release
-- Total execution time: ~47 minutes across 18 plans
+- Phase 9 (Polish & Testing) in progress
+- Plan 09-03 complete: Shell E2E tests — comprehensive bash/zsh/fish wrapper tests with real git repos (7.3 min)
+- Created tests/shell/shell_test.go with 9 test cases (3 shells × 3 commands)
+- Fixed GetHomePath bug for bare repo home detection
+- Real git fixtures (no mocking) for high-confidence shell integration testing
+- All bash and zsh tests passing, fish tests skip gracefully if not installed
+- Total execution time: ~44 minutes across 17 plans
 
 ## Accumulated Context
 
@@ -123,9 +123,10 @@ Recent decisions affecting current work:
 - **Go version pinning**: Use exact version from go.mod (1.25.7) for predictable CI environment (09-02)
 - **Lean CI philosophy**: Only go vet, no golangci-lint - keep CI fast and simple (09-02)
 - **Single-command release**: Full automation on tag push - git tag v2.0.0 triggers complete pipeline (09-02)
-- **README complete rewrite**: Fresh v2 documentation with no v1 references, thorough walkthrough style (09-04)
-- **Copy vs symlink decision tree**: Documented when to use each with practical examples and decision table (09-04)
-- **Troubleshooting approach**: Cause → Solution pattern for 6 common issues with specific commands (09-04)
+- **Real git fixtures**: Use real git repos with worktrees for E2E tests (no mocking) - highest confidence shell integration works (09-03)
+- **Build once pattern**: Build wt binary once per test run using sync.Once - 6x faster test execution (09-03)
+- **Skip missing shells**: Fish tests skip gracefully if not installed - allows tests to pass on systems without all shells (09-03)
+- **Short mode support**: All tests check testing.Short() to allow fast iteration with go test -short (09-03)
 
 ### Pending Todos
 
@@ -142,7 +143,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 09-04-PLAN.md (README rewrite) - ALL PHASES COMPLETE
+Stopped at: Completed 09-03-PLAN.md (Shell E2E tests)
 Resume file: None
 
 ---
