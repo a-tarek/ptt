@@ -5,10 +5,10 @@ const { resolve } = require('path');
 
 // Map Node.js platform/arch to package names
 const platformMap = {
-  'darwin-arm64': '@potato/wt-darwin-arm64',
-  'darwin-x64': '@potato/wt-darwin-amd64',
-  'linux-x64': '@potato/wt-linux-amd64',
-  'linux-arm64': '@potato/wt-linux-arm64',
+  'darwin-arm64': '@a-tarek/ptt-darwin-arm64',
+  'darwin-x64': '@a-tarek/ptt-darwin-amd64',
+  'linux-x64': '@a-tarek/ptt-linux-amd64',
+  'linux-arm64': '@a-tarek/ptt-linux-arm64',
 };
 
 const platformKey = `${process.platform}-${process.arch}`;
@@ -23,7 +23,7 @@ if (!packageName) {
 // Resolve the platform-specific binary
 let binaryPath;
 try {
-  binaryPath = require.resolve(`${packageName}/bin/wt`);
+  binaryPath = require.resolve(`${packageName}/bin/ptt`);
 } catch (err) {
   console.error(`Failed to find binary for ${packageName}`);
   console.error(`This usually means the optional dependency failed to install.`);
@@ -47,6 +47,6 @@ child.on('exit', (code, signal) => {
 
 // Handle errors
 child.on('error', (err) => {
-  console.error(`Failed to execute wt: ${err.message}`);
+  console.error(`Failed to execute ptt: ${err.message}`);
   process.exit(1);
 });
