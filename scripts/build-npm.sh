@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Build script for wt npm distribution
+# Build script for ptt npm distribution
 # Runs goreleaser cross-compilation and stages binaries in npm platform directories
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-echo "==> Building wt with goreleaser..."
+echo "==> Building ptt with goreleaser..."
 cd "$PROJECT_ROOT"
 
 # Run goreleaser build (snapshot mode for local builds, no git tags required)
@@ -21,10 +21,10 @@ echo "==> Staging binaries in npm platform directories..."
 
 # Define platform mappings (platform|source_path)
 PLATFORMS=(
-  "darwin-arm64|dist/wt_darwin_arm64_v8.0/wt"
-  "darwin-amd64|dist/wt_darwin_amd64_v1/wt"
-  "linux-arm64|dist/wt_linux_arm64_v8.0/wt"
-  "linux-amd64|dist/wt_linux_amd64_v1/wt"
+  "darwin-arm64|dist/ptt_darwin_arm64_v8.0/ptt"
+  "darwin-amd64|dist/ptt_darwin_amd64_v1/ptt"
+  "linux-arm64|dist/ptt_linux_arm64_v8.0/ptt"
+  "linux-amd64|dist/ptt_linux_amd64_v1/ptt"
 )
 
 STAGED_COUNT=0
@@ -32,7 +32,7 @@ STAGED_COUNT=0
 for entry in "${PLATFORMS[@]}"; do
   platform="${entry%%|*}"
   src="${entry##*|}"
-  dest="npm/platforms/$platform/bin/wt"
+  dest="npm/platforms/$platform/bin/ptt"
 
   if [[ ! -f "$src" ]]; then
     echo "ERROR: Expected binary not found: $src"

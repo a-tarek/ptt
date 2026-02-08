@@ -1,14 +1,14 @@
-project_name: wt
+project_name: ptt
 builds:
-  - id: wt
-    binary: wt
+  - id: ptt
+    binary: ptt
     main: ./main.go
     goos: [darwin, linux]
     goarch: [amd64, arm64]
     env: [CGO_ENABLED=0]
     ldflags:
       - -s -w
-      - -X github.com/ahmedelarabyy/wt/cmd.Version={{.Version}}
+      - -X github.com/a-tarek/ptt/cmd.Version={{.Version}}
 archives:
   - id: default
     format: binary

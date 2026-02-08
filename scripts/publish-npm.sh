@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Publish script for wt npm distribution
+# Publish script for ptt npm distribution
 # Handles version updates and coordinated publishing of all 5 packages
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -110,9 +110,9 @@ for platform_dir in platforms/darwin-arm64 platforms/darwin-amd64 platforms/linu
 done
 
 # Publish main package LAST
-echo "Publishing main package @potato/wt..."
+echo "Publishing main package @a-tarek/ptt..."
 $PUBLISH_CMD
-echo "  ✓ Published @potato/wt"
+echo "  ✓ Published @a-tarek/ptt"
 
 echo ""
 if [[ "$DRY_RUN" == true ]]; then
@@ -120,5 +120,5 @@ if [[ "$DRY_RUN" == true ]]; then
 else
   echo "==> Publish complete!"
   echo "    All 5 packages published at version $VERSION"
-  echo "    Install with: npm install @potato/wt@$VERSION"
+  echo "    Install with: npm install @a-tarek/ptt@$VERSION"
 fi
