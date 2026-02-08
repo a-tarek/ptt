@@ -1,13 +1,13 @@
-# wt
+# ptt
 
 A fast, cross-platform git worktree manager.
 
-Managing git worktrees should be effortless. `wt` makes it easy to create, navigate, and configure worktrees with intuitive commands that work the same way in bash, zsh, and fish shells across Linux, macOS, and Windows WSL.
+Managing git worktrees should be effortless. `ptt` makes it easy to create, navigate, and configure worktrees with intuitive commands that work the same way in bash, zsh, and fish shells across Linux, macOS, and Windows WSL.
 
 ## Features
 
 - Create and navigate worktrees with short commands
-- Auto-configure new worktrees with .wtconfig (copy/symlink files)
+- Auto-configure new worktrees with .pttconfig (copy/symlink files)
 - Eject branches into dedicated worktrees with stash handling
 - Tab completion for worktree names in all shells
 - Works with both regular and bare git repos
@@ -18,23 +18,23 @@ Managing git worktrees should be effortless. `wt` makes it easy to create, navig
 ### Primary Method (Global Install)
 
 ```bash
-npm install -g @potato/wt
-wt install
+npm install -g @a-tarek/ptt
+ptt install
 ```
 
 ### Try Before Committing
 
 ```bash
-npx @potato/wt install
+npx @a-tarek/ptt install
 ```
 
-### What `wt install` Does
+### What `ptt install` Does
 
-The `wt install` command:
+The `ptt install` command:
 - Detects your shell (bash, zsh, or fish)
 - Adds a thin shell wrapper to your RC file (~/.bashrc, ~/.zshrc, or ~/.config/fish/config.fish)
 - Sets up tab completion for worktree names
-- Migrates from wt v1 if found (comments out old source lines)
+- Migrates from v1 if found (comments out old source lines)
 
 The shell wrapper is needed because a subprocess cannot change the parent shell's directory. This is the same pattern used by tools like zoxide and nvm.
 
@@ -46,8 +46,8 @@ The shell wrapper is needed because a subprocess cannot change the parent shell'
 ### Uninstall
 
 ```bash
-wt uninstall
-npm uninstall -g @potato/wt
+ptt uninstall
+npm uninstall -g @a-tarek/ptt
 ```
 
 ## Quick Start
@@ -354,45 +354,45 @@ wt delete feature-auth --branch
 - With `--branch` flag, also deletes the branch after removing the worktree
 - Tab completion shows available worktree names
 
-### wt install
+### ptt install
 
-**Usage:** `wt install`
+**Usage:** `ptt install`
 
-Interactive installer that sets up wt shell integration.
+Interactive installer that sets up ptt shell integration.
 
 ```bash
-wt install
+ptt install
 ```
 
 **What it does:**
 - Detects your shell (bash, zsh, or fish)
-- Checks for existing wt installations
+- Checks for existing ptt installations
 - Shows you exactly what will be added to your RC file
-- Migrates from wt v1 if found (comments out old source lines)
+- Migrates from v1 if found (comments out old source lines)
 - Creates a backup of your RC file before modifying
-- Adds the wt configuration block with markers
+- Adds the ptt configuration block with markers
 
-**The installation is idempotent** — you can run it multiple times safely. If wt is already installed, it will detect this and exit without making changes.
+**The installation is idempotent** — you can run it multiple times safely. If ptt is already installed, it will detect this and exit without making changes.
 
-### wt uninstall
+### ptt uninstall
 
-**Usage:** `wt uninstall`
+**Usage:** `ptt uninstall`
 
-Removes wt shell integration from your RC file.
+Removes ptt shell integration from your RC file.
 
 ```bash
-wt uninstall
+ptt uninstall
 ```
 
 **What it does:**
 - Detects your shell
-- Removes the wt configuration block from your RC file
+- Removes the ptt configuration block from your RC file
 - Creates a backup before modifying
 - Prints instructions for removing the npm package
 
-**Note:** This command only removes the shell integration. To completely remove wt, also run:
+**Note:** This command only removes the shell integration. To completely remove ptt, also run:
 ```bash
-npm uninstall -g @potato/wt
+npm uninstall -g @a-tarek/ptt
 ```
 
 ## Configuration
@@ -513,17 +513,17 @@ This lets you maintain a standard configuration while making exceptions when nee
 
 ### How It Works
 
-The `wt` command consists of two parts:
+The `ptt` command consists of two parts:
 
-1. **Go binary** (`wt`) — Handles all logic, git operations, and completion generation
+1. **Go binary** (`ptt`) — Handles all logic, git operations, and completion generation
 2. **Shell wrapper** — Thin function that handles directory changes
 
-When you run `wt goto feature-auth`, the wrapper:
+When you run `ptt go feature-auth`, the wrapper:
 - Calls the Go binary with `--output-path` flag
 - Binary outputs the target path to stdout
 - Wrapper uses that path to `cd` into the directory
 
-For non-directory-changing commands (like `wt list`, `wt merge`), the wrapper simply passes through to the binary.
+For non-directory-changing commands (like `ptt ls`, `ptt merge`), the wrapper simply passes through to the binary.
 
 This pattern is used by tools like zoxide, nvm, and direnv because a subprocess cannot change the parent shell's directory.
 
@@ -532,26 +532,26 @@ This pattern is used by tools like zoxide, nvm, and direnv because a subprocess 
 Tab completion is automatically enabled for commands that take worktree names as arguments:
 
 ```bash
-wt goto <TAB>        # Shows worktree names
-wt delete <TAB>      # Shows worktree names
-wt merge <TAB>       # Shows worktree names
-wt rebase <TAB>      # Shows worktree names
+ptt go <TAB>         # Shows worktree names
+ptt rm <TAB>         # Shows worktree names
+ptt merge <TAB>      # Shows worktree names
+ptt rebase <TAB>     # Shows worktree names
 ```
 
 The completion is **live** — it queries `git worktree list` on every tab press to ensure accuracy. This adds ~5-10ms latency, which is acceptable for the improved UX.
 
-Commands that create new names (`wt new`, `wt eject`) do not have completion for the name argument.
+Commands that create new names (`ptt mk`, `ptt eject`) do not have completion for the name argument.
 
 ## Troubleshooting
 
-### "wt: command not found"
+### "ptt: command not found"
 
 **Cause:** The shell wrapper hasn't been sourced yet.
 
 **Solution:**
 ```bash
 # Run the installer
-wt install
+ptt install
 
 # Then either restart your terminal or source your RC file:
 source ~/.bashrc    # for bash
@@ -561,12 +561,12 @@ source ~/.config/fish/config.fish  # for fish
 
 ### "not inside a git repository"
 
-**Cause:** You're running wt commands outside a git repository.
+**Cause:** You're running ptt commands outside a git repository.
 
-**Solution:** Navigate to a git repository before running wt commands:
+**Solution:** Navigate to a git repository before running ptt commands:
 ```bash
 cd /path/to/your/git/repo
-wt list
+ptt ls
 ```
 
 ### Tab completion not working
@@ -576,7 +576,7 @@ wt list
 **Solution:**
 ```bash
 # Restart your terminal, or re-run the installer
-wt install
+ptt install
 ```
 
 If tab completion still doesn't work after restarting:
@@ -591,14 +591,14 @@ If tab completion still doesn't work after restarting:
 **Solution:**
 ```bash
 # Check available worktrees
-wt list
+ptt ls
 
 # Use the suffix from the directory name
 # If you see "myapp-feature-auth", use:
-wt goto feature-auth
+ptt go feature-auth
 ```
 
-The matching is based on the directory name suffix. If your worktree is named `myapp-feature-auth`, you can navigate to it with `wt goto feature-auth` or just `wt goto auth`.
+The matching is based on the directory name suffix. If your worktree is named `myapp-feature-auth`, you can navigate to it with `ptt go feature-auth` or just `ptt go auth`.
 
 ### Permission error during install
 
@@ -607,14 +607,14 @@ The matching is based on the directory name suffix. If your worktree is named `m
 **Solution:**
 ```bash
 # Either use sudo (not recommended long-term)
-sudo npm install -g @potato/wt
+sudo npm install -g @a-tarek/ptt
 
 # Or configure npm to use a user directory (recommended)
 mkdir ~/.npm-global
 npm config set prefix '~/.npm-global'
 echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
 source ~/.bashrc
-npm install -g @potato/wt
+npm install -g @a-tarek/ptt
 ```
 
 See [npm documentation on fixing permissions](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally).
