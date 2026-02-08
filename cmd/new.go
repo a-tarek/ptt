@@ -10,7 +10,7 @@ import (
 	"github.com/ahmedelarabyy/wt/internal/config"
 	"github.com/ahmedelarabyy/wt/internal/git"
 	"github.com/ahmedelarabyy/wt/internal/setup"
-	"github.com/fatih/color"
+	"github.com/ahmedelarabyy/wt/internal/ui"
 	"github.com/spf13/cobra"
 )
 
@@ -69,7 +69,7 @@ var newCmd = &cobra.Command{
 
 				// If config file found, parse and validate
 				if err == nil {
-	
+
 					actions, parseErr := config.ParseFile(configPath)
 					if parseErr != nil {
 						return parseErr
@@ -87,7 +87,7 @@ var newCmd = &cobra.Command{
 				// --config with inline flags: load named config, then append inline flags
 				configPath, cfgErr := config.ResolveConfigPath(homePath, configFlag)
 				if cfgErr == nil {
-	
+
 					actions, parseErr := config.ParseFile(configPath)
 					if parseErr != nil {
 						return parseErr
@@ -113,7 +113,16 @@ var newCmd = &cobra.Command{
 			}
 		}
 
-		// 6. Create worktree (all validation passed)
+		// 6. Build complete task list
+		basename := filepath.Base(targetPath)
+		tasks := ui.NewTaskList()
+		tasks.Add("create:", basename)
+		for _, action := range allActions {
+			tasks.Add(action.Type+":", action.Path)
+		}
+		tasks.Add("cd:", basename)
+
+		// 7. Create worktree (all validation passed)
 		createCmd := exec.Command("git", "worktree", "add", targetPath, "-b", branchName)
 		output, err := createCmd.CombinedOutput()
 		if err != nil {
@@ -121,24 +130,23 @@ var newCmd = &cobra.Command{
 			createCmd = exec.Command("git", "worktree", "add", targetPath, branchName)
 			output, err = createCmd.CombinedOutput()
 			if err != nil {
+				tasks.FailRemaining(0)
 				return fmt.Errorf("failed to create worktree: %s", strings.TrimSpace(string(output)))
 			}
 		}
+		tasks.MarkDone(0)
 
-		// 7. Print status and execute actions
-		basename := filepath.Base(targetPath)
-		label := color.New(color.FgCyan)
-		fmt.Fprintf(os.Stderr, "- %s %s\n", label.Sprint("create:"), basename)
-
+		// 8. Execute config actions
 		if len(allActions) > 0 {
-			if err := setup.ExecuteActions(currentWorktreeRoot, targetPath, allActions); err != nil {
+			if err := setup.ExecuteActions(currentWorktreeRoot, targetPath, allActions, tasks, 1); err != nil {
 				return err
 			}
 		}
 
-		fmt.Fprintf(os.Stderr, "- %s %s\n", label.Sprint("cd:"), basename)
+		// 9. cd
+		tasks.MarkDone(tasks.Len() - 1)
 
-		// 8. Output path to stdout for shell wrapper
+		// 10. Output path to stdout for shell wrapper
 		if outputPath {
 			fmt.Println(targetPath)
 		}

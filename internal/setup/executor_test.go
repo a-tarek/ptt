@@ -9,7 +9,16 @@ import (
 	"testing"
 
 	"github.com/ahmedelarabyy/wt/internal/config"
+	"github.com/ahmedelarabyy/wt/internal/ui"
 )
+
+func buildTaskList(actions []config.Action) *ui.TaskList {
+	tasks := ui.NewTaskList()
+	for _, a := range actions {
+		tasks.Add(a.Type+":", a.Path)
+	}
+	return tasks
+}
 
 func TestExecuteActionsHappyPath(t *testing.T) {
 	srcDir := t.TempDir()
@@ -33,8 +42,10 @@ func TestExecuteActionsHappyPath(t *testing.T) {
 		{Type: config.ActionRun, Path: "echo done"},
 	}
 
+	tasks := buildTaskList(actions)
+
 	// Execute
-	err := ExecuteActions(srcDir, targetDir, actions)
+	err := ExecuteActions(srcDir, targetDir, actions, tasks, 0)
 	if err != nil {
 		t.Fatalf("ExecuteActions failed: %v", err)
 	}
@@ -69,7 +80,9 @@ func TestExecuteActionsSequentialOrder(t *testing.T) {
 		{Type: config.ActionRun, Path: "echo 3 >> order.txt"},
 	}
 
-	err := ExecuteActions(srcDir, targetDir, actions)
+	tasks := buildTaskList(actions)
+
+	err := ExecuteActions(srcDir, targetDir, actions, tasks, 0)
 	if err != nil {
 		t.Fatalf("ExecuteActions failed: %v", err)
 	}
@@ -114,12 +127,14 @@ func TestExecuteActionsStatusMessages(t *testing.T) {
 		{Type: config.ActionRun, Path: "echo done"},
 	}
 
+	tasks := buildTaskList(actions)
+
 	// Capture stderr (status messages go to stderr, not stdout)
 	oldStderr := os.Stderr
 	r, w, _ := os.Pipe()
 	os.Stderr = w
 
-	err := ExecuteActions(srcDir, targetDir, actions)
+	err := ExecuteActions(srcDir, targetDir, actions, tasks, 0)
 
 	w.Close()
 	os.Stderr = oldStderr
@@ -132,15 +147,27 @@ func TestExecuteActionsStatusMessages(t *testing.T) {
 		t.Fatalf("ExecuteActions failed: %v", err)
 	}
 
-	// Verify status messages
-	if !strings.Contains(output, "copy: .env") {
-		t.Errorf("output missing 'copy: .env': %q", output)
+	// Verify status messages with checkmarks
+	if !strings.Contains(output, "[x]") {
+		t.Errorf("output missing '[x]' checkmarks: %q", output)
 	}
-	if !strings.Contains(output, "symlink: node_modules") {
-		t.Errorf("output missing 'symlink: node_modules': %q", output)
+	if !strings.Contains(output, "copy:") {
+		t.Errorf("output missing 'copy:': %q", output)
 	}
-	if !strings.Contains(output, "run: echo done") {
-		t.Errorf("output missing 'run: echo done': %q", output)
+	if !strings.Contains(output, ".env") {
+		t.Errorf("output missing '.env': %q", output)
+	}
+	if !strings.Contains(output, "symlink:") {
+		t.Errorf("output missing 'symlink:': %q", output)
+	}
+	if !strings.Contains(output, "node_modules") {
+		t.Errorf("output missing 'node_modules': %q", output)
+	}
+	if !strings.Contains(output, "run:") {
+		t.Errorf("output missing 'run:': %q", output)
+	}
+	if !strings.Contains(output, "echo done") {
+		t.Errorf("output missing 'echo done': %q", output)
 	}
 }
 
@@ -160,13 +187,15 @@ func TestExecuteActionsRunFailureTriggersRollback(t *testing.T) {
 		{Type: config.ActionRun, Path: "exit 1"},
 	}
 
+	tasks := buildTaskList(actions)
+
 	// Capture stderr to verify rollback message
 	oldStderr := os.Stderr
 	r, w, _ := os.Pipe()
 	os.Stderr = w
 
 	// Execute - should fail and trigger rollback
-	err := ExecuteActions(srcDir, targetDir, actions)
+	err := ExecuteActions(srcDir, targetDir, actions, tasks, 0)
 
 	w.Close()
 	os.Stderr = oldStderr
@@ -184,6 +213,11 @@ func TestExecuteActionsRunFailureTriggersRollback(t *testing.T) {
 		t.Errorf("stderr missing rollback message: %q", stderrOutput)
 	}
 
+	// Verify failed task shows [ ]
+	if !strings.Contains(stderrOutput, "[ ]") {
+		t.Errorf("stderr missing '[ ]' for failed task: %q", stderrOutput)
+	}
+
 	// Verify target directory was cleaned up (fallback removal works)
 	if _, err := os.Stat(targetDir); !os.IsNotExist(err) {
 		t.Errorf("target directory still exists after rollback")
@@ -199,7 +233,9 @@ func TestExecuteActionsCopyFailureTriggersRollback(t *testing.T) {
 		{Type: config.ActionCopy, Path: "nonexistent.txt"},
 	}
 
-	err := ExecuteActions(srcDir, targetDir, actions)
+	tasks := buildTaskList(actions)
+
+	err := ExecuteActions(srcDir, targetDir, actions, tasks, 0)
 	if err == nil {
 		t.Error("expected error for missing source, got nil")
 	}
@@ -210,8 +246,9 @@ func TestExecuteActionsEmptyList(t *testing.T) {
 	targetDir := t.TempDir()
 
 	var actions []config.Action
+	tasks := buildTaskList(actions)
 
-	err := ExecuteActions(srcDir, targetDir, actions)
+	err := ExecuteActions(srcDir, targetDir, actions, tasks, 0)
 	if err != nil {
 		t.Errorf("ExecuteActions with empty list failed: %v", err)
 	}
