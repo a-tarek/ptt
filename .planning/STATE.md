@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 10 of 10 (UAT Gap Closure)
-Plan: 1 of 2 complete
-Status: In progress
-Last activity: 2026-02-08 — Completed 10-02-PLAN.md
+Plan: 2 of 2 complete
+Status: Phase complete
+Last activity: 2026-02-08 — Completed 10-01-PLAN.md
 
-Progress: [██████████░] 95% (19/20 total plans complete)
+Progress: [███████████] 100% (20/20 total plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19
-- Average duration: ~2.5 min per plan
-- Total execution time: ~0.81 hours
+- Total plans completed: 20
+- Average duration: ~2.6 min per plan
+- Total execution time: ~0.87 hours
 
 **By Phase:**
 
@@ -36,10 +36,11 @@ Progress: [██████████░] 95% (19/20 total plans complete)
 | 7. npm Distribution | 2/2 ✓ | 7 min | 3.5 min |
 | 8. Interactive Installer | 2/2 ✓ | 6 min | 3 min |
 | 9. Polish & Testing | 4/4 ✓ | 14 min | 3.5 min |
-| 10. UAT Gap Closure | 1/2 | 2.2 min | 2.2 min |
+| 10. UAT Gap Closure | 2/2 ✓ | 6.2 min | 3.1 min |
 
 **Recent Trend:**
-- Phase 10 (UAT Gap Closure) IN PROGRESS
+- Phase 10 (UAT Gap Closure) COMPLETE ✓
+- Plan 10-01 complete: Stdout leak fix + --run flag — clean stderr/stdout separation for shell wrapper (4 min)
 - Plan 10-02 complete: Segment-aware fuzzy matching — scoring system for worktree name resolution (2.2 min)
 - Phase 9 (Polish & Testing) COMPLETE ✓
 - Plan 09-01 complete: Enhanced error messages — fuzzy matching, color output, help footer (3 min)
@@ -130,6 +131,9 @@ Recent decisions affecting current work:
 - **Short mode support**: All tests check testing.Short() to allow fast iteration with go test -short (09-03)
 
 **Phase 10 Decisions:**
+- **Status messages to stderr**: Progress messages (Copied, Symlinked, Running) use fmt.Fprintf(os.Stderr) to prevent shell wrapper stdout capture interference (10-01)
+- **Run command output to stderr**: cmd.Stdout = os.Stderr ensures run-action output doesn't leak into cd path (10-01)
+- **--run flag for convenience**: Enables wt new feature --run 'npm install' without .wtconfig file for AI agents and quick workflows (10-01)
 - **Segment-aware scoring**: Replace pure Levenshtein with scoring system (0-100) for fuzzy matching - handles wt-prefix pattern correctly (10-02)
 - **Export FindClosestMatch**: Export function for direct unit testing - enables comprehensive test coverage (10-02)
 - **Case-insensitive matching**: Convert to lowercase for matching, preserve original case in results - better UX (10-02)
@@ -149,7 +153,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-08
-Stopped at: Completed 10-02-PLAN.md
+Stopped at: Completed 10-01-PLAN.md (Phase 10 complete - all UAT gaps closed)
 Resume file: None
 
 ---
