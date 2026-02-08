@@ -8,28 +8,37 @@ import (
 )
 
 // ResolveConfigPath resolves a config name/path to an actual file path
-// - Empty name -> {repoRoot}/.wtconfig
-// - Bare name (no "/") -> {repoRoot}/.wtconfig-{name}
+// - Empty name -> try .pttconfig/default, fall back to .wtconfig
+// - Bare name (no "/") -> try .pttconfig/{name}, fall back to .wtconfig-{name}
 // - Contains "/" -> treated as exact path
 // Returns error if resolved path doesn't exist
 func ResolveConfigPath(repoRoot string, name string) (string, error) {
-	var configPath string
+	var candidates []string
 
 	if name == "" {
-		// Default config
-		configPath = filepath.Join(repoRoot, ".wtconfig")
+		// Default config: try .pttconfig/default first, then .wtconfig
+		candidates = []string{
+			filepath.Join(repoRoot, ".pttconfig", "default"),
+			filepath.Join(repoRoot, ".wtconfig"),
+		}
 	} else if strings.Contains(name, "/") {
 		// Exact path (contains "/")
-		configPath = name
+		candidates = []string{name}
 	} else {
-		// Bare name -> .wtconfig-{name}
-		configPath = filepath.Join(repoRoot, ".wtconfig-"+name)
+		// Bare name: try .pttconfig/{name} first, then .wtconfig-{name}
+		candidates = []string{
+			filepath.Join(repoRoot, ".pttconfig", name),
+			filepath.Join(repoRoot, ".wtconfig-"+name),
+		}
 	}
 
-	// Check if file exists
-	if _, err := os.Stat(configPath); err != nil {
-		return "", fmt.Errorf("config file not found: %s", configPath)
+	// Try each candidate in order
+	for _, p := range candidates {
+		if _, err := os.Stat(p); err == nil {
+			return p, nil
+		}
 	}
 
-	return configPath, nil
+	// None found - return error with first candidate
+	return "", fmt.Errorf("config file not found: %s", candidates[0])
 }
