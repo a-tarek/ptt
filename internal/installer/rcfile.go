@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	// MarkerBegin is the start marker for the wt configuration block
-	MarkerBegin = "# >>> wt >>>"
-	// MarkerEnd is the end marker for the wt configuration block
-	MarkerEnd = "# <<< wt <<<"
+	// MarkerBegin is the start marker for the ptt configuration block
+	MarkerBegin = "# >>> ptt >>>"
+	// MarkerEnd is the end marker for the ptt configuration block
+	MarkerEnd = "# <<< ptt <<<"
 )
 
 var (
@@ -28,16 +28,16 @@ var (
 func EvalLine(shellType string) string {
 	switch shellType {
 	case "fish":
-		return `wt shell-init | source`
+		return `ptt shell-init | source`
 	default: // bash, zsh
-		return `eval "$(wt shell-init)"`
+		return `eval "$(ptt shell-init)"`
 	}
 }
 
 // MarkerBlock returns the full marker block string for a given shell type.
 func MarkerBlock(shellType string) string {
 	return fmt.Sprintf(`%s
-# Managed by wt installer — do not edit this block manually
+# Managed by ptt installer — do not edit this block manually
 %s
 %s
 `, MarkerBegin, EvalLine(shellType), MarkerEnd)
@@ -72,7 +72,7 @@ func FindV1Lines(content string) []int {
 }
 
 // CommentOutLines returns a copy of lines with the given indices commented out.
-// Each line gets "# [wt v2 migration] " prepended.
+// Each line gets "# [ptt migration] " prepended.
 func CommentOutLines(lines []string, indices []int) []string {
 	// Create a copy
 	result := make([]string, len(lines))
@@ -87,7 +87,7 @@ func CommentOutLines(lines []string, indices []int) []string {
 	// Comment out the specified lines
 	for i := range result {
 		if indexSet[i] {
-			result[i] = "# [wt v2 migration] " + result[i]
+			result[i] = "# [ptt migration] " + result[i]
 		}
 	}
 
@@ -139,10 +139,10 @@ func RemoveMarkerBlock(content string) string {
 	return strings.Join(result, "\n")
 }
 
-// BackupFile copies filePath to filePath + ".wt-backup".
+// BackupFile copies filePath to filePath + ".ptt-backup".
 // Returns the backup path on success.
 func BackupFile(filePath string) (string, error) {
-	backupPath := filePath + ".wt-backup"
+	backupPath := filePath + ".ptt-backup"
 
 	// Read original file
 	content, err := os.ReadFile(filePath)
