@@ -52,75 +52,83 @@ npm uninstall -g @a-tarek/ptt
 
 ## Quick Start
 
-Here's a typical workflow with wt:
+Here's a typical workflow with ptt:
 
 ```bash
 # 1. Initialize configuration in your repo
-wt init
-# Creates .wtconfig template at repo root
+ptt init
+# Creates .pttconfig/default template at repo root
 
 # 2. Create a new worktree and branch
-wt new feature-auth
+ptt mk feature-auth
 # Creates worktree and automatically switches to it
 
 # 3. Work on your feature...
 # (make changes, commit, etc.)
 
 # 4. Jump back to main worktree
-wt home
+ptt go
 # Returns to the main worktree
 
 # 5. Clean up when done
-wt delete feature-auth
+ptt rm feature-auth
 # Removes the worktree (keeps the branch)
 ```
 
 **What's happening:**
-- `wt init` creates a configuration file where you define which files to copy or symlink
-- `wt new` creates a new worktree alongside your main repo (not nested inside it)
-- `wt goto` and `wt home` let you navigate between worktrees
-- `wt delete` cleans up worktrees you no longer need
+- `ptt init` creates `.pttconfig/default` where you define which files to copy or symlink
+- `ptt mk` creates a new worktree alongside your main repo (not nested inside it)
+- `ptt go` and `ptt go <name>` let you navigate between worktrees
+- `ptt rm` cleans up worktrees you no longer need
 
 ## Commands
 
-### wt init
+### ptt init
 
-**Usage:** `wt init`
+**Usage:** `ptt init [flags]`
 
-Creates a `.wtconfig` template in the repository root with commented examples for common setups.
+Creates a `.pttconfig/default` template in the repository root with commented examples for common setups.
+
+**Flags:**
+| Flag | Description |
+|------|-------------|
+| `--config <name>` | Create `.pttconfig/<name>` instead of `.pttconfig/default` |
 
 ```bash
-wt init
+ptt init
 ```
 
 This creates a file like:
 
 ```
-# .wtconfig — files to copy or symlink into new worktrees
-# Syntax: <action> <path>
-# Actions: copy, symlink
-
-# Node.js
+# pttconfig — actions to run when creating new worktrees
+#
+# Actions:
+#   copy <path>       Copy file or directory from source worktree
+#   symlink <path>    Symlink to source worktree's file or directory
+#   run <command>     Run a shell command in the new worktree
+#
+# Examples:
+#
 # copy .env.local
-# symlink node_modules
-
-# Python
 # copy .env
+# symlink node_modules
 # symlink .venv
-
-# Rust
 # symlink target
+# run npm install
 ```
 
 Uncomment or add lines to define which files should be automatically handled when creating new worktrees.
 
 **When to run:** Once per repository, before creating your first worktree.
 
-**Note:** If `.wtconfig` already exists, this command does nothing.
+**Note:** If `.pttconfig/default` already exists, this command does nothing. Use `--config <name>` to create named configs (`.pttconfig/<name>`).
 
-### wt new
+### ptt mk
 
-**Usage:** `wt new [flags] <name> [branch]`
+**Alias:** `new`
+
+**Usage:** `ptt mk [flags] <name> [branch]`
 
 Creates a new git worktree and automatically switches to it.
 
@@ -133,7 +141,7 @@ Creates a new git worktree and automatically switches to it.
 **Flags:**
 | Flag | Description |
 |------|-------------|
-| `--config <name>` | Use `.wtconfig-<name>` instead of `.wtconfig` |
+| `--config <name>` | Use `.pttconfig/<name>` instead of `.pttconfig/default` |
 | `--skip-config` | Skip all config file actions |
 | `--copy <path>` | Copy the specified file/directory (repeatable, overrides config) |
 | `--symlink <path>` | Symlink the specified file/directory (repeatable, overrides config) |
@@ -142,72 +150,66 @@ Creates a new git worktree and automatically switches to it.
 
 ```bash
 # Create worktree with new branch "feature-auth"
-wt new feature-auth
+ptt mk feature-auth
 
 # Create worktree using existing branch
-wt new hotfix release/hotfix-1.2
+ptt mk hotfix release/hotfix-1.2
 
-# Override .wtconfig: copy .env instead of symlinking
-wt new feature-auth --copy .env
+# Override .pttconfig/default: copy .env instead of symlinking
+ptt mk feature-auth --copy .env
 
-# One-off symlink (even if not in .wtconfig)
-wt new feature-auth --symlink node_modules
+# One-off symlink (even if not in .pttconfig/default)
+ptt mk feature-auth --symlink node_modules
 
 # Use alternate config file
-wt new staging --config staging
-# Uses .wtconfig-staging instead of .wtconfig
+ptt mk staging --config staging
+# Uses .pttconfig/staging instead of .pttconfig/default
 ```
 
 **Behavior:**
 - Creates worktree as sibling directory (e.g., `myapp-feature-auth` next to `myapp`)
 - For bare repos, creates worktree inside the repo directory
-- Processes `.wtconfig` (if it exists) to copy/symlink files
+- Processes `.pttconfig/default` (if it exists) to copy/symlink files
 - Flag overrides merge with file-based config
 - Automatically switches to the new worktree after creation
 
-### wt goto
+### ptt go
 
-**Usage:** `wt goto <worktree>`
+**Aliases:** `goto`, `home`
 
-Navigate to a worktree by name.
+**Usage:** `ptt go [worktree]`
+
+Navigate to a worktree by name, or return to the main worktree when called without arguments.
 
 **Arguments:**
 | Argument | Required | Description |
 |----------|----------|-------------|
-| `<worktree>` | Yes | Worktree name (suffix matching) |
+| `[worktree]` | No | Worktree name (suffix matching). If omitted, navigates to home worktree. |
 
 **Examples:**
 
 ```bash
-wt goto feature-auth
+# Navigate to a specific worktree
+ptt go feature-auth
 # Matches "myapp-feature-auth"
 
-wt goto staging
+ptt go staging
 # Matches "myapp-staging"
+
+# Navigate to home worktree (no arguments)
+ptt go
+# Same as the old "home" command
 ```
 
 **Behavior:**
-- Name matching uses suffix matching (e.g., "staging" matches "myapp-staging")
+- With argument: navigates to the specified worktree using suffix matching (e.g., "staging" matches "myapp-staging")
+- Without argument: navigates to the home worktree (the first one listed by `git worktree list`)
 - If already in the target worktree, prints a message and exits successfully
 - Tab completion shows available worktree names
 
-### wt home
+### ptt eject
 
-**Usage:** `wt home`
-
-Navigate back to the main (first) worktree.
-
-```bash
-wt home
-```
-
-**Behavior:**
-- Finds the home worktree (the first one listed by `git worktree list`)
-- If already in the home worktree, prints a message and exits successfully
-
-### wt eject
-
-**Usage:** `wt eject [flags] [name]`
+**Usage:** `ptt eject [flags] [name]`
 
 Eject the current branch into its own dedicated worktree. Useful when you started work in the main worktree and want to isolate it.
 
@@ -219,7 +221,7 @@ Eject the current branch into its own dedicated worktree. Useful when you starte
 **Flags:**
 | Flag | Description |
 |------|-------------|
-| `--config <name>` | Use `.wtconfig-<name>` instead of `.wtconfig` |
+| `--config <name>` | Use `.pttconfig/<name>` instead of `.pttconfig/default` |
 | `--skip-config` | Skip all config file actions |
 | `--copy <path>` | Copy the specified file/directory (repeatable, overrides config) |
 | `--symlink <path>` | Symlink the specified file/directory (repeatable, overrides config) |
@@ -228,13 +230,13 @@ Eject the current branch into its own dedicated worktree. Useful when you starte
 
 ```bash
 # Eject current branch into its own worktree
-wt eject
+ptt eject
 
 # Eject with a custom worktree name
-wt eject my-feature
+ptt eject my-feature
 
 # Eject with file overrides
-wt eject --copy .env.local --symlink node_modules
+ptt eject --copy .env.local --symlink node_modules
 ```
 
 **Behavior:**
@@ -244,19 +246,21 @@ wt eject --copy .env.local --symlink node_modules
   - For other worktrees: switches to the original branch for that worktree
 - Creates new worktree for the ejected branch
 - Restores stashed changes in the new worktree
-- Processes `.wtconfig` and applies flag overrides
+- Processes `.pttconfig/default` and applies flag overrides
 - Automatically switches to the new worktree
 
 **Note:** If stash pop has merge conflicts, a warning is printed but the command succeeds. You can resolve conflicts in the new worktree.
 
-### wt list
+### ptt ls
 
-**Usage:** `wt list`
+**Alias:** `list`
+
+**Usage:** `ptt ls`
 
 List all worktrees with their directory names and branches.
 
 ```bash
-wt list
+ptt ls
 ```
 
 **Example output:**
@@ -269,9 +273,9 @@ wt list
 
 The `*` marks the current worktree.
 
-### wt merge
+### ptt merge
 
-**Usage:** `wt merge <worktree>`
+**Usage:** `ptt merge <worktree>`
 
 Merge the specified worktree's branch into the current branch.
 
@@ -284,7 +288,7 @@ Merge the specified worktree's branch into the current branch.
 
 ```bash
 # From main worktree, merge feature-auth's branch
-wt merge feature-auth
+ptt merge feature-auth
 
 # Equivalent to:
 # git merge feature-auth
@@ -295,9 +299,9 @@ wt merge feature-auth
 - Runs `git merge <branch>`
 - Tab completion shows available worktree names
 
-### wt rebase
+### ptt rebase
 
-**Usage:** `wt rebase <worktree>`
+**Usage:** `ptt rebase <worktree>`
 
 Rebase the current branch onto the specified worktree's branch.
 
@@ -310,7 +314,7 @@ Rebase the current branch onto the specified worktree's branch.
 
 ```bash
 # From feature branch, rebase onto main
-wt rebase main
+ptt rebase main
 
 # Equivalent to:
 # git rebase main
@@ -321,9 +325,11 @@ wt rebase main
 - Runs `git rebase <branch>`
 - Tab completion shows available worktree names
 
-### wt delete
+### ptt rm
 
-**Usage:** `wt delete [flags] <worktree>`
+**Alias:** `delete`
+
+**Usage:** `ptt rm [flags] <worktree>`
 
 Remove a worktree directory. The branch is kept — only the worktree checkout is removed.
 
@@ -341,10 +347,10 @@ Remove a worktree directory. The branch is kept — only the worktree checkout i
 
 ```bash
 # Remove worktree, keep branch
-wt delete feature-auth
+ptt rm feature-auth
 
 # Remove worktree and branch
-wt delete feature-auth --branch
+ptt rm feature-auth --branch
 ```
 
 **Behavior:**
@@ -397,9 +403,9 @@ npm uninstall -g @a-tarek/ptt
 
 ## Configuration
 
-### .wtconfig
+### .pttconfig/default
 
-The `.wtconfig` file lives at your repository root and defines which files to copy or symlink when creating new worktrees.
+The `.pttconfig/` directory lives at your repository root and contains named configuration files. The default configuration is `.pttconfig/default`, which defines which files to copy or symlink when creating new worktrees.
 
 **Syntax:**
 
@@ -411,11 +417,12 @@ The `.wtconfig` file lives at your repository root and defines which files to co
 **Actions:**
 - `copy` — Duplicate the file or directory from the source worktree. Each worktree gets its own independent copy.
 - `symlink` — Create a symbolic link to the source file or directory. Changes affect all worktrees.
+- `run` — Execute a shell command in the new worktree after creation.
 
 **Full example for a Node.js project:**
 
 ```
-# .wtconfig — files to copy or symlink into new worktrees
+# .pttconfig/default — files to copy or symlink into new worktrees
 
 # Environment files - copy so each worktree can have different settings
 copy .env
@@ -455,19 +462,19 @@ symlink .next
 | `.next` | symlink | Next.js build cache shared |
 | `docker-compose.override.yml` | copy | Different ports per worktree |
 
-### Alternate Config Files
+### Named Configurations
 
-You can create named config files like `.wtconfig-staging` or `.wtconfig-ci` for different scenarios:
+You can create named config files like `.pttconfig/staging` or `.pttconfig/ci` for different scenarios:
 
 ```bash
-# Use default .wtconfig
-wt new feature-auth
+# Use default .pttconfig/default
+ptt mk feature-auth
 
-# Use .wtconfig-staging
-wt new staging --config staging
+# Use .pttconfig/staging
+ptt mk staging --config staging
 
-# Use .wtconfig-ci
-wt new ci-test --config ci
+# Use .pttconfig/ci
+ptt mk ci-test --config ci
 ```
 
 **When to use:**
@@ -477,25 +484,25 @@ wt new ci-test --config ci
 
 ### Override Flags
 
-The `--copy` and `--symlink` flags on `wt new` and `wt eject` let you override `.wtconfig` defaults on a per-command basis.
+The `--copy` and `--symlink` flags on `ptt mk` and `ptt eject` let you override `.pttconfig/default` defaults on a per-command basis.
 
-**Precedence:** CLI flags > .wtconfig entries
+**Precedence:** CLI flags > .pttconfig entries
 
 **Example scenarios:**
 
 ```bash
-# .wtconfig says "symlink .env" but you need a separate copy
-wt new feature-auth --copy .env
+# .pttconfig/default says "symlink .env" but you need a separate copy
+ptt mk feature-auth --copy .env
 
-# .wtconfig doesn't mention node_modules, but symlink it this time
-wt new feature-auth --symlink node_modules
+# .pttconfig/default doesn't mention node_modules, but symlink it this time
+ptt mk feature-auth --symlink node_modules
 
 # Multiple overrides
-wt new feature-auth --copy .env --copy .env.local --symlink node_modules
+ptt mk feature-auth --copy .env --copy .env.local --symlink node_modules
 ```
 
 **How it works:**
-1. `.wtconfig` entries are loaded and processed
+1. `.pttconfig/default` entries are loaded and processed
 2. For paths that appear in both config and flags, flags take precedence
 3. Paths that only appear in flags are applied as one-off operations
 
