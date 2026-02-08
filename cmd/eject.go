@@ -252,7 +252,7 @@ var ejectCmd = &cobra.Command{
 			}
 
 			// Flag-based actions
-			flagActions := config.BuildActionsFromFlags(ejectCopyFlags, ejectSymlinkFlags, ejectRunFlags)
+			flagActions := config.BuildActionsFromFlags(ejectCopyFlags, ejectSymlinkFlags, ejectRunFlags, os.Args)
 
 			// Check for duplicate paths
 			if err := config.CheckDuplicatePaths(ejectCopyFlags, ejectSymlinkFlags); err != nil {

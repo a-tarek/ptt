@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/ahmedelarabyy/wt/internal/config"
+
 	"github.com/ahmedelarabyy/wt/internal/git"
 	"github.com/ahmedelarabyy/wt/internal/setup"
 	"github.com/spf13/cobra"
@@ -128,7 +129,7 @@ var newCmd = &cobra.Command{
 					return err
 				}
 
-				flagActions := config.BuildActionsFromFlags(copyFlags, symlinkFlags, runFlags)
+				flagActions := config.BuildActionsFromFlags(copyFlags, symlinkFlags, runFlags, os.Args)
 				allActions = append(allActions, flagActions...)
 			}
 
