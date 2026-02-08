@@ -16,8 +16,8 @@ BARE="$TMPDIR/repo.git"
 git init --bare "$BARE" >/dev/null 2>&1
 
 # Create main worktree with initial commit
-MAIN="$BARE/main"
-git worktree add "$MAIN" -b main >/dev/null 2>&1
+MAIN="$TMPDIR/main"
+git -C "$BARE" worktree add "$MAIN" -b main >/dev/null 2>&1
 cd "$MAIN"
 echo "Initial content" > README.md
 git add README.md
@@ -25,10 +25,12 @@ git config user.email "test@example.com"
 git config user.name "Test User"
 git commit -m "Initial commit" >/dev/null 2>&1
 
-# Create feature worktree
-FEATURE="$BARE/feature"
-cd "$BARE"
-git worktree add "$FEATURE" -b feature >/dev/null 2>&1
+# Update bare repo HEAD to point to main
+git -C "$BARE" symbolic-ref HEAD refs/heads/main >/dev/null 2>&1
+
+# Create feature worktree from main
+FEATURE="$TMPDIR/feature"
+git -C "$BARE" worktree add "$FEATURE" -b feature main >/dev/null 2>&1
 cd "$FEATURE"
 echo "Feature content" > feature.txt
 git add feature.txt
