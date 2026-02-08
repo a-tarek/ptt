@@ -1,38 +1,86 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
-// BuildActionsFromFlags creates an ordered Action slice from flag inputs
-// Order: all copies, then all symlinks, then all runs
-// (Cobra cannot preserve interleaved order across different flag types)
-func BuildActionsFromFlags(copyPaths, symlinkPaths, runCommands []string) []Action {
+// BuildActionsFromFlags creates an ordered Action slice from flag inputs.
+// Uses osArgs to preserve the original flag order from the command line.
+func BuildActionsFromFlags(copyPaths, symlinkPaths, runCommands, osArgs []string) []Action {
+	// Build lookup maps: flag value -> Action
+	copyMap := make(map[string]bool)
+	for _, p := range copyPaths {
+		copyMap[p] = true
+	}
+	symlinkMap := make(map[string]bool)
+	for _, p := range symlinkPaths {
+		symlinkMap[p] = true
+	}
+	runMap := make(map[string]bool)
+	for _, c := range runCommands {
+		runMap[c] = true
+	}
+
+	// Walk osArgs to reconstruct original order
 	var actions []Action
+	for i := 0; i < len(osArgs); i++ {
+		arg := osArgs[i]
+		var flagType, value string
 
-	// Add copy actions
-	for _, path := range copyPaths {
-		actions = append(actions, Action{
-			Type: ActionCopy,
-			Path: path,
-			Line: 0, // from flags, not file
-		})
+		if arg == "--copy" || arg == "--symlink" || arg == "--run" {
+			flagType = strings.TrimPrefix(arg, "--")
+			if i+1 < len(osArgs) {
+				i++
+				value = osArgs[i]
+			}
+		} else if strings.HasPrefix(arg, "--copy=") {
+			flagType = "copy"
+			value = strings.TrimPrefix(arg, "--copy=")
+		} else if strings.HasPrefix(arg, "--symlink=") {
+			flagType = "symlink"
+			value = strings.TrimPrefix(arg, "--symlink=")
+		} else if strings.HasPrefix(arg, "--run=") {
+			flagType = "run"
+			value = strings.TrimPrefix(arg, "--run=")
+		} else {
+			continue
+		}
+
+		switch flagType {
+		case "copy":
+			if copyMap[value] {
+				actions = append(actions, Action{Type: ActionCopy, Path: value})
+				delete(copyMap, value)
+			}
+		case "symlink":
+			if symlinkMap[value] {
+				actions = append(actions, Action{Type: ActionSymlink, Path: value})
+				delete(symlinkMap, value)
+			}
+		case "run":
+			if runMap[value] {
+				actions = append(actions, Action{Type: ActionRun, Path: value})
+				delete(runMap, value)
+			}
+		}
 	}
 
-	// Add symlink actions
-	for _, path := range symlinkPaths {
-		actions = append(actions, Action{
-			Type: ActionSymlink,
-			Path: path,
-			Line: 0, // from flags, not file
-		})
+	// Append any remaining values not found in osArgs (safety fallback)
+	for _, p := range copyPaths {
+		if copyMap[p] {
+			actions = append(actions, Action{Type: ActionCopy, Path: p})
+		}
 	}
-
-	// Add run actions
-	for _, cmd := range runCommands {
-		actions = append(actions, Action{
-			Type: ActionRun,
-			Path: cmd,
-			Line: 0, // from flags, not file
-		})
+	for _, p := range symlinkPaths {
+		if symlinkMap[p] {
+			actions = append(actions, Action{Type: ActionSymlink, Path: p})
+		}
+	}
+	for _, c := range runCommands {
+		if runMap[c] {
+			actions = append(actions, Action{Type: ActionRun, Path: c})
+		}
 	}
 
 	return actions
