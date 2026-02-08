@@ -68,12 +68,13 @@ var newCmd = &cobra.Command{
 		// 6. Handle config
 		var appliedActions int
 		var configFileName string
+		hasInlineFlags := len(copyFlags) > 0 || len(symlinkFlags) > 0 || len(runFlags) > 0
 
-		if !skipConfig || len(copyFlags) > 0 || len(symlinkFlags) > 0 || len(runFlags) > 0 {
+		if !skipConfig || hasInlineFlags {
 			var allActions []config.Action
 
-			// Load file-based config (unless --skip-config)
-			if !skipConfig {
+			// Load file-based config (unless --skip-config or inline flags override)
+			if !skipConfig && !hasInlineFlags {
 				var configPath string
 				if configFlag != "" {
 					configPath, err = config.ResolveConfigPath(homePath, configFlag)
@@ -97,10 +98,27 @@ var newCmd = &cobra.Command{
 					allActions = append(allActions, actions...)
 				}
 				// Silently skip if config file not found
+			} else if !skipConfig && hasInlineFlags && configFlag != "" {
+				// --config with inline flags: load named config, then append inline flags
+				configPath, cfgErr := config.ResolveConfigPath(homePath, configFlag)
+				if cfgErr == nil {
+					configFileName = filepath.Base(configPath)
+					actions, parseErr := config.ParseFile(configPath)
+					if parseErr != nil {
+						return parseErr
+					}
+
+					validateErr := config.ValidateActions(currentWorktreeRoot, actions)
+					if validateErr != nil {
+						return validateErr
+					}
+
+					allActions = append(allActions, actions...)
+				}
 			}
 
 			// Add inline flag actions
-			if len(copyFlags) > 0 || len(symlinkFlags) > 0 || len(runFlags) > 0 {
+			if hasInlineFlags {
 				// Check for duplicates within flags
 				if err := config.CheckDuplicatePaths(copyFlags, symlinkFlags); err != nil {
 					return err
