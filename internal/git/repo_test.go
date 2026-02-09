@@ -206,9 +206,13 @@ func TestBareRepoRoot_FromWorktree(t *testing.T) {
 		t.Fatalf("BareRepoRoot() failed: %v", err)
 	}
 
+	// Resolve both to canonical paths for comparison (handles /var vs /private/var on macOS)
+	expected, _ := filepath.EvalSymlinks(containerRoot)
+	actual, _ := filepath.EvalSymlinks(bareRoot)
+
 	// Should return container root
-	if bareRoot != containerRoot {
-		t.Errorf("expected %s, got %s", containerRoot, bareRoot)
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
 	}
 }
 
@@ -232,9 +236,13 @@ func TestBareRepoRoot_FromContainerRoot(t *testing.T) {
 		t.Fatalf("BareRepoRoot() failed: %v", err)
 	}
 
+	// Resolve both to canonical paths for comparison
+	expected, _ := filepath.EvalSymlinks(containerRoot)
+	actual, _ := filepath.EvalSymlinks(bareRoot)
+
 	// Should return container root
-	if bareRoot != containerRoot {
-		t.Errorf("expected %s, got %s", containerRoot, bareRoot)
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
 	}
 }
 
@@ -265,9 +273,13 @@ func TestBareRepoRoot_FromSubdir(t *testing.T) {
 		t.Fatalf("BareRepoRoot() failed: %v", err)
 	}
 
+	// Resolve both to canonical paths for comparison
+	expected, _ := filepath.EvalSymlinks(containerRoot)
+	actual, _ := filepath.EvalSymlinks(bareRoot)
+
 	// Should return container root
-	if bareRoot != containerRoot {
-		t.Errorf("expected %s, got %s", containerRoot, bareRoot)
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
 	}
 }
 
@@ -321,10 +333,13 @@ func TestWorktreePath_BareRepo(t *testing.T) {
 		t.Fatalf("WorktreePath failed: %v", err)
 	}
 
+	// Resolve both to canonical paths for comparison
+	expected, _ := filepath.EvalSymlinks(filepath.Join(containerRoot, "feature"))
+	actual, _ := filepath.EvalSymlinks(targetPath)
+
 	// Should return nested path
-	expected := filepath.Join(containerRoot, "feature")
-	if targetPath != expected {
-		t.Errorf("expected %s, got %s", expected, targetPath)
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
 	}
 }
 
@@ -349,9 +364,13 @@ func TestConfigRoot_BareRepo(t *testing.T) {
 		t.Fatalf("ConfigRoot() failed: %v", err)
 	}
 
+	// Resolve both to canonical paths for comparison
+	expected, _ := filepath.EvalSymlinks(containerRoot)
+	actual, _ := filepath.EvalSymlinks(configRoot)
+
 	// Should return container root
-	if configRoot != containerRoot {
-		t.Errorf("expected %s, got %s", containerRoot, configRoot)
+	if actual != expected {
+		t.Errorf("expected %s, got %s", expected, actual)
 	}
 }
 

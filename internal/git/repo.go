@@ -162,48 +162,57 @@ func GetHomePath() (string, error) {
 }
 
 // WorktreePath computes the target path for a new worktree
-// For bare repos: nested mode (e.g., /code/wt/staging)
+// For ptt bare repos: nested mode (e.g., /code/project-bare/staging)
+// For standard bare repos: nested mode (e.g., /code/repo.git/staging)
 // For regular repos: sibling mode (e.g., /code/wt-staging)
 // Returns error if the computed path already exists
 func WorktreePath(repoRoot string, name string) (string, error) {
-	// Check if the home path is a bare repo by looking for .git suffix
-	// or by checking if it's in the worktree list as bare
-	isBare := false
+	var targetPath string
 
-	// Method 1: Check if repo root ends with .git (common bare convention)
-	if strings.HasSuffix(repoRoot, ".git") {
-		isBare = true
+	// First, check if we're in a ptt bare repo context
+	bareRoot, err := BareRepoRoot()
+	if err == nil {
+		// Ptt bare repo mode: nested path under container root
+		targetPath = filepath.Join(bareRoot, name)
 	} else {
-		// Method 2: Check worktree list for bare marker
-		cmd := exec.Command("git", "worktree", "list", "--porcelain")
-		output, err := cmd.Output()
-		if err == nil {
-			lines := strings.Split(string(output), "\n")
-			// First worktree entry
-			for _, line := range lines {
-				line = strings.TrimSpace(line)
-				if line == "bare" {
-					isBare = true
-					break
-				}
-				// Stop at first empty line (end of first entry)
-				if line == "" {
-					break
+		// Fall back to legacy bare detection for backward compatibility
+		// Check if repo root ends with .git (standard bare repo convention)
+		if strings.HasSuffix(repoRoot, ".git") {
+			// Standard bare repo: nested mode under parent directory
+			parentDir := filepath.Dir(repoRoot)
+			targetPath = filepath.Join(parentDir, name)
+		} else {
+			// Check worktree list for bare marker (another way to detect bare repos)
+			cmd := exec.Command("git", "worktree", "list", "--porcelain")
+			output, err := cmd.Output()
+			isBare := false
+			if err == nil {
+				lines := strings.Split(string(output), "\n")
+				// Check first worktree entry for bare marker
+				for _, line := range lines {
+					line = strings.TrimSpace(line)
+					if line == "bare" {
+						isBare = true
+						break
+					}
+					// Stop at first empty line (end of first entry)
+					if line == "" {
+						break
+					}
 				}
 			}
-		}
-	}
 
-	var targetPath string
-	if isBare {
-		// Nested mode: worktree alongside home worktree under bare repo root
-		parentDir := filepath.Dir(repoRoot)
-		targetPath = filepath.Join(parentDir, name)
-	} else {
-		// Sibling mode: worktree as sibling to main checkout
-		parentDir := filepath.Dir(repoRoot)
-		repoName := filepath.Base(repoRoot)
-		targetPath = filepath.Join(parentDir, repoName+"-"+name)
+			if isBare {
+				// Bare repo detected via worktree list: nested mode
+				parentDir := filepath.Dir(repoRoot)
+				targetPath = filepath.Join(parentDir, name)
+			} else {
+				// Non-bare mode: sibling path using repoRoot
+				parentDir := filepath.Dir(repoRoot)
+				repoName := filepath.Base(repoRoot)
+				targetPath = filepath.Join(parentDir, repoName+"-"+name)
+			}
+		}
 	}
 
 	// Check if path already exists
@@ -212,6 +221,75 @@ func WorktreePath(repoRoot string, name string) (string, error) {
 	}
 
 	return targetPath, nil
+}
+
+// BareRepoRoot returns the container root path when CWD is inside a ptt bare repo
+// Returns error if not in a ptt bare repo structure
+//
+// A ptt bare repo structure looks like:
+//   project-bare/
+//     .git          (file containing "gitdir: ./.bare")
+//     .bare/        (actual bare repository)
+//     main/         (worktree)
+//     feature/      (worktree)
+//
+// This function returns the "project-bare" path when called from any worktree or the root
+func BareRepoRoot() (string, error) {
+	// Get the git common directory (shared git data directory)
+	cmd := exec.Command("git", "rev-parse", "--git-common-dir")
+	output, err := cmd.Output()
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			return "", fmt.Errorf("git rev-parse failed: %s", string(exitErr.Stderr))
+		}
+		return "", fmt.Errorf("failed to execute git: %w", err)
+	}
+
+	commonDir := strings.TrimSpace(string(output))
+
+	// Make path absolute if it's relative
+	if !filepath.IsAbs(commonDir) {
+		absCommonDir, err := filepath.Abs(commonDir)
+		if err != nil {
+			return "", fmt.Errorf("failed to resolve absolute path: %w", err)
+		}
+		commonDir = absCommonDir
+	}
+
+	// Check if the basename is ".bare" (ptt convention)
+	if filepath.Base(commonDir) != ".bare" {
+		return "", fmt.Errorf("not in ptt bare repo: common dir is not .bare")
+	}
+
+	// Get the container root (parent of .bare)
+	containerRoot := filepath.Dir(commonDir)
+
+	// Verify that containerRoot/.git exists and is a file (not directory)
+	gitPath := filepath.Join(containerRoot, ".git")
+	info, err := os.Lstat(gitPath)
+	if err != nil {
+		return "", fmt.Errorf("not in ptt bare repo: .git file not found at container root")
+	}
+
+	if info.IsDir() {
+		return "", fmt.Errorf("not in ptt bare repo: .git is a directory, not a file")
+	}
+
+	return containerRoot, nil
+}
+
+// ConfigRoot returns the root directory where ptt config should be stored
+// In bare repo context: returns the bare repo container root
+// In non-bare context: returns the home worktree path
+func ConfigRoot() (string, error) {
+	// Try bare repo first
+	bareRoot, err := BareRepoRoot()
+	if err == nil {
+		return bareRoot, nil
+	}
+
+	// Fall back to home path for non-bare repos
+	return GetHomePath()
 }
 
 // CurrentBranch returns the current branch name
