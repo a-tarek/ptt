@@ -43,14 +43,12 @@ var rmCmd = &cobra.Command{
 			return fmt.Errorf("can't delete current worktree")
 		}
 
-		// Check if worktree is dirty
-		dirty, err := git.IsDirty(wt.Path)
-		if err != nil {
-			return err
-		}
+		// Check if worktree is dirty (broken worktrees are treated as force-removable)
+		dirty, dirtyErr := git.IsDirty(wt.Path)
+		broken := dirtyErr != nil
 
 		// If dirty and not --force, prompt for confirmation
-		if dirty && !forceDelete {
+		if dirty && !forceDelete && !broken {
 			basename := filepath.Base(wt.Path)
 			fmt.Fprintf(os.Stderr, "Worktree '%s' has uncommitted changes. Delete? [y/N] ", basename)
 
@@ -68,16 +66,25 @@ var rmCmd = &cobra.Command{
 
 		// Remove worktree
 		var removeCmd *exec.Cmd
-		if dirty {
-			// Force remove if dirty (user confirmed or --force was passed)
+		if dirty || broken {
 			removeCmd = exec.Command("git", "worktree", "remove", "--force", wt.Path)
 		} else {
 			removeCmd = exec.Command("git", "worktree", "remove", wt.Path)
 		}
 
-		output, err := removeCmd.CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("failed to remove worktree: %s", string(output))
+		if output, err := removeCmd.CombinedOutput(); err != nil {
+			// If git worktree remove fails (e.g. broken .git pointer), fall back to
+			// manual cleanup: remove the directory and prune stale worktree metadata.
+			if !broken {
+				return fmt.Errorf("failed to remove worktree: %s", string(output))
+			}
+			if err := os.RemoveAll(wt.Path); err != nil {
+				return fmt.Errorf("failed to remove worktree directory: %w", err)
+			}
+			pruneCmd := exec.Command("git", "worktree", "prune")
+			if pruneOut, err := pruneCmd.CombinedOutput(); err != nil {
+				return fmt.Errorf("failed to prune worktrees: %s", string(pruneOut))
+			}
 		}
 
 		// If --branch flag is set, also delete the branch
