@@ -114,10 +114,10 @@
 
 ### cd Command
 
-- [ ] **CD-01**: `ptt cd <worktree>` navigates to worktree (replaces `go`)
-- [ ] **CD-02**: `ptt cd` (no args) navigates to main worktree (bare and non-bare)
-- [ ] **CD-03**: `go` command removed entirely (no backward-compat alias)
-- [ ] **CD-04**: Shell wrappers updated with `cd` in case list (bash/zsh/fish)
+- [x] **CD-01**: `ptt cd <worktree>` navigates to worktree (replaces `go`)
+- [x] **CD-02**: `ptt cd` (no args) navigates to main worktree (bare and non-bare)
+- [x] **CD-03**: `go` command removed entirely (no backward-compat alias)
+- [x] **CD-04**: Shell wrappers updated with `cd` in case list (bash/zsh/fish)
 
 ### Polish
 
@@ -218,10 +218,10 @@
 | ADOPT-02 | Phase 18 | Pending |
 | ADOPT-03 | Phase 18 | Pending |
 | INIT-01 | Phase 18 | Pending |
-| CD-01 | Phase 16 | Pending |
-| CD-02 | Phase 16 | Pending |
-| CD-03 | Phase 16 | Pending |
-| CD-04 | Phase 16 | Pending |
+| CD-01 | Phase 16 | Complete |
+| CD-02 | Phase 16 | Complete |
+| CD-03 | Phase 16 | Complete |
+| CD-04 | Phase 16 | Complete |
 | POL-01 | Phase 19 | Pending |
 
 **Coverage:**

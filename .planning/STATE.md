@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** A single `ptt` command that works in any shell on any platform with full autocompletion
-**Current focus:** v2.0 Bare Repo + cd Rename -- Phase 15 complete, ready for Phase 16
+**Current focus:** v2.0 Bare Repo + cd Rename -- Phase 16 in progress (cd rename complete)
 
 ## Current Position
 
-Phase: 15 of 19 (Bare Repo Infrastructure) -- COMPLETE
-Plan: 2 of 2 in current phase (all complete)
+Phase: 16 of 19 (cd Rename)
+Plan: 1 of 1 in current phase (all complete)
 Status: Phase complete
-Last activity: 2026-02-09 -- Phase 15 complete (Bare Repo Infrastructure)
+Last activity: 2026-02-09 -- Completed 16-01-PLAN.md
 
-Progress: [██████████████░░░░░░] 74% (34/~46 plans -- 34 complete)
+Progress: [███████████████░░░░░] 76% (35/~46 plans -- 35 complete)
 
 ## Performance Metrics
 
@@ -23,7 +23,8 @@ Progress: [██████████████░░░░░░] 74% (34
 - v2.0 Go Rewrite: 20 plans, ~3.2 min/plan
 - v2.0 Rebrand: 6 plans, ~3.5 min/plan
 - v2.0 Bare Repo Infrastructure: 2 plans, ~4.5 min/plan
-- Total: 34 plans executed in ~1.7 hours
+- v2.0 cd Rename: 1 plan, ~6 min/plan
+- Total: 35 plans executed in ~1.8 hours
 
 ## Accumulated Context
 
@@ -33,6 +34,7 @@ Previous decisions logged in PROJECT.md Key Decisions table.
 
 New decisions for this milestone:
 - **Rename go -> cd**: `cd` is more intuitive; `go` removed entirely (no alias)
+- **Clean break, no aliases** (16-01): Removed go/goto/home completely for simplicity, no backward compat
 - **Bare repo support**: Nested worktrees inside bare repo avoids cluttering parent directory
 - **mk-bare-repo as clone-from-remote**: Safer than in-place restructure -- user verifies then deletes old
 - **.pttconfig at bare root**: Project-level config shared by all worktrees, not per-worktree
@@ -55,9 +57,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Phase 15 complete -- ready for Phase 16 (cd Rename)
+Stopped at: Completed 16-01-PLAN.md -- Phase 16 complete (cd Rename)
 Resume file: None
 
 ---
 *State initialized: 2026-02-07*
-*Updated: 2026-02-09 -- Phase 15 complete (Bare Repo Infrastructure)*
+*Updated: 2026-02-09 -- Phase 16 complete (cd Rename)*
