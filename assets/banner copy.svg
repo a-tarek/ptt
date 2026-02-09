@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 280" fill="none">
+
+  <!-- Potato — simple bean shape, thick outline, dumb and happy -->
+  <g transform="translate(175, 140)">
+
+    <!-- Thick dark outline -->
+    <path d="M -5 -100 C 40 -108, 72 -80, 78 -42 C 84 -4, 78 40, 62 70 C 46 100, 15 112, -12 108 C -39 104, -62 85, -72 55 C -82 25, -80 -15, -70 -48 C -60 -81, -35 -96, -5 -100 Z" fill="#2B2520" />
+
+    <!-- Body fill — olive/yellow-brown gradient look -->
+    <path d="M -5 -93 C 35 -100, 65 -74, 71 -39 C 77 -4, 72 37, 57 64 C 42 91, 14 103, -10 100 C -34 97, -55 79, -65 51 C -75 23, -73 -13, -64 -44 C -55 -75, -31 -89, -5 -93 Z" fill="#B8A848" />
+
+    <!-- Slightly darker edge shading — left/bottom -->
+    <path d="M -64 -44 C -55 -75, -31 -89, -5 -93 C -20 -85, -45 -65, -55 -35 C -65 -5, -62 35, -50 58 C -40 75, -25 88, -10 100 C -34 97, -55 79, -65 51 C -75 23, -73 -13, -64 -44 Z" fill="#9E9235" opacity="0.4"/>
+
+    <!-- Spots — just small brown circles, scattered unevenly -->
+    <circle cx="-32" cy="-45" r="5" fill="#7D6B30" opacity="0.55"/>
+    <circle cx="38" cy="15" r="6" fill="#7D6B30" opacity="0.5"/>
+    <circle cx="-18" cy="55" r="5.5" fill="#7D6B30" opacity="0.45"/>
+    <circle cx="20" cy="-55" r="4" fill="#7D6B30" opacity="0.4"/>
+    <circle cx="-40" cy="20" r="4.5" fill="#7D6B30" opacity="0.4"/>
+    <circle cx="48" cy="50" r="4" fill="#7D6B30" opacity="0.35"/>
+    <circle cx="10" cy="30" r="3.5" fill="#7D6B30" opacity="0.3"/>
+
+    <!-- Eyes — just two dots, slightly uneven -->
+    <circle cx="-18" cy="-15" r="8" fill="#2B2520"/>
+    <circle cx="22" cy="-18" r="7.5" fill="#2B2520"/>
+
+    <!-- Smile — tiny, simple, slightly crooked -->
+    <path d="M -5 8 Q 5 18, 15 10" stroke="#2B2520" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- ptt text -->
+  <text x="320" y="125" fill="#2B2520" font-family="'SF Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace" font-size="74" font-weight="800" letter-spacing="3">ptt</text>
+
+  <!-- Tagline -->
+  <text x="324" y="162" fill="#7D6B30" font-family="'SF Mono', 'Fira Code', Consolas, monospace" font-size="15" opacity="0.75">a potato worktree manager</text>
+
+  <!-- Install line -->
+  <g transform="translate(324, 205)">
+    <rect x="-10" y="-18" width="330" height="30" rx="5" fill="#2B2520" opacity="0.05"/>
+    <text fill="#5C5030" font-family="'SF Mono', 'Fira Code', Consolas, monospace" font-size="13">
+      <tspan fill="#7D6B30" opacity="0.5">$</tspan>
+      <tspan> npx @a-tarek/ptt install</tspan>
+    </text>
+  </g>
+</svg>
