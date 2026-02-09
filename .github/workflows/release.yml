@@ -60,6 +60,8 @@ jobs:
           install-only: true
 
       - name: Run goreleaser
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: goreleaser release --clean
 
       - name: Stage npm binaries
