@@ -37,12 +37,9 @@ var rmCmd = &cobra.Command{
 			return err
 		}
 
-		// Check if trying to delete current worktree
-		currentPath, err := git.CurrentWorktreeRoot()
-		if err != nil {
-			return err
-		}
-		if wt.Path == currentPath {
+		// Check if trying to delete current worktree (best-effort; may fail from bare repo root)
+		currentPath, _ := git.CurrentWorktreeRoot()
+		if currentPath != "" && wt.Path == currentPath {
 			return fmt.Errorf("can't delete current worktree")
 		}
 
