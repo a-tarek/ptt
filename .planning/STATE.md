@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-09)
 
 ## Current Position
 
-Phase: 18 of 19 (Adopt Smart Init)
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-02-09 -- Completed 18-03-PLAN.md
+Phase: 19 of 19 (Polish)
+Plan: 1 of ~2 in current phase
+Status: In progress
+Last activity: 2026-02-09 -- Completed 19-01-PLAN.md
 
-Progress: [████████████████░░░░] 87% (40/~46 plans -- 40 complete)
+Progress: [████████████████░░░░] 89% (41/~46 plans -- 41 complete)
 
 ## Performance Metrics
 
@@ -26,7 +26,8 @@ Progress: [████████████████░░░░] 87% (40
 - v2.0 cd Rename: 1 plan, ~6 min/plan
 - v2.0 mk-bare-repo Command: 2 plans, ~2 min/plan
 - v2.0 Adopt Smart Init: 3 plans, ~3 min/plan (complete)
-- Total: 40 plans executed in ~2.05 hours
+- v2.0 Polish: 1 plan, ~4 min/plan (in progress)
+- Total: 41 plans executed in ~2.12 hours
 
 ## Accumulated Context
 
@@ -60,6 +61,8 @@ New decisions for this milestone:
 - **IsDirty() ignores untracked files** (18-03): Only actual changes (M/A/D) trigger dirty state, untracked files allowed
 - **RepairPttRepo() handles .pttconfig** (18-03): .pttconfig creation is a valid repair item for ptt bare repos
 - **Default branch from remote HEAD** (18-03): Normal repos detect default from remote HEAD, not current checkout
+- **Filter at presentation layer** (19-01): cmd/list.go filters IsBare entries after fetching, not in internal/git/worktree.go
+- **Use IsBare boolean flag** (19-01): Filter checks wt.IsBare field, not path-based string matching for reliability
 
 ### Pending Todos
 
@@ -74,9 +77,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed 18-03-PLAN.md -- Phase 18 complete (Adopt Smart Init)
+Stopped at: Completed 19-01-PLAN.md -- Phase 19 in progress (Filter bare entries from ls output)
 Resume file: None
 
 ---
 *State initialized: 2026-02-07*
-*Updated: 2026-02-09 -- Phase 18 complete (Smart Init command with comprehensive tests and bug fixes)*
+*Updated: 2026-02-09 -- Phase 19 in progress (Filter bare entries from ls output completed)*
