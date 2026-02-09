@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-09)
 ## Current Position
 
 Phase: 18 of 19 (Adopt Smart Init)
-Plan: 1 of 3 in current phase
-Status: In progress
-Last activity: 2026-02-09 -- Completed 18-01-PLAN.md
+Plan: 3 of 3 in current phase
+Status: Phase complete
+Last activity: 2026-02-09 -- Completed 18-03-PLAN.md
 
-Progress: [████████████████░░░░] 83% (38/~46 plans -- 38 complete)
+Progress: [████████████████░░░░] 87% (40/~46 plans -- 40 complete)
 
 ## Performance Metrics
 
@@ -25,8 +25,8 @@ Progress: [████████████████░░░░] 83% (38
 - v2.0 Bare Repo Infrastructure: 2 plans, ~4.5 min/plan
 - v2.0 cd Rename: 1 plan, ~6 min/plan
 - v2.0 mk-bare-repo Command: 2 plans, ~2 min/plan
-- v2.0 Adopt Smart Init: 1 plan, ~2 min/plan (in progress)
-- Total: 38 plans executed in ~1.90 hours
+- v2.0 Adopt Smart Init: 3 plans, ~3 min/plan (complete)
+- Total: 40 plans executed in ~2.05 hours
 
 ## Accumulated Context
 
@@ -54,6 +54,12 @@ New decisions for this milestone:
 - **RepoType detection order** (18-01): Check IsInsideGitRepo → BareRepoRoot → IsBareRepository → default to normal
 - **IsBareFromWorktree flag** (18-01): Distinguishes calling init from container root vs from within a worktree
 - **ProgressCallback export** (18-01): Exported type needed by Plan 18-02 for restructure/adopt/repair operations
+- **Staging directory for untracked files** (18-02): Normal repo restructure preserves untracked files via _ptt_staging/
+- **Cleanup stack pattern** (18-02): All transformations build rollback functions, executed in reverse on failure
+- **Feature branch sanitization** (18-02): Replace "/" with "-" in branch names for safe directory names
+- **IsDirty() ignores untracked files** (18-03): Only actual changes (M/A/D) trigger dirty state, untracked files allowed
+- **RepairPttRepo() handles .pttconfig** (18-03): .pttconfig creation is a valid repair item for ptt bare repos
+- **Default branch from remote HEAD** (18-03): Normal repos detect default from remote HEAD, not current checkout
 
 ### Pending Todos
 
@@ -68,9 +74,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed 18-01-PLAN.md -- Phase 18 in progress (Adopt Smart Init)
+Stopped at: Completed 18-03-PLAN.md -- Phase 18 complete (Adopt Smart Init)
 Resume file: None
 
 ---
 *State initialized: 2026-02-07*
-*Updated: 2026-02-09 -- Phase 18 in progress (Smart Init foundation with repo detection and validation)*
+*Updated: 2026-02-09 -- Phase 18 complete (Smart Init command with comprehensive tests and bug fixes)*
