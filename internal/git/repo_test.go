@@ -7,11 +7,6 @@ import (
 	"testing"
 )
 
-func TestWorktreePath_BareRepoOld(t *testing.T) {
-	// Legacy test - replaced by TestWorktreePath_BareRepo below
-	t.Skip("Replaced by comprehensive bare repo tests")
-}
-
 func TestWorktreePath_SiblingMode(t *testing.T) {
 	// Create a temporary directory structure
 	tmpDir, err := os.MkdirTemp("", "wt-test-")
