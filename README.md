@@ -173,6 +173,95 @@ ptt mk staging --config staging
 - Flag overrides merge with file-based config
 - Automatically switches to the new worktree after creation
 
+### ptt mk-bare-repo
+
+**Usage:** `ptt mk-bare-repo`
+
+Converts a normal git clone into a bare repository with nested worktrees. This creates a cleaner workspace where all worktrees live inside a single directory instead of scattered across the parent directory.
+
+**What it does:**
+
+Clones your repository's remote origin as a bare repo, then sets up the structure needed for nested worktrees:
+
+```
+myapp-bare/
+├── .bare/              # Bare git repository (like .git)
+├── .git                # Pointer file to .bare
+├── .pttconfig/         # Shared config (copied from source)
+└── main/               # Initial worktree for main/master branch
+```
+
+**Workflow:**
+
+1. **Validates requirements** - Must be in a normal clone with remote origin
+2. **Clones bare** - `git clone --bare <origin> <repo-bare>/.bare`
+3. **Creates .git pointer** - Points to `.bare` directory
+4. **Configures fetch** - Sets up `+refs/heads/*:refs/remotes/origin/*` refspec
+5. **Enables reflog** - Sets `core.logallrefupdates = true` for better history
+6. **Fetches branches** - Downloads all remote branches
+7. **Creates initial worktree** - Adds worktree for default branch (main or master)
+8. **Copies .pttconfig** - Preserves your configuration from source repo
+
+**After conversion:**
+
+The command creates a new directory (e.g., `myapp-bare/`) as a sibling to your current clone. You can verify the setup, then switch to it:
+
+```bash
+# From your normal clone
+ptt mk-bare-repo
+
+# Output shows:
+# ✔ clone: .bare
+# ✔ create: .git pointer
+# ✔ config: fetch refspec
+# ✔ config: reflog
+# ✔ fetch: origin
+# ✔ worktree: default branch
+# ✔ copy: .pttconfig
+#
+# Bare repo ready: /path/to/myapp-bare
+# cd myapp-bare/main && ptt mk <branch>
+
+# Navigate to the bare repo
+cd ../myapp-bare/main
+
+# Create new worktrees (they'll be siblings to main/)
+ptt mk feature-auth
+# Creates myapp-bare/feature-auth/
+
+ptt ls
+# * myapp-bare/main               main
+#   myapp-bare/feature-auth       feature-auth
+
+# Navigate between worktrees
+ptt cd feature-auth
+ptt cd  # back to main
+```
+
+**Requirements:**
+
+- Must be run from inside a normal git clone (not already a bare repo)
+- Repository must have a remote named `origin` (used for cloning)
+- Target directory (e.g., `myapp-bare/`) must not already exist
+
+**Error messages:**
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `already in a ptt bare repo` | Already in a bare repo structure | No conversion needed |
+| `not inside a git repository` | Not in a git directory | Run from inside a git clone |
+| `no remote origin configured` | Repository has no origin | Add origin remote first |
+| `target directory already exists` | `<repo>-bare/` exists | Move/rename existing directory |
+| `neither 'main' nor 'master' branch found` | No default branch | Ensure main or master exists remotely |
+
+**When to use:**
+
+- You want nested worktrees instead of sibling directories
+- You're starting fresh with a clean clone
+- You work with many worktrees and want better organization
+
+**Note:** This creates a **new** bare repo clone rather than converting in-place. Your original clone remains unchanged, allowing you to verify the setup before deleting it.
+
 ### ptt cd
 
 **Usage:** `ptt cd [worktree]`
