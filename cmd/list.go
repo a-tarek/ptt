@@ -32,6 +32,20 @@ var lsCmd = &cobra.Command{
 			return nil
 		}
 
+		// Filter out bare repository metadata entries
+		var filtered []git.Worktree
+		for _, wt := range worktrees {
+			if !wt.IsBare {
+				filtered = append(filtered, wt)
+			}
+		}
+		worktrees = filtered
+
+		// Re-check after filtering (bare-only repo produces empty list)
+		if len(worktrees) == 0 {
+			return nil
+		}
+
 		// Get current worktree path
 		currentPath, _ := git.CurrentWorktreeRoot()
 

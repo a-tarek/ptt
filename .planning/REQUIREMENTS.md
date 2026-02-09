@@ -104,13 +104,13 @@
 
 ### Bare Repo -- Adopt Raw Bare Repo
 
-- [ ] **ADOPT-01**: `ptt init` inside a raw bare repo detects it and offers to restructure into ptt layout
-- [ ] **ADOPT-02**: Restructure wraps bare git data in `.bare/`, creates `.git` pointer, adds default branch worktree
-- [ ] **ADOPT-03**: Sets fetch refspec and enables reflog (same fixes as mk-bare-repo)
+- [x] **ADOPT-01**: `ptt init` inside a raw bare repo detects it and offers to restructure into ptt layout
+- [x] **ADOPT-02**: Restructure wraps bare git data in `.bare/`, creates `.git` pointer, adds default branch worktree
+- [x] **ADOPT-03**: Sets fetch refspec and enables reflog (same fixes as mk-bare-repo)
 
 ### Bare Repo -- Smart Init
 
-- [ ] **INIT-01**: `ptt init` in a normal repo creates `.pttconfig/default` + suggests bare repo conversion
+- [x] **INIT-01**: `ptt init` in a normal repo creates `.pttconfig/default` + suggests bare repo conversion
 
 ### cd Command
 
@@ -214,10 +214,10 @@
 | MKBR-06 | Phase 17 | Complete |
 | MKBR-07 | Phase 17 | Complete |
 | MKBR-08 | Phase 17 | Complete |
-| ADOPT-01 | Phase 18 | Pending |
-| ADOPT-02 | Phase 18 | Pending |
-| ADOPT-03 | Phase 18 | Pending |
-| INIT-01 | Phase 18 | Pending |
+| ADOPT-01 | Phase 18 | Complete |
+| ADOPT-02 | Phase 18 | Complete |
+| ADOPT-03 | Phase 18 | Complete |
+| INIT-01 | Phase 18 | Complete |
 | CD-01 | Phase 16 | Complete |
 | CD-02 | Phase 16 | Complete |
 | CD-03 | Phase 16 | Complete |

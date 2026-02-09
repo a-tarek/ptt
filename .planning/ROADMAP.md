@@ -237,7 +237,7 @@ Plans:
 - [x] **Phase 15: Bare Repo Infrastructure** - Detection, path resolution, and config resolution for bare repo contexts
 - [x] **Phase 16: cd Rename** - Rename `go` to `cd` as primary navigation command
 - [x] **Phase 17: mk-bare-repo Command** - Convert normal clone to bare repo with nested worktrees
-- [ ] **Phase 18: Adopt + Smart Init** - Restructure raw bare repos and enhance `ptt init`
+- [x] **Phase 18: Adopt + Smart Init** - Restructure raw bare repos and enhance `ptt init`
 - [ ] **Phase 19: Polish** - Clean up bare repo artifacts from user-facing output
 
 #### Phase 15: Bare Repo Infrastructure
@@ -297,9 +297,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 18-01-PLAN.md -- Remove mk-bare-repo and create detection/validation/plan display infrastructure
-- [ ] 18-02-PLAN.md -- Implement restructuring operations (normal clone, raw bare adoption, repair)
-- [ ] 18-03-PLAN.md -- Rewrite init command with context routing and integration tests
+- [x] 18-01-PLAN.md -- Remove mk-bare-repo and create detection/validation/plan display infrastructure
+- [x] 18-02-PLAN.md -- Implement restructuring operations (normal clone, raw bare adoption, repair)
+- [x] 18-03-PLAN.md -- Rewrite init command with context routing and integration tests
 
 #### Phase 19: Polish
 **Goal**: Bare repo metadata is hidden from user-facing output
@@ -308,7 +308,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Running `ptt ls` inside a bare repo shows only real worktrees, not the `.bare` metadata entry
   2. The bare metadata entry is filtered regardless of how git reports it (path or label variations)
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 19-01-PLAN.md -- Filter bare repo metadata entries from ptt ls output
 
 ## Progress
 
@@ -334,8 +337,8 @@ Phases 15 and 16 can execute in parallel (independent). Phase 17 and 18 depend o
 | 15. Bare Repo Infrastructure | Bare Repo + cd | 2/2 | Complete | 2026-02-09 |
 | 16. cd Rename | Bare Repo + cd | 1/1 | Complete | 2026-02-09 |
 | 17. mk-bare-repo Command | Bare Repo + cd | 2/2 | Complete | 2026-02-09 |
-| 18. Adopt + Smart Init | Bare Repo + cd | 0/3 | Not started | - |
-| 19. Polish | Bare Repo + cd | 0/TBD | Not started | - |
+| 18. Adopt + Smart Init | Bare Repo + cd | 3/3 | Complete | 2026-02-09 |
+| 19. Polish | Bare Repo + cd | 0/1 | Planned | - |
 
 ---
 *Roadmap created: 2026-02-07*
