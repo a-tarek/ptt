@@ -62,8 +62,8 @@ func parsePWD(output string) (string, error) {
 	return "", fmt.Errorf("RESULT_PWD not found in output: %s", output)
 }
 
-// TestBashWrapperGoto tests that the bash wrapper successfully changes directory with 'wt goto'.
-func TestBashWrapperGoto(t *testing.T) {
+// TestBashWrapperCd tests that the bash wrapper successfully changes directory with 'ptt cd'.
+func TestBashWrapperCd(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping shell e2e test in short mode")
 	}
@@ -81,7 +81,7 @@ func TestBashWrapperGoto(t *testing.T) {
 		export SHELL="%s"
 		eval "$('%s' shell-init)"
 		cd "%s/main"
-		ptt goto feature
+		ptt cd feature
 		echo "RESULT_PWD=$PWD"
 	`, bashPath, tmpBin, tmpDir)
 
@@ -102,8 +102,8 @@ func TestBashWrapperGoto(t *testing.T) {
 	}
 }
 
-// TestBashWrapperHome tests that the bash wrapper successfully changes directory with 'wt home'.
-func TestBashWrapperHome(t *testing.T) {
+// TestBashWrapperCdHome tests that the bash wrapper successfully navigates home with 'ptt cd' (no args).
+func TestBashWrapperCdHome(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping shell e2e test in short mode")
 	}
@@ -121,7 +121,7 @@ func TestBashWrapperHome(t *testing.T) {
 		export SHELL="%s"
 		eval "$('%s' shell-init)"
 		cd "%s/feature"
-		ptt home
+		ptt cd
 		echo "RESULT_PWD=$PWD"
 	`, bashPath, tmpBin, tmpDir)
 
@@ -142,7 +142,7 @@ func TestBashWrapperHome(t *testing.T) {
 	}
 }
 
-// TestBashWrapperNew tests that the bash wrapper successfully changes directory with 'wt new'.
+// TestBashWrapperNew tests that the bash wrapper successfully changes directory with 'ptt new'.
 func TestBashWrapperNew(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping shell e2e test in short mode")
@@ -216,8 +216,8 @@ func TestBashWrapperPassthrough(t *testing.T) {
 	}
 }
 
-// TestZshWrapperGoto tests that the zsh wrapper successfully changes directory with 'wt goto'.
-func TestZshWrapperGoto(t *testing.T) {
+// TestZshWrapperCd tests that the zsh wrapper successfully changes directory with 'ptt cd'.
+func TestZshWrapperCd(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping shell e2e test in short mode")
 	}
@@ -235,7 +235,7 @@ func TestZshWrapperGoto(t *testing.T) {
 		export SHELL="%s"
 		eval "$('%s' shell-init)"
 		cd "%s/main"
-		ptt goto feature
+		ptt cd feature
 		echo "RESULT_PWD=$PWD"
 	`, zshPath, tmpBin, tmpDir)
 
@@ -256,8 +256,8 @@ func TestZshWrapperGoto(t *testing.T) {
 	}
 }
 
-// TestZshWrapperHome tests that the zsh wrapper successfully changes directory with 'wt home'.
-func TestZshWrapperHome(t *testing.T) {
+// TestZshWrapperCdHome tests that the zsh wrapper successfully navigates home with 'ptt cd' (no args).
+func TestZshWrapperCdHome(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping shell e2e test in short mode")
 	}
@@ -275,7 +275,7 @@ func TestZshWrapperHome(t *testing.T) {
 		export SHELL="%s"
 		eval "$('%s' shell-init)"
 		cd "%s/feature"
-		ptt home
+		ptt cd
 		echo "RESULT_PWD=$PWD"
 	`, zshPath, tmpBin, tmpDir)
 
@@ -296,7 +296,7 @@ func TestZshWrapperHome(t *testing.T) {
 	}
 }
 
-// TestZshWrapperNew tests that the zsh wrapper successfully changes directory with 'wt new'.
+// TestZshWrapperNew tests that the zsh wrapper successfully changes directory with 'ptt new'.
 func TestZshWrapperNew(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping shell e2e test in short mode")
@@ -369,8 +369,8 @@ func TestZshWrapperPassthrough(t *testing.T) {
 	}
 }
 
-// TestFishWrapperGoto tests that the fish wrapper successfully changes directory with 'wt goto'.
-func TestFishWrapperGoto(t *testing.T) {
+// TestFishWrapperCd tests that the fish wrapper successfully changes directory with 'ptt cd'.
+func TestFishWrapperCd(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping shell e2e test in short mode")
 	}
@@ -388,7 +388,7 @@ func TestFishWrapperGoto(t *testing.T) {
 		set -x SHELL "%s"
 		eval (%s shell-init)
 		cd "%s/main"
-		ptt goto feature
+		ptt cd feature
 		echo "RESULT_PWD=$PWD"
 	`, fishPath, tmpBin, tmpDir)
 
@@ -409,8 +409,8 @@ func TestFishWrapperGoto(t *testing.T) {
 	}
 }
 
-// TestFishWrapperHome tests that the fish wrapper successfully changes directory with 'wt home'.
-func TestFishWrapperHome(t *testing.T) {
+// TestFishWrapperCdHome tests that the fish wrapper successfully navigates home with 'ptt cd' (no args).
+func TestFishWrapperCdHome(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping shell e2e test in short mode")
 	}
@@ -428,7 +428,7 @@ func TestFishWrapperHome(t *testing.T) {
 		set -x SHELL "%s"
 		eval (%s shell-init)
 		cd "%s/feature"
-		ptt home
+		ptt cd
 		echo "RESULT_PWD=$PWD"
 	`, fishPath, tmpBin, tmpDir)
 
@@ -449,7 +449,7 @@ func TestFishWrapperHome(t *testing.T) {
 	}
 }
 
-// TestFishWrapperNew tests that the fish wrapper successfully changes directory with 'wt new'.
+// TestFishWrapperNew tests that the fish wrapper successfully changes directory with 'ptt new'.
 func TestFishWrapperNew(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping shell e2e test in short mode")
