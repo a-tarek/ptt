@@ -48,6 +48,11 @@ var ejectCmd = &cobra.Command{
 			return err
 		}
 
+		configRoot, err := git.ConfigRoot()
+		if err != nil {
+			return err
+		}
+
 		// 3. Determine fallback branch
 		var fallbackBranch string
 		if srcRoot == homePath {
@@ -179,7 +184,7 @@ var ejectCmd = &cobra.Command{
 
 			// File-based config (unless --skip-config or inline flags override)
 			if !ejectSkipConfig && !hasEjectInlineFlags {
-				configPath, err := config.ResolveConfigPath(srcRoot, ejectConfigName)
+				configPath, err := config.ResolveConfigPath(configRoot, ejectConfigName)
 				if err == nil {
 					// Config file exists
 					fileActions, err = config.ParseFile(configPath)
@@ -219,7 +224,7 @@ var ejectCmd = &cobra.Command{
 				}
 			} else if !ejectSkipConfig && hasEjectInlineFlags && ejectConfigName != "" {
 				// --config with inline flags: load named config, then append inline flags
-				configPath, cfgErr := config.ResolveConfigPath(srcRoot, ejectConfigName)
+				configPath, cfgErr := config.ResolveConfigPath(configRoot, ejectConfigName)
 				if cfgErr == nil {
 					fileActions, err = config.ParseFile(configPath)
 					if err != nil {
