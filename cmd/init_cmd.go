@@ -39,8 +39,8 @@ var initCmd = &cobra.Command{
 			return fmt.Errorf("not inside a git repository")
 		}
 
-		// Get repo root (home worktree)
-		repoRoot, err := git.GetHomePath()
+		// Get config root (bare repo root or home worktree)
+		repoRoot, err := git.ConfigRoot()
 		if err != nil {
 			return fmt.Errorf("failed to get repo root: %w", err)
 		}
