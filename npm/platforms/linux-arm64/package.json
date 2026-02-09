@@ -1,5 +1,5 @@
 {
-  "name": "@a-tarek/ptt-linux-arm64",
+  "name": "@atarek/ptt-linux-arm64",
   "version": "0.0.0",
   "description": "ptt: a potato worktree manager - Linux ARM64 binary",
   "repository": "github:a-tarek/ptt",

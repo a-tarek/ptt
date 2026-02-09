@@ -18,14 +18,14 @@ Managing git worktrees should be effortless. `ptt` makes it easy to create, navi
 ### Primary Method (Global Install)
 
 ```bash
-npm install -g @a-tarek/ptt
+npm install -g @atarek/ptt
 ptt install
 ```
 
 ### Try Before Committing
 
 ```bash
-npx @a-tarek/ptt install
+npx @atarek/ptt install
 ```
 
 ### What `ptt install` Does
@@ -47,7 +47,7 @@ The shell wrapper is needed because a subprocess cannot change the parent shell'
 
 ```bash
 ptt uninstall
-npm uninstall -g @a-tarek/ptt
+npm uninstall -g @atarek/ptt
 ```
 
 ## Quick Start
@@ -485,7 +485,7 @@ ptt uninstall
 
 **Note:** This command only removes the shell integration. To completely remove ptt, also run:
 ```bash
-npm uninstall -g @a-tarek/ptt
+npm uninstall -g @atarek/ptt
 ```
 
 ## Configuration
@@ -701,14 +701,14 @@ The matching is based on the directory name suffix. If your worktree is named `m
 **Solution:**
 ```bash
 # Either use sudo (not recommended long-term)
-sudo npm install -g @a-tarek/ptt
+sudo npm install -g @atarek/ptt
 
 # Or configure npm to use a user directory (recommended)
 mkdir ~/.npm-global
 npm config set prefix '~/.npm-global'
 echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
 source ~/.bashrc
-npm install -g @a-tarek/ptt
+npm install -g @atarek/ptt
 ```
 
 See [npm documentation on fixing permissions](https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally).

@@ -24,7 +24,7 @@ This command will:
   • Provide instructions for complete uninstallation
 
 Note: This only removes the RC file integration. To fully uninstall ptt,
-you'll need to also run: npm uninstall -g @a-tarek/ptt`,
+you'll need to also run: npm uninstall -g @atarek/ptt`,
 	Args: cobra.NoArgs,
 	RunE: runUninstall,
 }
@@ -120,7 +120,7 @@ func runUninstall(cmd *cobra.Command, args []string) error {
 	fmt.Println()
 	fmt.Println("To complete uninstallation:")
 	fmt.Println("  1. Restart your terminal (or run: source " + displayPath + ")")
-	fmt.Println("  2. Run: npm uninstall -g @a-tarek/ptt")
+	fmt.Println("  2. Run: npm uninstall -g @atarek/ptt")
 
 	return nil
 }

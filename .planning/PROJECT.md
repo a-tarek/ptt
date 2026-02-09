@@ -8,15 +8,15 @@ A cross-platform Git worktree manager ("a potato worktree manager"). Go binary w
 
 A single `ptt` command that works in any shell on any platform with full autocompletion — managing git worktrees should be effortless everywhere.
 
-## Current Milestone: v2.0 Pre-Release (Bare Repo + Command Polish)
+## Current Milestone: v2.1 Release Polish
 
-**Goal:** Add bare repo conversion and nested worktree support, rename go→cd, ship v2.0.
+**Goal:** Cheatsheet-style README and clean git history before first public release.
 
 **Target changes:**
-- `ptt mk-bare-repo`: convert normal clone to bare repo with nested worktrees (creates `-bare` copy)
-- `ptt mk` in bare repos: create worktrees nested inside bare repo directory
-- Rename `go` → `cd` (`ptt cd <wt>` navigates, `ptt cd` goes to main worktree), `go` kept as alias
-- `.pttconfig/` lives at bare repo root, shared by all worktrees
+- README.md rewrite: concise cheatsheet with banner, install, all commands with one-liner examples — fits one screen
+- Remove all verbose documentation, no separate docs files
+- Remove `.planning/` from entire git history via history rewrite
+- Untrack `.planning/` going forward (.gitignore)
 
 ## Requirements
 
@@ -29,14 +29,16 @@ A single `ptt` command that works in any shell on any platform with full autocom
 - ✓ Command restructure: mk, go, rm, ls as primary names — v2.0 rebrand
 - ✓ Config directory: .pttconfig/ with default and named configs — v2.0 rebrand
 - ✓ Shell wrappers + npm distribution under @a-tarek/ptt — v2.0 rebrand
+- ✓ Bare repo conversion via `ptt init` (smart init) — v2.0 bare repo
+- ✓ Nested worktrees inside bare repo directory — v2.0 bare repo
+- ✓ `cd` as primary navigation command — v2.0 cd rename
+- ✓ `.pttconfig/` at bare repo root, shared across worktrees — v2.0 bare repo
 
 ### Active
 
-- [ ] `ptt mk-bare-repo`: convert normal clone to bare repo with nested worktrees
-- [ ] `ptt mk` nests worktrees inside bare repo directory when in bare repo context
-- [ ] Rename `go` → `cd` as primary command name (`go` kept as alias)
-- [ ] `ptt cd` (no args) always navigates to main worktree (bare and non-bare)
-- [ ] `.pttconfig/` at bare repo root, shared across all worktrees
+- [ ] README.md rewrite: cheatsheet-style, all commands, one screen
+- [ ] Remove `.planning/` from git history (filter-repo/BFG)
+- [ ] Untrack `.planning/` via .gitignore
 
 ### Out of Scope
 
@@ -92,5 +94,8 @@ A single `ptt` command that works in any shell on any platform with full autocom
 | mk-bare-repo as copy | Safer than in-place restructure — user verifies then deletes old repo | — Pending |
 | .pttconfig at bare root | Project-level config shared by all worktrees, not per-worktree | — Pending |
 
+| Cheatsheet README | Verbose README adds friction; one-screen cheatsheet is more scannable | — Pending |
+| Remove .planning from history | Internal planning docs shouldn't be in public release | — Pending |
+
 ---
-*Last updated: 2026-02-09 after bare repo + cd rename milestone planning*
+*Last updated: 2026-02-09 after v2.1 release polish milestone start*

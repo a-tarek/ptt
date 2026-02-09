@@ -110,9 +110,9 @@ for platform_dir in platforms/darwin-arm64 platforms/darwin-amd64 platforms/linu
 done
 
 # Publish main package LAST
-echo "Publishing main package @a-tarek/ptt..."
+echo "Publishing main package @atarek/ptt..."
 $PUBLISH_CMD
-echo "  ✓ Published @a-tarek/ptt"
+echo "  ✓ Published @atarek/ptt"
 
 echo ""
 if [[ "$DRY_RUN" == true ]]; then
@@ -120,5 +120,5 @@ if [[ "$DRY_RUN" == true ]]; then
 else
   echo "==> Publish complete!"
   echo "    All 5 packages published at version $VERSION"
-  echo "    Install with: npm install @a-tarek/ptt@$VERSION"
+  echo "    Install with: npm install @atarek/ptt@$VERSION"
 fi
