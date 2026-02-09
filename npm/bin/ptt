@@ -5,10 +5,10 @@ const { resolve } = require('path');
 
 // Map Node.js platform/arch to package names
 const platformMap = {
-  'darwin-arm64': '@a-tarek/ptt-darwin-arm64',
-  'darwin-x64': '@a-tarek/ptt-darwin-amd64',
-  'linux-x64': '@a-tarek/ptt-linux-amd64',
-  'linux-arm64': '@a-tarek/ptt-linux-arm64',
+  'darwin-arm64': '@atarek/ptt-darwin-arm64',
+  'darwin-x64': '@atarek/ptt-darwin-amd64',
+  'linux-x64': '@atarek/ptt-linux-amd64',
+  'linux-arm64': '@atarek/ptt-linux-arm64',
 };
 
 const platformKey = `${process.platform}-${process.arch}`;

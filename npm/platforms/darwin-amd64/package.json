@@ -1,5 +1,5 @@
 {
-  "name": "@a-tarek/ptt-darwin-amd64",
+  "name": "@atarek/ptt-darwin-amd64",
   "version": "0.0.0",
   "description": "ptt: a potato worktree manager - macOS x64 binary",
   "repository": "github:a-tarek/ptt",

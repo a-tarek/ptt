@@ -86,6 +86,6 @@ jobs:
         run: bash scripts/publish-npm.sh ${{ steps.version.outputs.version }}
 
 # Secrets required:
-# - NPM_TOKEN: npm automation token for publishing @a-tarek/* packages
+# - NPM_TOKEN: npm automation token for publishing @atarek/* packages
 #   Create at: https://www.npmjs.com/settings/<username>/tokens
 #   Add to repository: Settings -> Secrets and variables -> Actions -> New repository secret

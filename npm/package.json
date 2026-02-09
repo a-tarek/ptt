@@ -1,5 +1,5 @@
 {
-  "name": "@a-tarek/ptt",
+  "name": "@atarek/ptt",
   "version": "0.0.0",
   "description": "ptt: a potato worktree manager - fast, intuitive git worktree management",
   "repository": "github:a-tarek/ptt",
@@ -7,10 +7,10 @@
   "bin": { "ptt": "bin/ptt" },
   "files": ["bin/ptt"],
   "optionalDependencies": {
-    "@a-tarek/ptt-darwin-arm64": "0.0.0",
-    "@a-tarek/ptt-darwin-amd64": "0.0.0",
-    "@a-tarek/ptt-linux-amd64": "0.0.0",
-    "@a-tarek/ptt-linux-arm64": "0.0.0"
+    "@atarek/ptt-darwin-arm64": "0.0.0",
+    "@atarek/ptt-darwin-amd64": "0.0.0",
+    "@atarek/ptt-linux-amd64": "0.0.0",
+    "@atarek/ptt-linux-arm64": "0.0.0"
   },
   "engines": { "node": ">=18" }
 }
