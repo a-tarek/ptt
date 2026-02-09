@@ -39,9 +39,10 @@ var mkCmd = &cobra.Command{
 			return err
 		}
 
+		// CurrentWorktreeRoot may fail from bare repo root; fall back to homePath
 		currentWorktreeRoot, err := git.CurrentWorktreeRoot()
 		if err != nil {
-			return err
+			currentWorktreeRoot = homePath
 		}
 
 		configRoot, err := git.ConfigRoot()
@@ -155,6 +156,8 @@ var mkCmd = &cobra.Command{
 		// 10. Output path to stdout for shell wrapper
 		if outputPath {
 			fmt.Println(targetPath)
+		} else {
+			fmt.Fprintf(os.Stderr, "\nRun: ptt cd %s\n", name)
 		}
 
 		return nil
