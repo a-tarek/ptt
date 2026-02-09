@@ -11,9 +11,9 @@ import (
 
 var outputPath bool
 
-var goCmd = &cobra.Command{
-	Use:               "go [worktree]",
-	Aliases:           []string{"goto", "home"},
+var cdCmd = &cobra.Command{
+	Use:               "cd [worktree]",
+	Aliases:           []string{},
 	Short:             "Navigate to a worktree (or home if no args)",
 	Args:              cobra.MaximumNArgs(1),
 	ValidArgsFunction: worktreeNameCompletion,
@@ -135,7 +135,7 @@ var goCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(goCmd)
+	rootCmd.AddCommand(cdCmd)
 	// Register --output-path as a hidden persistent flag on root
 	rootCmd.PersistentFlags().BoolVar(&outputPath, "output-path", false, "output only the target path")
 	rootCmd.PersistentFlags().MarkHidden("output-path")

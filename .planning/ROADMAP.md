@@ -234,7 +234,7 @@ Plans:
 
 **Milestone Goal:** Add bare repo conversion and nested worktree support, rename go to cd, ship v2.0.
 
-- [ ] **Phase 15: Bare Repo Infrastructure** - Detection, path resolution, and config resolution for bare repo contexts
+- [x] **Phase 15: Bare Repo Infrastructure** - Detection, path resolution, and config resolution for bare repo contexts
 - [ ] **Phase 16: cd Rename** - Rename `go` to `cd` as primary navigation command
 - [ ] **Phase 17: mk-bare-repo Command** - Convert normal clone to bare repo with nested worktrees
 - [ ] **Phase 18: Adopt + Smart Init** - Restructure raw bare repos and enhance `ptt init`
@@ -252,8 +252,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 15-01-PLAN.md — BareRepoRoot detection, WorktreePath refactor, and ConfigRoot function (TDD)
-- [ ] 15-02-PLAN.md — Update init, mk, and eject commands to use ConfigRoot for config resolution
+- [x] 15-01-PLAN.md — BareRepoRoot detection, WorktreePath refactor, and ConfigRoot function (TDD)
+- [x] 15-02-PLAN.md — Update init, mk, and eject commands to use ConfigRoot for config resolution
 
 #### Phase 16: cd Rename
 **Goal**: Users navigate worktrees with `ptt cd` as the primary command, with `go` removed
@@ -264,7 +264,10 @@ Plans:
   2. User can run `ptt cd` (no args) and the shell changes to the main worktree
   3. `ptt go` is no longer a recognized command (clean removal, not alias)
   4. Shell wrappers (bash/zsh/fish) handle the `cd` subcommand for directory changes
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 16-01-PLAN.md -- Rename go command to cd across Go source, shell wrappers, tests, and README
 
 #### Phase 17: mk-bare-repo Command
 **Goal**: Users can convert any normal clone into a bare repo layout with a single command
@@ -318,8 +321,8 @@ Phases 15 and 16 can execute in parallel (independent). Phase 17 and 18 depend o
 | 12. Command Restructure + Config Directory | Rebrand | 2/2 | Complete | 2026-02-08 |
 | 13. Shell Wrappers + npm Distribution | Rebrand | 2/2 | Complete | 2026-02-08 |
 | 14. Documentation | Rebrand | 1/1 | Complete | 2026-02-08 |
-| 15. Bare Repo Infrastructure | Bare Repo + cd | 0/2 | Not started | - |
-| 16. cd Rename | Bare Repo + cd | 0/TBD | Not started | - |
+| 15. Bare Repo Infrastructure | Bare Repo + cd | 2/2 | Complete | 2026-02-09 |
+| 16. cd Rename | Bare Repo + cd | 0/1 | Not started | - |
 | 17. mk-bare-repo Command | Bare Repo + cd | 0/TBD | Not started | - |
 | 18. Adopt + Smart Init | Bare Repo + cd | 0/TBD | Not started | - |
 | 19. Polish | Bare Repo + cd | 0/TBD | Not started | - |

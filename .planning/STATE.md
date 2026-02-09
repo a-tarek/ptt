@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** A single `ptt` command that works in any shell on any platform with full autocompletion
-**Current focus:** v2.0 Bare Repo + cd Rename -- Phase 15 (Bare Repo Infrastructure)
+**Current focus:** v2.0 Bare Repo + cd Rename -- Phase 15 complete, ready for Phase 16
 
 ## Current Position
 
-Phase: 15 of 19 (Bare Repo Infrastructure)
-Plan: 2 of TBD in current phase (15-01, 15-02 complete)
-Status: In progress
-Last activity: 2026-02-09 -- Completed 15-02-PLAN.md (Command integration for bare repo config)
+Phase: 15 of 19 (Bare Repo Infrastructure) -- COMPLETE
+Plan: 2 of 2 in current phase (all complete)
+Status: Phase complete
+Last activity: 2026-02-09 -- Phase 15 complete (Bare Repo Infrastructure)
 
 Progress: [██████████████░░░░░░] 74% (34/~46 plans -- 34 complete)
 
@@ -55,9 +55,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed 15-02-PLAN.md (Command integration for bare repo config)
+Stopped at: Phase 15 complete -- ready for Phase 16 (cd Rename)
 Resume file: None
 
 ---
 *State initialized: 2026-02-07*
-*Updated: 2026-02-09 -- Completed 15-02 (init, mk, eject commands use ConfigRoot)*
+*Updated: 2026-02-09 -- Phase 15 complete (Bare Repo Infrastructure)*

@@ -1,6 +1,6 @@
 ptt() {
   case "$1" in
-    go|goto|home|mk|new|eject)
+    cd|mk|new|eject)
       local result
       result=$("__PTT_BIN__" --output-path "$@")
       local exit_code=$?
