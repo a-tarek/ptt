@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-09)
 ## Current Position
 
 Phase: 15 of 19 (Bare Repo Infrastructure)
-Plan: 1 of TBD in current phase (15-01 complete)
+Plan: 2 of TBD in current phase (15-01, 15-02 complete)
 Status: In progress
-Last activity: 2026-02-09 -- Completed 15-01-PLAN.md (Bare repo detection functions)
+Last activity: 2026-02-09 -- Completed 15-02-PLAN.md (Command integration for bare repo config)
 
-Progress: [██████████████░░░░░░] 72% (33/~46 plans -- 33 complete)
+Progress: [██████████████░░░░░░] 74% (34/~46 plans -- 34 complete)
 
 ## Performance Metrics
 
@@ -22,8 +22,8 @@ Progress: [██████████████░░░░░░] 72% (33
 - v1.0 Documentation: 6 plans, ~2 min/plan
 - v2.0 Go Rewrite: 20 plans, ~3.2 min/plan
 - v2.0 Rebrand: 6 plans, ~3.5 min/plan
-- v2.0 Bare Repo Infrastructure: 1 plan, 7 min/plan
-- Total: 33 plans executed in ~1.6 hours
+- v2.0 Bare Repo Infrastructure: 2 plans, ~4.5 min/plan
+- Total: 34 plans executed in ~1.7 hours
 
 ## Accumulated Context
 
@@ -40,6 +40,7 @@ New decisions for this milestone:
 - **git rev-parse --git-common-dir for detection** (15-01): Most reliable way to detect ptt bare repos
 - **Backward compatibility in WorktreePath()** (15-01): Support both ptt and standard bare repos
 - **Integration tests with real git** (15-01): Use actual git commands, not mocks, for reliability
+- **ConfigRoot() for config, GetHomePath() for file operations** (15-02): Separation ensures .pttconfig/ is shared across worktrees while files are copied from current location
 
 ### Pending Todos
 
@@ -54,9 +55,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed 15-01-PLAN.md (Bare repo infrastructure functions)
+Stopped at: Completed 15-02-PLAN.md (Command integration for bare repo config)
 Resume file: None
 
 ---
 *State initialized: 2026-02-07*
-*Updated: 2026-02-09 -- Completed 15-01 (BareRepoRoot, ConfigRoot, WorktreePath refactor)*
+*Updated: 2026-02-09 -- Completed 15-02 (init, mk, eject commands use ConfigRoot)*
