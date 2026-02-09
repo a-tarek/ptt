@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-09)
 
 ## Current Position
 
-Phase: 17 of 19 (mk-bare-repo Command)
-Plan: 2 of 2 in current phase (all complete)
-Status: Phase complete
-Last activity: 2026-02-09 -- Completed 17-02-PLAN.md
+Phase: 18 of 19 (Adopt Smart Init)
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-02-09 -- Completed 18-01-PLAN.md
 
-Progress: [████████████████░░░░] 80% (37/~46 plans -- 37 complete)
+Progress: [████████████████░░░░] 83% (38/~46 plans -- 38 complete)
 
 ## Performance Metrics
 
@@ -25,7 +25,8 @@ Progress: [████████████████░░░░] 80% (37
 - v2.0 Bare Repo Infrastructure: 2 plans, ~4.5 min/plan
 - v2.0 cd Rename: 1 plan, ~6 min/plan
 - v2.0 mk-bare-repo Command: 2 plans, ~2 min/plan
-- Total: 37 plans executed in ~1.87 hours
+- v2.0 Adopt Smart Init: 1 plan, ~2 min/plan (in progress)
+- Total: 38 plans executed in ~1.90 hours
 
 ## Accumulated Context
 
@@ -49,6 +50,10 @@ New decisions for this milestone:
 - **Initial worktree creation** (17-01): Always create worktree for default branch (main or master) for immediate usability
 - **mk-bare-repo documentation positioning** (17-02): Placed between mk and cd commands to group create commands together
 - **Error messages documented** (17-02): Self-diagnosis table helps users troubleshoot without support
+- **Package name 'initcmd'** (18-01): Avoid Go keyword 'init' for package name
+- **RepoType detection order** (18-01): Check IsInsideGitRepo → BareRepoRoot → IsBareRepository → default to normal
+- **IsBareFromWorktree flag** (18-01): Distinguishes calling init from container root vs from within a worktree
+- **ProgressCallback export** (18-01): Exported type needed by Plan 18-02 for restructure/adopt/repair operations
 
 ### Pending Todos
 
@@ -63,9 +68,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed 17-02-PLAN.md -- Phase 17 complete (mk-bare-repo Command)
+Stopped at: Completed 18-01-PLAN.md -- Phase 18 in progress (Adopt Smart Init)
 Resume file: None
 
 ---
 *State initialized: 2026-02-07*
-*Updated: 2026-02-09 -- Phase 17 complete (mk-bare-repo Command, including documentation)*
+*Updated: 2026-02-09 -- Phase 18 in progress (Smart Init foundation with repo detection and validation)*
