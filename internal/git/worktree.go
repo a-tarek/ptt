@@ -75,8 +75,23 @@ func IsDirty(path string) (bool, error) {
 		return false, fmt.Errorf("failed to execute git: %w", err)
 	}
 
-	// Porcelain output: empty if clean, non-empty if dirty
-	return strings.TrimSpace(string(output)) != "", nil
+	// Check for actual changes (not just untracked files)
+	// Porcelain format: XY filename
+	// Untracked files start with "??"
+	// Modified/staged files have other status codes (M, A, D, R, C, etc.)
+	lines := strings.Split(string(output), "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		// If line doesn't start with "??" it's a real change
+		if !strings.HasPrefix(line, "?? ") {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 // CurrentWorktreeRoot returns the root path of the current worktree

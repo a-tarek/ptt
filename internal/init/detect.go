@@ -130,22 +130,42 @@ func DetectRepoType() (RepoType, *RepoInfo, error) {
 	currentBranch, err := git.CurrentBranch()
 	if err == nil {
 		info.CurrentBranch = currentBranch
-		info.DefaultBranch = currentBranch // For normal repos, current is the "default"
 	}
 
-	// Get symbolic ref HEAD
-	cmd := exec.Command("git", "symbolic-ref", "HEAD")
-	output, err := cmd.Output()
-	if err == nil {
-		headRef := strings.TrimSpace(string(output))
-		if strings.HasPrefix(headRef, "refs/heads/") {
-			branch := strings.TrimPrefix(headRef, "refs/heads/")
-			info.DefaultBranch = branch
+	// Get remote info first
+	populateRemoteInfo(info.RepoRoot, info)
+
+	// Determine default branch
+	// 1. Try remote's HEAD (if has remote)
+	if info.HasRemote {
+		cmd := exec.Command("git", "-C", repoRoot, "symbolic-ref", "refs/remotes/origin/HEAD")
+		output, err := cmd.Output()
+		if err == nil {
+			headRef := strings.TrimSpace(string(output))
+			if strings.HasPrefix(headRef, "refs/remotes/origin/") {
+				branch := strings.TrimPrefix(headRef, "refs/remotes/origin/")
+				info.DefaultBranch = branch
+			}
 		}
 	}
 
-	// Get remote info
-	populateRemoteInfo(info.RepoRoot, info)
+	// 2. Fallback to checking for main/master branches
+	if info.DefaultBranch == "" {
+		mainCmd := exec.Command("git", "-C", repoRoot, "show-ref", "--verify", "--quiet", "refs/heads/main")
+		if mainCmd.Run() == nil {
+			info.DefaultBranch = "main"
+		} else {
+			masterCmd := exec.Command("git", "-C", repoRoot, "show-ref", "--verify", "--quiet", "refs/heads/master")
+			if masterCmd.Run() == nil {
+				info.DefaultBranch = "master"
+			}
+		}
+	}
+
+	// 3. Final fallback to current branch
+	if info.DefaultBranch == "" && info.CurrentBranch != "" {
+		info.DefaultBranch = info.CurrentBranch
+	}
 
 	return RepoTypeNormal, info, nil
 }
