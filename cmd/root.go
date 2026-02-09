@@ -17,9 +17,8 @@ A fast, intuitive git worktree manager.
 
 Commands:
   mk [flags] <name>                            Create a new worktree
-  mk-bare-repo                                 Convert clone to bare repo
   cd [worktree]                                Navigate to a worktree (or home)
-  init                                         Create config template
+  init                                         Initialize repository for ptt
   eject [flags] [name]                         Eject current branch
   ls                                           List all worktrees
   merge <worktree>                             Merge worktree's branch

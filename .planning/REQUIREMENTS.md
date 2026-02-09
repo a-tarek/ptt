@@ -93,14 +93,14 @@
 
 ### Bare Repo -- mk-bare-repo Command
 
-- [ ] **MKBR-01**: `ptt mk-bare-repo` creates `<repo>-bare/` sibling directory with bare repo layout
-- [ ] **MKBR-02**: Bare layout uses `.bare/` hidden directory for git database + `.git` pointer file
-- [ ] **MKBR-03**: Sets `remote.origin.fetch` refspec so `git fetch` works correctly
-- [ ] **MKBR-04**: Enables `core.logallrefupdates` for reflog support
-- [ ] **MKBR-05**: Creates initial worktree for default branch (main/master)
-- [ ] **MKBR-06**: Copies `.pttconfig/` from source repo to container root (if exists)
-- [ ] **MKBR-07**: Errors if already in a ptt bare repo layout or no remote origin
-- [ ] **MKBR-08**: Branch names with slashes converted to dashes for directory names (`feature/auth` -> `feature-auth`)
+- [x] **MKBR-01**: `ptt mk-bare-repo` creates `<repo>-bare/` sibling directory with bare repo layout
+- [x] **MKBR-02**: Bare layout uses `.bare/` hidden directory for git database + `.git` pointer file
+- [x] **MKBR-03**: Sets `remote.origin.fetch` refspec so `git fetch` works correctly
+- [x] **MKBR-04**: Enables `core.logallrefupdates` for reflog support
+- [x] **MKBR-05**: Creates initial worktree for default branch (main/master)
+- [x] **MKBR-06**: Copies `.pttconfig/` from source repo to container root (if exists)
+- [x] **MKBR-07**: Errors if already in a ptt bare repo layout or no remote origin
+- [x] **MKBR-08**: Branch names with slashes converted to dashes for directory names (`feature/auth` -> `feature-auth`)
 
 ### Bare Repo -- Adopt Raw Bare Repo
 
@@ -206,14 +206,14 @@
 | BARE-04 | Phase 15 | Complete |
 | BARE-05 | Phase 15 | Complete |
 | BARE-06 | Phase 15 | Complete |
-| MKBR-01 | Phase 17 | Pending |
-| MKBR-02 | Phase 17 | Pending |
-| MKBR-03 | Phase 17 | Pending |
-| MKBR-04 | Phase 17 | Pending |
-| MKBR-05 | Phase 17 | Pending |
-| MKBR-06 | Phase 17 | Pending |
-| MKBR-07 | Phase 17 | Pending |
-| MKBR-08 | Phase 17 | Pending |
+| MKBR-01 | Phase 17 | Complete |
+| MKBR-02 | Phase 17 | Complete |
+| MKBR-03 | Phase 17 | Complete |
+| MKBR-04 | Phase 17 | Complete |
+| MKBR-05 | Phase 17 | Complete |
+| MKBR-06 | Phase 17 | Complete |
+| MKBR-07 | Phase 17 | Complete |
+| MKBR-08 | Phase 17 | Complete |
 | ADOPT-01 | Phase 18 | Pending |
 | ADOPT-02 | Phase 18 | Pending |
 | ADOPT-03 | Phase 18 | Pending |
