@@ -67,7 +67,7 @@ ptt mk feature-auth
 # (make changes, commit, etc.)
 
 # 4. Jump back to main worktree
-ptt go
+ptt cd
 # Returns to the main worktree
 
 # 5. Clean up when done
@@ -78,7 +78,7 @@ ptt rm feature-auth
 **What's happening:**
 - `ptt init` creates `.pttconfig/default` where you define which files to copy or symlink
 - `ptt mk` creates a new worktree alongside your main repo (not nested inside it)
-- `ptt go` and `ptt go <name>` let you navigate between worktrees
+- `ptt cd` and `ptt cd <name>` let you navigate between worktrees
 - `ptt rm` cleans up worktrees you no longer need
 
 ## Commands
@@ -173,11 +173,9 @@ ptt mk staging --config staging
 - Flag overrides merge with file-based config
 - Automatically switches to the new worktree after creation
 
-### ptt go
+### ptt cd
 
-**Aliases:** `goto`, `home`
-
-**Usage:** `ptt go [worktree]`
+**Usage:** `ptt cd [worktree]`
 
 Navigate to a worktree by name, or return to the main worktree when called without arguments.
 
@@ -190,14 +188,14 @@ Navigate to a worktree by name, or return to the main worktree when called witho
 
 ```bash
 # Navigate to a specific worktree
-ptt go feature-auth
+ptt cd feature-auth
 # Matches "myapp-feature-auth"
 
-ptt go staging
+ptt cd staging
 # Matches "myapp-staging"
 
 # Navigate to home worktree (no arguments)
-ptt go
+ptt cd
 # Same as the old "home" command
 ```
 
@@ -525,7 +523,7 @@ The `ptt` command consists of two parts:
 1. **Go binary** (`ptt`) — Handles all logic, git operations, and completion generation
 2. **Shell wrapper** — Thin function that handles directory changes
 
-When you run `ptt go feature-auth`, the wrapper:
+When you run `ptt cd feature-auth`, the wrapper:
 - Calls the Go binary with `--output-path` flag
 - Binary outputs the target path to stdout
 - Wrapper uses that path to `cd` into the directory
@@ -539,7 +537,7 @@ This pattern is used by tools like zoxide, nvm, and direnv because a subprocess 
 Tab completion is automatically enabled for commands that take worktree names as arguments:
 
 ```bash
-ptt go <TAB>         # Shows worktree names
+ptt cd <TAB>         # Shows worktree names
 ptt rm <TAB>         # Shows worktree names
 ptt merge <TAB>      # Shows worktree names
 ptt rebase <TAB>     # Shows worktree names
@@ -602,10 +600,10 @@ ptt ls
 
 # Use the suffix from the directory name
 # If you see "myapp-feature-auth", use:
-ptt go feature-auth
+ptt cd feature-auth
 ```
 
-The matching is based on the directory name suffix. If your worktree is named `myapp-feature-auth`, you can navigate to it with `ptt go feature-auth` or just `ptt go auth`.
+The matching is based on the directory name suffix. If your worktree is named `myapp-feature-auth`, you can navigate to it with `ptt cd feature-auth` or just `ptt cd auth`.
 
 ### Permission error during install
 
