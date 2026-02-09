@@ -30,13 +30,10 @@ var cdCmd = &cobra.Command{
 				return err
 			}
 
-			// Check if already home
-			currentPath, err := git.CurrentWorktreeRoot()
-			if err != nil {
-				return err
-			}
+			// Check if already home (best-effort; may fail from bare repo root)
+			currentPath, _ := git.CurrentWorktreeRoot()
 
-			if homePath == currentPath {
+			if currentPath != "" && homePath == currentPath {
 				fmt.Fprintf(os.Stderr, "Already home\n")
 				return nil
 			}
@@ -94,16 +91,18 @@ var cdCmd = &cobra.Command{
 			return err
 		}
 
-		// Check if already in target worktree
-		currentPath, err := git.CurrentWorktreeRoot()
-		if err != nil {
-			return err
-		}
+		// Check if already in target worktree (best-effort; may fail from bare repo root)
+		currentPath, _ := git.CurrentWorktreeRoot()
 
 		basename := filepath.Base(wt.Path)
-		if wt.Path == currentPath {
+		if currentPath != "" && wt.Path == currentPath {
 			fmt.Fprintf(os.Stderr, "Already in %s\n", basename)
 			return nil
+		}
+
+		// Check worktree path exists (may be prunable/stale)
+		if _, statErr := os.Stat(wt.Path); os.IsNotExist(statErr) {
+			return fmt.Errorf("worktree '%s' path no longer exists (%s). Run 'git worktree prune' to clean up", args[0], wt.Path)
 		}
 
 		// Check dirty status
