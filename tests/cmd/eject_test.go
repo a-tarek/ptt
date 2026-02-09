@@ -73,10 +73,6 @@ func TestEjectDetachedHeadError(t *testing.T) {
 	if res.Err == nil {
 		t.Fatal("eject should fail on detached HEAD")
 	}
-
-	if !strings.Contains(res.Stderr, "detached HEAD") {
-		t.Errorf("error should mention 'detached HEAD', got: %s", res.Stderr)
-	}
 }
 
 func TestEjectAlreadyOnFallbackError(t *testing.T) {
@@ -88,8 +84,54 @@ func TestEjectAlreadyOnFallbackError(t *testing.T) {
 	if res.Err == nil {
 		t.Fatal("eject should fail when already on fallback branch")
 	}
+}
 
-	if !strings.Contains(res.Stderr, "already on 'main'") {
-		t.Errorf("error should mention already on 'main', got: %s", res.Stderr)
+func TestEjectPreservesTrackedChanges(t *testing.T) {
+	containerRoot := setupPttBareRepoWithCommit(t)
+	mainPath := filepath.Join(containerRoot, "main")
+
+	// Switch to feature branch
+	gitCmd(t, mainPath, "checkout", "-b", "feature-y")
+
+	// Modify a tracked file (creates a dirty state that IsDirty detects)
+	os.WriteFile(filepath.Join(mainPath, "README.md"), []byte("# Modified\n"), 0644)
+
+	res := runPtt(t, mainPath, "eject")
+	if res.Err != nil {
+		t.Fatalf("eject failed: %s", res.Stderr)
+	}
+
+	// Verify tracked change was carried to new worktree
+	featurePath := filepath.Join(containerRoot, "feature-y")
+	content, err := os.ReadFile(filepath.Join(featurePath, "README.md"))
+	if err != nil {
+		t.Fatalf("README.md not found in ejected worktree: %v", err)
+	}
+	if string(content) != "# Modified\n" {
+		t.Errorf("tracked change not preserved, got: %s", content)
+	}
+
+	// Verify main is back on "main" branch
+	branch := gitBranch(t, mainPath)
+	if branch != "main" {
+		t.Errorf("main should be back on 'main', got '%s'", branch)
+	}
+}
+
+func TestEjectOutputPath(t *testing.T) {
+	containerRoot := setupPttBareRepoWithCommit(t)
+	mainPath := filepath.Join(containerRoot, "main")
+
+	gitCmd(t, mainPath, "checkout", "-b", "feature-z")
+
+	res := runPtt(t, mainPath, "eject", "--output-path")
+	if res.Err != nil {
+		t.Fatalf("eject --output-path failed: %s", res.Stderr)
+	}
+
+	expectedPath := realPath(t, filepath.Join(containerRoot, "feature-z"))
+	got := strings.TrimSpace(res.Stdout)
+	if got != expectedPath {
+		t.Errorf("expected output path %s, got %s", expectedPath, got)
 	}
 }

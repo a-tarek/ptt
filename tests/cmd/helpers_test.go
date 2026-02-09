@@ -133,6 +133,9 @@ func setupPttBareRepoWithCommit(t *testing.T) string {
 	gitCmd(t, mainPath, "add", "README.md")
 	gitCmd(t, mainPath, "commit", "-m", "Initial commit")
 
+	// Fix HEAD to point to main (git init --bare defaults to master which doesn't exist)
+	gitCmd(t, filepath.Join(containerRoot, ".bare"), "symbolic-ref", "HEAD", "refs/heads/main")
+
 	return containerRoot
 }
 
@@ -235,4 +238,22 @@ func worktreeListContains(t *testing.T, dir, name string) bool {
 	t.Helper()
 	output := gitCmd(t, dir, "worktree", "list", "--porcelain")
 	return strings.Contains(output, name)
+}
+
+// branchExists checks if a git branch exists in the repository.
+func branchExists(t *testing.T, dir, branch string) bool {
+	t.Helper()
+	cmd := exec.Command("git", "show-ref", "--verify", "--quiet", "refs/heads/"+branch)
+	cmd.Dir = dir
+	return cmd.Run() == nil
+}
+
+// realPath resolves symlinks in a path (macOS /var -> /private/var).
+func realPath(t *testing.T, path string) string {
+	t.Helper()
+	resolved, err := filepath.EvalSymlinks(path)
+	if err != nil {
+		t.Fatalf("failed to resolve path %s: %v", path, err)
+	}
+	return resolved
 }
