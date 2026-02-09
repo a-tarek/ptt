@@ -44,6 +44,11 @@ var mkCmd = &cobra.Command{
 			return err
 		}
 
+		configRoot, err := git.ConfigRoot()
+		if err != nil {
+			return err
+		}
+
 		// 3. Compute target path
 		name := args[0]
 		targetPath, err := git.WorktreePath(homePath, name)
@@ -63,9 +68,9 @@ var mkCmd = &cobra.Command{
 			if !skipConfig && !hasInlineFlags {
 				var configPath string
 				if configFlag != "" {
-					configPath, err = config.ResolveConfigPath(homePath, configFlag)
+					configPath, err = config.ResolveConfigPath(configRoot, configFlag)
 				} else {
-					configPath, err = config.ResolveConfigPath(homePath, "")
+					configPath, err = config.ResolveConfigPath(configRoot, "")
 				}
 
 				// If config file found, parse and validate
@@ -86,7 +91,7 @@ var mkCmd = &cobra.Command{
 				// Silently skip if config file not found
 			} else if !skipConfig && hasInlineFlags && configFlag != "" {
 				// --config with inline flags: load named config, then append inline flags
-				configPath, cfgErr := config.ResolveConfigPath(homePath, configFlag)
+				configPath, cfgErr := config.ResolveConfigPath(configRoot, configFlag)
 				if cfgErr == nil {
 
 					actions, parseErr := config.ParseFile(configPath)
