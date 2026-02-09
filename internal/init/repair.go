@@ -64,6 +64,18 @@ func RepairPttRepo(containerRoot string, repairItems []string, progress Progress
 			// Critical issue - can't repair a missing .bare directory
 			return fmt.Errorf("cannot repair: .bare/ directory is missing (repo structure is corrupted)")
 
+		} else if strings.Contains(item, "pttconfig") || item == "create-pttconfig" {
+			// Create .pttconfig/default
+			progress("Creating .pttconfig")
+			pttconfigDir := filepath.Join(containerRoot, ".pttconfig")
+			if err := os.MkdirAll(pttconfigDir, 0755); err != nil {
+				return fmt.Errorf("failed to create .pttconfig directory: %w", err)
+			}
+			defaultConfig := filepath.Join(pttconfigDir, "default")
+			if err := os.WriteFile(defaultConfig, []byte{}, 0644); err != nil {
+				return fmt.Errorf("failed to create .pttconfig/default: %w", err)
+			}
+
 		} else {
 			// Unknown repair item - log but don't fail
 			progress(fmt.Sprintf("Warning: unknown repair item: %s", item))
