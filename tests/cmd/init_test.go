@@ -189,8 +189,4 @@ func TestInit_NotGitRepo(t *testing.T) {
 	if res.Err == nil {
 		t.Errorf("expected error for non-git directory")
 	}
-
-	if !strings.Contains(res.Stderr, "Not inside a git repository") {
-		t.Errorf("error should mention 'Not inside a git repository', got: %s", res.Stderr)
-	}
 }

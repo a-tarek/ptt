@@ -1,6 +1,7 @@
 package cmd_test
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -40,5 +41,56 @@ func TestLsNormalRepo(t *testing.T) {
 	res := runPtt(t, repoDir, "ls")
 	if res.Err != nil {
 		t.Fatalf("ls in normal repo failed: %s", res.Stderr)
+	}
+}
+
+func TestLsShowsMultipleWorktrees(t *testing.T) {
+	containerRoot := setupPttBareRepo(t)
+	addWorktree(t, containerRoot, "staging")
+	addWorktree(t, containerRoot, "feature")
+	mainPath := filepath.Join(containerRoot, "main")
+
+	res := runPtt(t, mainPath, "ls")
+	if res.Err != nil {
+		t.Fatalf("ls failed: %s", res.Stderr)
+	}
+
+	output := res.Stdout
+	if !strings.Contains(output, "main") {
+		t.Errorf("output should contain 'main' worktree")
+	}
+	if !strings.Contains(output, "staging") {
+		t.Errorf("output should contain 'staging' worktree")
+	}
+	if !strings.Contains(output, "feature") {
+		t.Errorf("output should contain 'feature' worktree")
+	}
+}
+
+func TestLsFromBareRoot(t *testing.T) {
+	containerRoot := setupPttBareRepo(t)
+
+	res := runPtt(t, containerRoot, "ls")
+	if res.Err != nil {
+		t.Fatalf("ls from bare root failed: %s", res.Stderr)
+	}
+
+	if len(strings.TrimSpace(res.Stdout)) == 0 {
+		t.Errorf("output should not be empty from bare root")
+	}
+}
+
+func TestLsShowsAllPaths(t *testing.T) {
+	containerRoot := setupPttBareRepo(t)
+	mainPath := filepath.Join(containerRoot, "main")
+
+	res := runPtt(t, mainPath, "ls", "--all")
+	if res.Err != nil {
+		t.Fatalf("ls --all failed: %s", res.Stderr)
+	}
+
+	// With --all, output should contain the full path
+	if !strings.Contains(res.Stdout, containerRoot) {
+		t.Errorf("--all output should contain full paths, got:\n%s", res.Stdout)
 	}
 }
