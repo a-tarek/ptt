@@ -4,7 +4,8 @@
 
 - ✅ **v1.0 Documentation** - Phases 1-2 (shipped 2026-02-07)
 - ✅ **v2.0 Go Rewrite** - Phases 3-10 (shipped 2026-02-08)
-- 📋 **v2.0 Pre-Release Rebrand** - Phases 11-14 (planned)
+- ✅ **v2.0 Pre-Release Rebrand** - Phases 11-14 (shipped 2026-02-08)
+- 🚧 **v2.0 Bare Repo + cd Rename** - Phases 15-19 (in progress)
 
 ## Phases
 
@@ -161,7 +162,10 @@ Plans:
 
 </details>
 
-### v2.0 Pre-Release Rebrand (Phases 11-14)
+<details>
+<summary>✅ v2.0 Pre-Release Rebrand (Phases 11-14) - SHIPPED 2026-02-08</summary>
+
+### v2.0 Pre-Release Rebrand (Complete)
 
 **Milestone Goal:** Rebrand wt to ptt, restructure commands for better UX, and update distribution before first public release.
 
@@ -222,9 +226,81 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 14-01-PLAN.md — README rewrite for ptt branding, new command names, and @a-tarek scope
+- [x] 14-01-PLAN.md — README rewrite for ptt branding, new command names, and @a-tarek scope
+
+</details>
+
+### v2.0 Bare Repo + cd Rename (Phases 15-19)
+
+**Milestone Goal:** Add bare repo conversion and nested worktree support, rename go to cd, ship v2.0.
+
+- [ ] **Phase 15: Bare Repo Infrastructure** - Detection, path resolution, and config resolution for bare repo contexts
+- [ ] **Phase 16: cd Rename** - Rename `go` to `cd` as primary navigation command
+- [ ] **Phase 17: mk-bare-repo Command** - Convert normal clone to bare repo with nested worktrees
+- [ ] **Phase 18: Adopt + Smart Init** - Restructure raw bare repos and enhance `ptt init`
+- [ ] **Phase 19: Polish** - Clean up bare repo artifacts from user-facing output
+
+#### Phase 15: Bare Repo Infrastructure
+**Goal**: ptt correctly detects bare repo context and resolves worktree paths and config from the right locations
+**Depends on**: Phase 14
+**Requirements**: BARE-01, BARE-02, BARE-03, BARE-04, BARE-05, BARE-06
+**Success Criteria** (what must be TRUE):
+  1. Running `ptt mk <name>` inside a ptt bare repo creates the worktree nested inside the container directory (not as a sibling)
+  2. Running `ptt init` inside a bare repo worktree creates `.pttconfig/` at the bare repo container root (not inside the worktree)
+  3. Running `ptt mk` inside a bare repo resolves config from the container root `.pttconfig/`
+  4. Bare repo detection works from any CWD within the bare repo structure (container root, inside a worktree, nested subdirectory)
+**Plans**: 2 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — BareRepoRoot detection, WorktreePath refactor, and ConfigRoot function (TDD)
+- [ ] 15-02-PLAN.md — Update init, mk, and eject commands to use ConfigRoot for config resolution
+
+#### Phase 16: cd Rename
+**Goal**: Users navigate worktrees with `ptt cd` as the primary command, with `go` removed
+**Depends on**: Phase 14 (independent of Phase 15)
+**Requirements**: CD-01, CD-02, CD-03, CD-04
+**Success Criteria** (what must be TRUE):
+  1. User can run `ptt cd <worktree>` and the shell changes to that worktree directory
+  2. User can run `ptt cd` (no args) and the shell changes to the main worktree
+  3. `ptt go` is no longer a recognized command (clean removal, not alias)
+  4. Shell wrappers (bash/zsh/fish) handle the `cd` subcommand for directory changes
+**Plans**: TBD
+
+#### Phase 17: mk-bare-repo Command
+**Goal**: Users can convert any normal clone into a bare repo layout with a single command
+**Depends on**: Phase 15
+**Requirements**: MKBR-01, MKBR-02, MKBR-03, MKBR-04, MKBR-05, MKBR-06, MKBR-07, MKBR-08
+**Success Criteria** (what must be TRUE):
+  1. User can run `ptt mk-bare-repo` in a normal clone and a `<repo>-bare/` sibling directory is created with the correct bare layout (`.bare/` + `.git` pointer)
+  2. User can `cd` into the new bare repo and run `git fetch` successfully (refspec configured correctly)
+  3. The new bare repo contains an initial worktree checked out to the default branch (main or master)
+  4. If the source repo has `.pttconfig/`, it is copied to the new bare repo container root
+  5. Running `ptt mk-bare-repo` in an already-converted bare repo or a repo without remotes produces a clear error
+**Plans**: TBD
+
+#### Phase 18: Adopt + Smart Init
+**Goal**: Users can bring existing raw bare repos into ptt's managed layout, and `ptt init` gives contextual guidance
+**Depends on**: Phase 15
+**Requirements**: ADOPT-01, ADOPT-02, ADOPT-03, INIT-01
+**Success Criteria** (what must be TRUE):
+  1. User can run `ptt init` inside a raw `git clone --bare` repo and it restructures into ptt layout (`.bare/` wrapper, `.git` pointer, default branch worktree)
+  2. After adoption, `git fetch` works correctly in the restructured repo (refspec and reflog configured)
+  3. User can run `ptt init` in a normal (non-bare) repo and it creates `.pttconfig/default` with a suggestion to try `ptt mk-bare-repo`
+**Plans**: TBD
+
+#### Phase 19: Polish
+**Goal**: Bare repo metadata is hidden from user-facing output
+**Depends on**: Phase 17
+**Requirements**: POL-01
+**Success Criteria** (what must be TRUE):
+  1. Running `ptt ls` inside a bare repo shows only real worktrees, not the `.bare` metadata entry
+  2. The bare metadata entry is filtered regardless of how git reports it (path or label variations)
+**Plans**: TBD
 
 ## Progress
+
+**Execution Order:**
+Phases 15 and 16 can execute in parallel (independent). Phase 17 and 18 depend on Phase 15. Phase 19 depends on Phase 17.
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -241,8 +317,14 @@ Plans:
 | 11. Go Module + Binary Rename | Rebrand | 1/1 | Complete | 2026-02-08 |
 | 12. Command Restructure + Config Directory | Rebrand | 2/2 | Complete | 2026-02-08 |
 | 13. Shell Wrappers + npm Distribution | Rebrand | 2/2 | Complete | 2026-02-08 |
-| 14. Documentation | Rebrand | 0/1 | Not started | - |
+| 14. Documentation | Rebrand | 1/1 | Complete | 2026-02-08 |
+| 15. Bare Repo Infrastructure | Bare Repo + cd | 0/2 | Not started | - |
+| 16. cd Rename | Bare Repo + cd | 0/TBD | Not started | - |
+| 17. mk-bare-repo Command | Bare Repo + cd | 0/TBD | Not started | - |
+| 18. Adopt + Smart Init | Bare Repo + cd | 0/TBD | Not started | - |
+| 19. Polish | Bare Repo + cd | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-07*
-*v1.0 complete (phases 1-2), v2.0 complete (phases 3-10), rebrand phases 11-14 planned*
+*v1.0 complete (phases 1-2), v2.0 complete (phases 3-10), rebrand complete (phases 11-14)*
+*Bare repo + cd rename milestone added: 2026-02-09*

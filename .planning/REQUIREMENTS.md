@@ -80,7 +80,7 @@
 - [x] **DIST-01**: npm package.json files updated for @a-tarek scope
 - [x] **DIST-02**: Build/publish scripts reference ptt binary and @a-tarek packages
 - [x] **DIST-03**: CI/CD workflows updated for ptt binary paths
-- [ ] **DOCS-01**: README.md rewritten for ptt branding and new command names
+- [x] **DOCS-01**: README.md rewritten for ptt branding and new command names
 
 ## Future Requirements
 
@@ -154,7 +154,7 @@
 | DIST-01 | Phase 13 | Complete |
 | DIST-02 | Phase 13 | Complete |
 | DIST-03 | Phase 13 | Complete |
-| DOCS-01 | Phase 14 | Pending |
+| DOCS-01 | Phase 14 | Complete |
 
 **Coverage:**
 - v2.0 original requirements: 28 total (all complete)

@@ -2,61 +2,37 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-08)
+See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** A single `ptt` command that works in any shell on any platform with full autocompletion
-**Current focus:** v2.0 Pre-Release Rebrand — Phase 13 (Shell Wrappers + npm Distribution)
+**Current focus:** v2.0 Pre-Release — Bare Repo + Command Polish
 
 ## Current Position
 
-Phase: 13 of 14 (Shell Wrappers + npm Distribution)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-02-08 — Completed 13-02-PLAN.md
-
-Progress: [##############################.] 31/32 plans (97%) — 31 complete + 1 rebrand remaining
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-09 — Milestone v2.0 (bare repo + cd rename) started
 
 ## Performance Metrics
 
-**Velocity:**
-- Total plans completed: 30
-- Average duration: ~2.7 min per plan
-- Total execution time: ~1.4 hours
-
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 1. Internal Documentation | 3 | - | ~2 min |
-| 2. User-Facing Documentation | 3 | - | ~2 min |
-| 3. Core Go Binary Foundation | 2/2 | 7 min | 3.5 min |
-| 4. Configuration System | 2/2 | 8 min | 4 min |
-| 5. Directory-Changing Commands | 3/3 | 9 min | 3 min |
-| 6. Shell Integration | 2/2 | 3 min | 1.5 min |
-| 7. npm Distribution | 2/2 | 7 min | 3.5 min |
-| 8. Interactive Installer | 2/2 | 6 min | 3 min |
-| 9. Polish & Testing | 4/4 | 14 min | 3.5 min |
-| 10. UAT Gap Closure | 2/2 | 6.2 min | 3.1 min |
-| 11. Go Module + Binary Rename | 1/1 | 6.9 min | 6.9 min |
-| 12. Command Restructure + Config Directory | 2/2 | 5 min | 2.5 min |
-| 13. Shell Wrappers + npm Distribution | 2/2 | 5.2 min | 2.6 min |
-
-**Recent Trend:**
-- Phase 13 (Shell Wrappers + npm Distribution) COMPLETE
-- 1 rebrand plan remaining (phase 14)
+**Previous milestones:**
+- v1.0 Documentation: 6 plans, ~2 min/plan
+- v2.0 Go Rewrite: 20 plans, ~3.2 min/plan
+- v2.0 Rebrand: 6 plans, ~3.5 min/plan
+- Total: 32 plans executed in ~1.5 hours
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
+Previous decisions logged in PROJECT.md Key Decisions table.
 
-- **Rebrand wt to ptt**: "a potato worktree manager" — distinctive name, clean break before first release
-- **Merge goto+home into go**: `ptt go` = home, `ptt go <wt>` = navigate — simpler mental model
-- **Config directory (.pttconfig/)**: Named configs in directory vs flat files — cleaner, supports --config flag
-- **@a-tarek/ptt npm scope**: Personal scope, guarantees npm availability
-- **github.com/a-tarek/ptt module**: Matches npm scope, personal GitHub
+New decisions for this milestone:
+- **Rename go → cd**: `cd` is more intuitive; `go` kept as alias
+- **Bare repo support**: Nested worktrees inside bare repo avoids cluttering parent directory
+- **mk-bare-repo as copy**: Safer than in-place restructure — user verifies then deletes old
+- **.pttconfig at bare root**: Project-level config shared by all worktrees
 
 ### Pending Todos
 
@@ -70,10 +46,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-08
-Stopped at: Completed Phase 13 — Shell Wrappers + npm Distribution
+Last session: 2026-02-09
+Stopped at: Defining requirements for bare repo + cd rename milestone
 Resume file: None
 
 ---
 *State initialized: 2026-02-07*
-*Updated: 2026-02-08 — completed Phase 13 (Shell Wrappers + npm Distribution)*
+*Updated: 2026-02-09 — New milestone: bare repo support + go→cd rename*
