@@ -1,4 +1,6 @@
 # Binary (but not npm wrapper script)
+.DS_Store
+potato-*
 wt
 !npm/bin/wt
 .planning*
