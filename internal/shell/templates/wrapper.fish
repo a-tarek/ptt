@@ -1,6 +1,6 @@
 function ptt
   switch $argv[1]
-    case go goto home mk new eject
+    case cd mk new eject
       set -l result ("__PTT_BIN__" --output-path $argv)
       set -l exit_code $status
       if test $exit_code -eq 0 -a -n "$result"

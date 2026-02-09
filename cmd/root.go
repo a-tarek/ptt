@@ -17,7 +17,7 @@ A fast, intuitive git worktree manager.
 
 Commands:
   mk [flags] <name>                            Create a new worktree
-  go [worktree]                                Navigate to a worktree (or home)
+  cd [worktree]                                Navigate to a worktree (or home)
   init                                         Create config template
   eject [flags] [name]                         Eject current branch
   ls                                           List all worktrees
@@ -34,7 +34,7 @@ func Execute() error {
 		// Extract subcommand name from args
 		cmd := ""
 		if len(os.Args) > 1 {
-			// os.Args[1] is the subcommand (e.g., "goto", "delete")
+			// os.Args[1] is the subcommand (e.g., "cd", "delete")
 			// Ignore if it starts with "-" (flag) or is "help"
 			arg := os.Args[1]
 			if arg != "" && arg[0] != '-' && arg != "help" {
