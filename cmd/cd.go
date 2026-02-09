@@ -41,11 +41,8 @@ var cdCmd = &cobra.Command{
 			// Get basename for display
 			basename := filepath.Base(homePath)
 
-			// Check dirty status
-			dirty, err := git.IsDirty(homePath)
-			if err != nil {
-				return err
-			}
+			// Check dirty status (best-effort; may fail for broken worktrees)
+			dirty, _ := git.IsDirty(homePath)
 
 			dirtyStr := "clean"
 			if dirty {
@@ -105,11 +102,8 @@ var cdCmd = &cobra.Command{
 			return fmt.Errorf("worktree '%s' path no longer exists (%s). Run 'git worktree prune' to clean up", args[0], wt.Path)
 		}
 
-		// Check dirty status
-		dirty, err := git.IsDirty(wt.Path)
-		if err != nil {
-			return err
-		}
+		// Check dirty status (best-effort; may fail for broken worktrees)
+		dirty, _ := git.IsDirty(wt.Path)
 
 		dirtyStr := "clean"
 		if dirty {
