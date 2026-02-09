@@ -19,11 +19,11 @@ function wt() {
       echo "Usage: wt <command> [args]"
       echo ""
       echo "Commands:"
-      echo "  new <name> [branch]                          Create a new worktree"
+      echo "  new [flags] <name> [branch]                  Create a new worktree"
       echo "  goto <worktree>                              cd into a worktree"
       echo "  home                                         cd into the main worktree"
       echo "  init                                         Create .wtconfig template"
-      echo "  eject [name]                                 Eject current branch into its own worktree"
+      echo "  eject [flags] [name]                         Eject current branch into its own worktree"
       echo "  list                                         List all worktrees"
       echo "  merge <worktree>                             Merge worktree's branch into current"
       echo "  rebase <worktree>                            Rebase current onto worktree's branch"
@@ -34,11 +34,20 @@ function wt() {
 }
 
 function _wt_new() {
+  local -a overrides
+  while [[ "$1" == --* ]]; do
+    case "$1" in
+      --copy)   overrides+=("copy:$2"); shift 2 ;;
+      --symlink) overrides+=("symlink:$2"); shift 2 ;;
+      *) echo "Unknown flag: $1"; return 1 ;;
+    esac
+  done
+
   local name="$1"
   local branch="${2:-$name}"
 
   if [[ -z "$name" ]]; then
-    echo "Usage: wt new <name> [branch]"
+    echo "Usage: wt new [--copy <path>] [--symlink <path>] <name> [branch]"
     return 1
   fi
 
@@ -68,7 +77,7 @@ function _wt_new() {
     fi
   fi
 
-  _wt_setup "$src_root" "$target_abs"
+  _wt_setup "$src_root" "$target_abs" "${overrides[@]}"
 
   cd "$target_abs"
   echo ""
@@ -135,6 +144,15 @@ WTEOF
 }
 
 function _wt_eject() {
+  local -a overrides
+  while [[ "$1" == --* ]]; do
+    case "$1" in
+      --copy)   overrides+=("copy:$2"); shift 2 ;;
+      --symlink) overrides+=("symlink:$2"); shift 2 ;;
+      *) echo "Unknown flag: $1"; return 1 ;;
+    esac
+  done
+
   if ! git rev-parse --git-dir &>/dev/null; then
     echo "Error: not inside a git repository"
     return 1
@@ -248,7 +266,7 @@ function _wt_eject() {
   fi
 
   # 9. Apply .wtconfig setup
-  _wt_setup "$src_root" "$target_abs"
+  _wt_setup "$src_root" "$target_abs" "${overrides[@]}"
 
   # 10. cd into the new worktree
   cd "$target_abs"
@@ -348,40 +366,81 @@ function _wt_delete() {
 # --- Helpers ---
 
 # Apply .wtconfig actions (copy/symlink) from source to target worktree
+# Additional args are override strings in "action:path" format
 function _wt_setup() {
   local src="$1" target="$2"
+  shift 2
   local config="${src}/.wtconfig"
 
-  [[ -f "$config" ]] || return 0
+  # Build overrides associative array
+  local -A overrides
+  local ov
+  for ov in "$@"; do
+    local ov_action="${ov%%:*}"
+    local ov_path="${ov#*:}"
+    overrides[$ov_path]="$ov_action"
+  done
 
-  while IFS= read -r line || [[ -n "$line" ]]; do
-    [[ "$line" =~ ^[[:space:]]*# ]] && continue
-    [[ -z "${line// /}" ]] && continue
+  # Track which overrides were applied (to add one-offs after)
+  local -A applied
 
-    local action="${line%% *}"
-    local path="${line#* }"
-    # trim whitespace
-    path="${path## }"
-    path="${path%% }"
+  if [[ -f "$config" ]]; then
+    while IFS= read -r line || [[ -n "$line" ]]; do
+      [[ "$line" =~ ^[[:space:]]*# ]] && continue
+      [[ -z "${line// /}" ]] && continue
 
-    case "$action" in
+      local action="${line%% *}"
+      local entry="${line#* }"
+      # trim whitespace
+      entry="${entry## }"
+      entry="${entry%% }"
+
+      # Check for override
+      if (( ${+overrides[$entry]} )); then
+        action="${overrides[$entry]}"
+        applied[$entry]=1
+      fi
+
+      case "$action" in
+        copy)
+          if [[ -e "${src}/${entry}" ]]; then
+            cp -r "${src}/${entry}" "${target}/${entry}"
+            echo "Copied $entry"
+          fi
+          ;;
+        symlink)
+          if [[ -e "${src}/${entry}" ]]; then
+            ln -s "${src}/${entry}" "${target}/${entry}"
+            echo "Symlinked $entry"
+          fi
+          ;;
+        *)
+          echo "Warning: unknown action '$action' in .wtconfig"
+          ;;
+      esac
+    done < "$config"
+  fi
+
+  # Apply overrides not in config (one-offs)
+  local ov_path
+  for ov_path in ${(k)overrides}; do
+    (( ${+applied[$ov_path]} )) && continue
+    local ov_action="${overrides[$ov_path]}"
+    case "$ov_action" in
       copy)
-        if [[ -e "${src}/${path}" ]]; then
-          cp -r "${src}/${path}" "${target}/${path}"
-          echo "Copied $path"
+        if [[ -e "${src}/${ov_path}" ]]; then
+          cp -r "${src}/${ov_path}" "${target}/${ov_path}"
+          echo "Copied $ov_path"
         fi
         ;;
       symlink)
-        if [[ -e "${src}/${path}" ]]; then
-          ln -s "${src}/${path}" "${target}/${path}"
-          echo "Symlinked $path"
+        if [[ -e "${src}/${ov_path}" ]]; then
+          ln -s "${src}/${ov_path}" "${target}/${ov_path}"
+          echo "Symlinked $ov_path"
         fi
         ;;
-      *)
-        echo "Warning: unknown action '$action' in .wtconfig"
-        ;;
     esac
-  done < "$config"
+  done
 }
 
 # Resolve a worktree name to its path
@@ -469,8 +528,16 @@ function _wt() {
   case "${words[2]}" in
     new)
       _arguments \
+        '*--copy[Copy path instead of config default]:path:_files' \
+        '*--symlink[Symlink path instead of config default]:path:_files' \
         '1:name:' \
         '2:branch:'
+      ;;
+    eject)
+      _arguments \
+        '*--copy[Copy path instead of config default]:path:_files' \
+        '*--symlink[Symlink path instead of config default]:path:_files' \
+        '1:name:'
       ;;
     goto|merge|rebase|delete)
       local -a wt_names
