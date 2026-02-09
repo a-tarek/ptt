@@ -1,343 +1,289 @@
-# Feature Landscape
+# Feature Landscape: Bare Repo Conversion & Nested Worktree Workflows
 
-**Domain:** Git worktree manager CLI tool (zsh to Go rewrite with npm distribution)
-**Researched:** 2026-02-07
+**Domain:** Git worktree manager CLI tool -- bare repo support milestone
+**Researched:** 2026-02-09
+**Applies to:** ptt v3.0 (bare repo + nested worktree features)
+
+---
+
+## Ecosystem Survey: How Bare Repo Worktree Workflows Work in the Wild
+
+### The Canonical Bare Repo + Worktree Pattern
+
+The community has converged on a standard layout for bare repo worktree workflows. This pattern appears across virtually all tools and blog posts surveyed:
+
+```
+my-project/              # container directory
+  .bare/                 # bare git repo (all metadata)
+  .git                   # file (not directory) containing: gitdir: ./.bare
+  main/                  # worktree: default branch
+  feature-auth/          # worktree: feature branch
+  hotfix-security/       # worktree: hotfix branch
+```
+
+Key characteristics:
+1. **`.bare/` hides git internals** -- the bare clone lives in a hidden directory
+2. **`.git` is a file, not a directory** -- contains `gitdir: ./.bare` pointer
+3. **Worktrees are siblings** -- nested inside the container directory, not outside it
+4. **Each worktree is a full checkout** -- has its own `.git` file pointing back to `.bare/worktrees/<name>`
+
+This is fundamentally different from ptt's current "sibling mode" where worktrees are created as siblings to the repo (`repo-staging/` next to `repo/`). In bare repo mode, worktrees live **inside** the container directory.
+
+### Existing Tools Surveyed
+
+| Tool | Language | Bare Focus | Key Differentiator |
+|------|----------|------------|-------------------|
+| [git-wt (gabri.me)](https://gabri.me/blog/git-wt) | Shell | Yes | `clone`, `migrate`, `switch` with fzf, `destroy` (remote cleanup) |
+| [git-worktree-wrapper](https://github.com/lu0/git-worktree-wrapper) | Shell | Yes | Wraps `git checkout`/`git branch` to auto-create worktrees |
+| [worktree-manager (wtm)](https://github.com/jarredkenny/worktree-manager) | TypeScript/Bun | Yes | `post_create` hooks, `cleanup` for merged branches |
+| [gwq](https://github.com/d-kuro/gwq) | Go | No | Global worktree management, tmux integration, status dashboard |
+| [wtp](https://github.com/satococoa/wtp) | Go | No | `.wtp.yml` config with copy/symlink/command hooks |
+| [worktrunk](https://github.com/max-sixty/worktrunk) | Rust | No | AI agent parallel workflows, LLM commit messages |
+| [git-worktree-runner (gtr)](https://github.com/coderabbitai/git-worktree-runner) | Bash | No | Editor/AI tool integration, `.gtrconfig` |
+| [git-prole](https://becca.ooo/blog/announcing-git-prole/) | Rust | Yes | `convert` existing repos, auto-copies untracked files |
+
+### What Users Expect (Behavioral Patterns)
+
+From blog posts and tool READMEs, the standard user expectations are:
+
+1. **One-command bare clone setup** -- nobody wants to run 5+ manual commands
+2. **`git fetch` works out of the box** -- bare clones break this without `remote.origin.fetch` config
+3. **Worktrees inside the container** -- not scattered as siblings
+4. **Navigate by branch name, not path** -- users think in branches, not directories
+5. **Config files shared or copied** -- `.env`, `node_modules`, `.venv` handled automatically
+6. **Easy cleanup** -- remove worktree + optionally delete branch + optionally delete remote branch
+
+---
 
 ## Table Stakes
 
-Features users expect from a modern Go CLI tool distributed via npm. Missing = product feels incomplete.
+Features users absolutely expect for bare repo workflow support. Missing any of these makes the feature feel broken or incomplete.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Shell completion generation | Modern CLI tools auto-generate completions for bash/zsh/fish | Low | Cobra provides built-in `completion` subcommand |
-| `--help` flag on all commands | Universal CLI convention | Low | Cobra auto-generates from command descriptions |
-| `--version` flag | Users need to verify installed version | Low | Standard root-level flag |
-| Platform-specific binaries | npm package must work on macOS/Linux/WSL | Medium | Requires architecture-specific packages or postinstall detection |
-| Exit codes (0=success, 1=error) | Scripts and CI depend on proper exit codes | Low | Already implemented in zsh version |
-| Colored output with NO_COLOR support | Expected for modern CLIs, but must respect NO_COLOR env var | Low | Use library like fatih/color or charm/lipgloss |
-| Error messages to stderr | stdout for data, stderr for errors | Low | Standard Go practice |
-| Interactive installer | npm postinstall script that detects shell and offers to modify rc files | Medium | Must detect bash/zsh/fish, locate rc files, add source line |
-| Shell wrapper generation | Commands that cd (goto, home, new, eject) need shell wrappers | High | Go binary generates shell function, sourced by rc file |
-| Config file parsing (.wtconfig) | Existing feature, users depend on it | Medium | Simple line-based format: `<action> <path>` |
-| Worktree name resolution | Existing feature: suffix matching on directory basename | Low | Port existing `_wt_resolve_path` logic |
-| Subcommand architecture | 9 commands organized as subcommands | Low | Cobra command tree |
-| Non-interactive mode | Support CI/scripting with no TTY | Low | Detect TTY, skip colored output/prompts |
+| **Bare repo detection** | ptt must know it's in a bare repo to change worktree placement | Low | Already partially implemented (`IsBareRepository()`, `WorktreePath()`) |
+| **Nested worktree creation** | In bare repos, worktrees go inside container dir, not as siblings | Low | `WorktreePath()` already has this logic (`parentDir/name` for bare) |
+| **Correct fetch config** | `git clone --bare` does not set `remote.origin.fetch`, breaking `git fetch` | Low | Must set `+refs/heads/*:refs/remotes/origin/*` during setup |
+| **`.git` pointer file creation** | Container dir needs `gitdir: ./.bare` file for git commands to work | Low | Single file write: `echo "gitdir: ./.bare" > .git` |
+| **Navigate to home worktree in bare repo** | `ptt cd` (no args) must find the right worktree, not the bare dir | Medium | Already implemented: `GetHomePath()` finds non-bare worktree matching HEAD |
+| **`ptt ls` works in bare repos** | Listing worktrees must work regardless of repo type | Low | Already works -- `ListWorktrees()` parses porcelain output correctly |
+| **Config file resolution in bare repos** | `.pttconfig/` must be findable from any nested worktree | Medium | Currently resolves from `homePath` -- in bare repos, must resolve from container root or main worktree |
+| **Initial worktree for default branch** | After bare conversion/clone, user needs at least one working checkout | Low | Create `main/` (or whatever HEAD points to) worktree automatically |
+| **Enable `core.logallrefupdates`** | Bare repos disable reflog by default, which surprises users | Low | One config set during setup |
 
 ## Differentiators
 
-Features that set wt apart from alternatives. Not expected, but valued.
+Features that set ptt apart from alternatives. These are valuable but not strictly required for bare repo support to function.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Automatic shell detection | Zero-config experience: installer detects shell and configures appropriately | Medium | Detect from SHELL env var, verify rc file exists |
-| Override flags (--copy/--symlink) | Per-command overrides for .wtconfig behavior | Low | Already implemented, port to Go flags |
-| Smart eject with stash handling | Safely move current branch to new worktree with uncommitted changes | High | Complex flow: stash, checkout, worktree add, stash pop |
-| Suffix-based worktree matching | Type "staging" instead of "myapp-staging" | Low | Quality-of-life feature that differentiates from raw git worktree |
-| Branch fallback detection | Eject from home → main/master, eject from worktree → inferred branch | Medium | Logic already exists in zsh, port to Go |
-| Single binary + shell wrapper | Install via npm, works across all shells | High | Unique approach: binary does work, thin wrapper handles cd |
-| .wtconfig templates | `wt init` generates commented examples for Node/Python/Rust | Low | Template embedding in Go binary |
-| Worktree list with current marker | Show "*" next to current worktree in list output | Low | Parse git worktree list --porcelain |
-| Config-free operation | Works without .wtconfig, just creates worktrees | Low | .wtconfig is optional enhancement |
+| **`ptt mk-bare` conversion command** | Convert existing normal clone to bare layout without re-cloning | High | git-prole's `convert` is its killer feature; most tools only do `clone --bare` |
+| **Preserve uncommitted work during conversion** | Stash/restore changes when converting to bare layout | Medium | Users will try to convert dirty repos -- must handle gracefully |
+| **`.pttconfig/` at container level** | Config in container root applies to ALL nested worktrees | Low | Natural location for bare repos -- container root is the shared context |
+| **Branch name as worktree name** | `ptt mk feature/auth` creates `feature-auth/` worktree (slash to dash) | Low | wtp and git-wt both do this; cleaner than raw git |
+| **Post-create hook/config for bare repos** | Auto-run `npm install` or similar after worktree creation | Medium | wtm and wtp both offer this; ptt already has `run` action type |
+| **Worktree cleanup/prune** | Remove worktrees whose branches have been merged | Medium | wtm has `cleanup` command; useful for long-lived bare repos |
+| **`ptt cd` no-arg behavior in bare repos** | Navigate to the default branch worktree (not the bare dir) | Low | Already implemented in `GetHomePath()` |
+| **Fuzzy worktree switching** | `ptt cd` with partial name matching | Low | Already implemented via `ResolveWorktree()` with fuzzy scoring |
 
 ## Anti-Features
 
-Features to explicitly NOT build in the Go rewrite. Common mistakes in this domain.
+Features to deliberately NOT build. These are common in the ecosystem but are wrong choices for ptt.
 
 | Anti-Feature | Why Avoid | What to Do Instead |
 |--------------|-----------|-------------------|
-| Built-in cd implementation | Cannot cd from child process in Unix | Generate shell wrapper that sources a function |
-| Complex config file format (YAML/TOML) | .wtconfig is intentionally simple for easy hand-editing | Keep line-based `<action> <path>` format |
-| Automatic rc file modification | Don't modify user's shell config without permission | Installer offers, shows command, requires confirmation |
-| GUI installer | npm postinstall runs in terminal, GUI adds complexity | Terminal-based interactive installer with clear prompts |
-| Git subcommand (`git wt`) | Requires git config modification, harder to discover | Standalone `wt` command, simpler mental model |
-| Worktree templates beyond copy/symlink | Feature creep: hooks, custom scripts, etc. | Stick to copy/symlink, users can script if needed |
-| Interactive TUI for worktree management | Adds dependency, most operations are one-liners | Keep command-focused, list is already informative |
-| Workspace persistence (remembering last worktree) | Adds state management, conflicts with shell history | Let shell history handle command recall |
-| Auto-update mechanism | npm handles updates, don't duplicate | Use npm's standard update flow |
-| Windows native support | WSL is sufficient for Git workflows | Document "use WSL on Windows" |
+| **Wrap `git checkout`/`git branch`** | git-worktree-wrapper's approach of intercepting standard git commands creates confusion and unexpected behavior | Keep explicit commands (`ptt mk`, `ptt cd`, `ptt rm`) -- users should know they're managing worktrees |
+| **`ptt clone` command** | Duplicates `git clone --bare` with minimal added value; users already know how to clone | Provide `ptt mk-bare` to convert existing repos; that is the harder workflow to get right |
+| **Global worktree registry** | gwq tracks worktrees across all repos globally; adds persistence, state management, and complexity | Keep per-repo scope -- ptt operates within a single repo context |
+| **Tmux/editor integration** | gwq and gtr integrate with tmux/VS Code; adds coupling to specific tools | Stay editor-agnostic -- ptt outputs paths, users wire up their own editor workflows |
+| **LLM/AI commit messages** | worktrunk generates commit messages from diffs; orthogonal to worktree management | Out of scope -- let users pick their own commit message tooling |
+| **Interactive TUI for worktree selection** | fzf-based pickers are nice but add dependencies and complexity | Keep CLI-first; users who want fzf can pipe `ptt ls` through it themselves |
+| **Destroy command (delete remote branch)** | git-wt's `destroy` deletes worktree + local branch + remote branch; too destructive for a convenience tool | `ptt rm` removes worktree only; branch deletion is a deliberate git operation users should do explicitly |
+| **Automatic dependency installation** | gtr and wtp auto-run `npm install` after worktree creation | ptt already supports `run` actions in `.pttconfig/` -- users configure what they need rather than ptt guessing |
+| **Force-convert in-place** | Converting a repo in-place (mutating `.git/` to bare) risks data loss | Always create a new container directory (`repo-bare/`), leaving original untouched until user verifies |
+| **Dotfiles management mode** | Some bare repo tools support the `$HOME` as worktree pattern for dotfiles | Orthogonal use case -- ptt is for project development, not dotfiles management |
+| **PR/CI integration** | worktrunk shows CI status and PR links; scope creep | Let `gh` CLI handle PR workflows; ptt manages worktrees |
+
+---
+
+## Detailed Feature Analysis
+
+### Feature 1: `ptt mk-bare` -- Convert Existing Repo to Bare Layout
+
+**What it does:** Takes a normal `git clone` and restructures it into the bare repo + nested worktree layout.
+
+**Why it matters:** This is the hardest part of bare repo adoption. Users have existing repos they want to convert without re-cloning (which loses local branches, stashes, reflog). Only git-prole offers this, and it is cited as its primary value.
+
+**Expected behavior:**
+```
+$ cd ~/code/my-project      # normal clone, currently on main
+$ ptt mk-bare
+
+Creating bare repo layout...
+  create: my-project-bare/
+  move:   .git -> my-project-bare/.bare/
+  create: my-project-bare/.git (pointer)
+  config: remote.origin.fetch
+  config: core.logallrefupdates
+  add:    my-project-bare/main/ (worktree)
+  copy:   working tree -> main/
+
+Ready: ~/code/my-project-bare/main/
+```
+
+**Critical decisions:**
+- Create sibling directory (`my-project-bare/`) vs in-place conversion
+- Recommendation: **sibling directory** -- safer, user can verify before deleting original
+- Handle dirty working tree: stash first, restore in new worktree
+- Handle existing worktrees: must migrate them or error with guidance
+- Preserve `.pttconfig/`: copy to container root
+
+**Complexity:** HIGH -- many edge cases (dirty tree, existing worktrees, submodules, hooks)
+
+### Feature 2: `ptt mk` in Bare Repos -- Nested Worktree Creation
+
+**What it does:** When inside a bare repo layout, `ptt mk <name>` creates a worktree as a subdirectory of the container rather than a sibling.
+
+**Current state:** Already partially implemented. `WorktreePath()` in `repo.go` detects bare repos and returns `parentDir/name` instead of `parentDir/repoName-name`. However, "parentDir" resolution in bare repos needs verification.
+
+**Expected behavior:**
+```
+$ pwd
+~/code/my-project-bare/main
+
+$ ptt mk feature-auth
+
+  create: feature-auth
+  copy:   .env.local
+  symlink: node_modules
+  cd:     feature-auth
+
+Ready: ~/code/my-project-bare/feature-auth/
+Branch: feature-auth
+```
+
+**Key subtlety:** The container directory is the parent of both `.bare/` and the worktrees. When running from inside a worktree (e.g., `main/`), ptt must resolve "up" to the container directory, then create the new worktree there.
+
+**Path resolution chain:**
+1. `git rev-parse --show-toplevel` returns current worktree root (e.g., `~/code/my-project-bare/main`)
+2. Need to find container root: parent of that worktree
+3. In bare repo layout: container = `dirname(worktree_root)` = `~/code/my-project-bare/`
+4. New worktree goes at `container/name` = `~/code/my-project-bare/feature-auth/`
+
+### Feature 3: Config File Resolution in Bare Repos
+
+**Current behavior:** `ResolveConfigPath()` looks for `.pttconfig/default` relative to `homePath` (the main worktree path). In a normal repo, this works because `.pttconfig/` lives in the repo root. In a bare repo, the question becomes: where does `.pttconfig/` live?
+
+**Two options:**
+
+| Location | Pros | Cons |
+|----------|------|------|
+| Container root (`my-project-bare/.pttconfig/`) | Shared across all worktrees naturally; one config for the whole project | Not inside any git-tracked directory |
+| Main worktree (`my-project-bare/main/.pttconfig/`) | Git-tracked; travels with the repo | Other worktrees must look into `main/` to find config; breaks if main worktree is deleted |
+
+**Recommendation:** Container root. Rationale:
+- `.pttconfig/` is already gitignored (it contains local paths like `.env`)
+- The container directory IS the project root conceptually
+- Config applies to worktree creation, which is a container-level operation
+- Consistent: always look at the level where you'd run `ptt mk`
+
+**Resolution chain for bare repos:**
+1. Detect bare repo
+2. Find container root (parent of `.bare/`)
+3. Look for `.pttconfig/default` at container root
+
+**Fallback:** If not found at container root, check main worktree root. This handles repos where `.pttconfig/` was committed and is part of the tracked tree.
+
+### Feature 4: `ptt cd` Navigation in Bare Repos
+
+**Current behavior:** `ptt cd` (no args) calls `GetHomePath()` which finds the first non-bare worktree matching the bare repo's HEAD branch. This already works correctly.
+
+**`ptt cd <name>` behavior:** `ResolveWorktree()` uses suffix matching on directory basenames. In bare repos, worktree basenames ARE the names (e.g., `feature-auth`), not `repo-feature-auth`. This means the name IS the full basename -- no suffix stripping needed.
+
+**Current resolve logic works for both modes:**
+- Normal repo: `basename == name` OR `basename ends with -name` (suffix match)
+- Bare repo: `basename == name` (direct match -- worktrees are named by branch)
+
+**No changes needed** for basic navigation. The existing resolve logic handles both cases.
+
+---
 
 ## Feature Dependencies
 
 ```
-Platform-specific binaries
-  └─→ Interactive installer (detects platform for wrapper syntax)
-       └─→ Shell wrapper generation (bash/zsh/fish syntax differs)
-            └─→ cd commands (goto, home, new, eject)
-
-Config file parsing (.wtconfig)
-  └─→ Override flags (--copy/--symlink)
-       └─→ Setup function (_wt_setup equivalent)
-
-Worktree name resolution
-  └─→ Commands that accept worktree names (goto, merge, rebase, delete)
-
-Shell completion generation
-  └─→ Completion for worktree names (dynamic, queries git worktree list)
+mk-bare (conversion)
+  |
+  +-- bare repo detection (already exists)
+  +-- .git pointer file creation
+  +-- fetch config setup
+  +-- logallrefupdates config
+  +-- initial worktree creation
+  |
+  +---> mk in bare repos (nested worktree creation)
+  |       +-- path resolution (already exists, needs verification)
+  |       +-- config resolution in bare repos
+  |       +-- .pttconfig/ at container root
+  |
+  +---> cd in bare repos (navigation)
+  |       +-- GetHomePath() (already works)
+  |       +-- ResolveWorktree() (already works)
+  |
+  +---> ls in bare repos (listing)
+          +-- already works via porcelain parsing
 ```
 
-## MVP Recommendation
+## Priority Order for Implementation
 
-For Go rewrite MVP, prioritize:
+1. **Bare repo detection + nested path resolution** (verify existing code handles all cases)
+2. **Config resolution in bare repos** (update `ResolveConfigPath` for container root)
+3. **`ptt mk-bare`** (the conversion command -- the big new feature)
+4. **`ptt cd` rename** (from `go` to `cd` -- separate from bare repo work)
+5. **Post-creation hooks in bare repos** (verify `run` actions work correctly)
 
-1. **All 9 commands ported** - Core functionality, table stakes
-2. **Shell wrapper generation** - Required for cd commands, core value prop
-3. **Interactive installer** - npm postinstall, detects shell, offers to configure
-4. **Shell completion (cobra built-in)** - Table stakes for modern CLI
-5. **.wtconfig parsing** - Existing users depend on this
-6. **Override flags** - Existing users depend on this
-7. **Worktree name resolution** - Quality-of-life feature that's core to UX
-
-Defer to post-MVP:
-- **Colored output**: Low priority, focus on correctness first
-- **Advanced error messages**: Can iterate after core works
-- **Non-interactive mode flags**: Add when CI users request it
-
-## Command Categorization
-
-### Commands that require shell wrapper (cd changes parent shell)
-- `goto <worktree>` - cd into worktree
-- `home` - cd into main worktree
-- `new [flags] <name> [branch]` - creates worktree, then cd into it
-- `eject [flags] [name]` - creates worktree, then cd into it
-
-**Implementation:** Go binary prints `CD:<path>` to stdout, shell wrapper parses and cd's.
-
-### Commands that work as pure Go binary
-- `init` - creates .wtconfig file
-- `list` - queries git, prints to stdout
-- `merge <worktree>` - calls `git merge`
-- `rebase <worktree>` - calls `git rebase`
-- `delete <worktree>` - calls `git worktree remove`
-
-**Implementation:** Standard Cobra commands, no wrapper involvement.
-
-## Shell Completion Requirements
-
-| Completion Type | Commands | Source |
-|----------------|----------|--------|
-| Subcommand names | (root) | Static: new, goto, home, init, eject, list, merge, rebase, delete |
-| Worktree names | goto, merge, rebase, delete | Dynamic: query `git worktree list --porcelain`, extract short names |
-| Flag names | new, eject | Static: --copy, --symlink |
-| File paths | --copy, --symlink arguments | File system completion (shell default) |
-| Branch names | new [branch] argument | Dynamic: query `git branch`, but optional |
-
-**Cobra implementation:** Custom completion function for worktree names, file completion for paths.
-
-## npm Distribution Architecture
-
-### Package Structure
-
-```
-@user/wt/
-├── package.json (platform: neutral, postinstall script)
-├── bin/
-│   └── wt (Node.js shim that calls platform binary)
-├── install.js (postinstall: detect platform, install wrapper)
-├── binaries/
-│   ├── wt-darwin-amd64
-│   ├── wt-darwin-arm64
-│   ├── wt-linux-amd64
-│   └── wt-linux-arm64
-└── wrappers/
-    ├── wt.bash
-    ├── wt.zsh
-    └── wt.fish
-```
-
-**Alternative: Platform-specific packages**
-```
-@user/wt (depends on @user/wt-{platform})
-@user/wt-darwin-arm64 (optionalDependencies in main package)
-@user/wt-linux-amd64
-...
-```
-
-**Recommendation:** Single package with all binaries, simpler for users.
-
-## Shell Wrapper Pattern
-
-### Wrapper Responsibilities
-1. Source the shell function `wt()` into user's shell
-2. Call Go binary with all arguments
-3. Parse stdout for `CD:<path>` directive
-4. Execute cd if directive present
-5. Pass through all other output
-
-### Example (bash/zsh):
-```bash
-wt() {
-  local output
-  output=$(/path/to/wt-binary "$@")
-  local exit_code=$?
-
-  if [[ "$output" == CD:* ]]; then
-    local target="${output#CD:}"
-    cd "$target"
-  else
-    echo "$output"
-  fi
-
-  return $exit_code
-}
-```
-
-### Example (fish):
-```fish
-function wt
-  set output (wt-binary $argv)
-  set exit_code $status
-
-  if string match -q 'CD:*' -- $output
-    set target (string replace 'CD:' '' -- $output)
-    cd $target
-  else
-    echo $output
-  end
-
-  return $exit_code
-end
-```
-
-## Interactive Installer Flow
-
-1. **Detect shell**: Read `$SHELL` env var → `/bin/zsh`, `/bin/bash`, `/usr/bin/fish`
-2. **Locate rc file**:
-   - bash: `~/.bashrc` (Linux) or `~/.bash_profile` (macOS)
-   - zsh: `~/.zshrc`
-   - fish: `~/.config/fish/config.fish`
-3. **Check if already installed**: Grep rc file for `source.*wt.{shell}`
-4. **Prompt user**: "Add wt to ~/.zshrc? [Y/n]"
-5. **Show what will be added**:
-   ```bash
-   # wt - Git Worktree Manager
-   source /path/to/node_modules/@user/wt/wrappers/wt.zsh
-   ```
-6. **Append if confirmed**
-7. **Remind user**: "Run `source ~/.zshrc` or restart shell"
-
-**Safety:**
-- Never modify without confirmation
-- Show exact line being added
-- Detect existing installation (idempotent)
-- Provide manual instructions if automated fails
-
-## Configuration File Format (.wtconfig)
-
-**Current format (keep this):**
-```
-# Comments start with #
-<action> <path>
-
-# Actions: copy, symlink
-copy .env.local
-symlink node_modules
-```
-
-**Parsing rules:**
-- Line-based (split on newlines)
-- Ignore lines starting with `#` (after trimming whitespace)
-- Ignore blank lines
-- Split on first space: `action` and `path`
-- Validate action is "copy" or "symlink"
-- Path is relative to repo root
-
-**Go implementation:**
-```go
-type WtConfigEntry struct {
-    Action string // "copy" or "symlink"
-    Path   string // relative path
-}
-
-func ParseWtConfig(repoRoot string) ([]WtConfigEntry, error)
-```
-
-## Override Flags Design
-
-**Current zsh implementation:**
-```bash
-wt new --copy .env.local --symlink node_modules myfeature
-wt eject --copy .env --symlink target staging
-```
-
-**Behavior:**
-- Override affects only the specified path for this command
-- If path is in .wtconfig, override replaces the action
-- If path is NOT in .wtconfig, override adds it as one-off
-- Multiple `--copy` and `--symlink` flags allowed
-
-**Go implementation:**
-```go
-// Cobra flags (repeatable)
-cmd.Flags().StringArray("copy", []string{}, "Copy path (override .wtconfig)")
-cmd.Flags().StringArray("symlink", []string{}, "Symlink path (override .wtconfig)")
-
-// Merge logic
-func MergeOverrides(configEntries []WtConfigEntry, copyPaths, symlinkPaths []string) []WtConfigEntry
-```
-
-## Complexity Assessment
-
-| Feature Category | Overall Complexity | Risk Areas |
-|-----------------|-------------------|------------|
-| Core commands (port from zsh) | Low-Medium | eject is complex, rest are straightforward |
-| Shell wrapper generation | Medium | Must handle 3 shell syntaxes correctly |
-| Interactive installer | Medium | Shell detection, rc file modification edge cases |
-| npm distribution | Low-Medium | Platform detection, binary selection |
-| Config parsing | Low | Simple format, no dependencies |
-| Completions | Low | Cobra generates boilerplate, custom for worktree names |
-| Worktree resolution | Low | Port existing suffix-match logic |
-
-## Edge Cases to Handle
+## Edge Cases
 
 | Edge Case | How to Handle |
 |-----------|---------------|
-| No .wtconfig file | Skip setup, create worktree only |
-| .wtconfig references missing file | Log warning, skip that entry |
-| User declines installer | Exit gracefully, show manual instructions |
-| RC file doesn't exist | Create it (with user permission) or show manual instructions |
-| Platform not detected | Error with manual installation instructions |
-| Multiple shell rc files | Ask user which to configure |
-| Already installed (rc file has source line) | Skip, report "already installed" |
-| npm installed locally vs globally | Installer uses `__dirname` to find wrappers (works for both) |
-| Worktree name collision | Same as zsh: error if target directory exists |
-| Detached HEAD in eject | Same as zsh: error "nothing to eject" |
+| Convert repo with uncommitted changes | Stash, convert, restore stash in new main worktree |
+| Convert repo that already has linked worktrees | Error: "repo has existing worktrees -- remove them first or use --force" |
+| `ptt mk-bare` when already in a bare repo | Error: "already in a bare repo layout" |
+| Container directory name collision | Error: "directory already exists: my-project-bare/" |
+| Running `ptt mk` from container root (not inside any worktree) | Detect this case (cwd has `.bare/` but is not inside a worktree) and create worktree at `cwd/name` |
+| `.pttconfig/` exists in both container root and main worktree | Container root takes precedence |
+| User deletes main worktree in bare repo | `ptt cd` (no args) falls back to first non-bare worktree |
+| Submodules during conversion | Warn: "submodules detected -- verify submodule paths after conversion" |
+| Running from outside git repo after conversion | The `.git` pointer file in container root makes git recognize the directory |
+| Branch with slashes (`feature/auth`) | Convert to directory-safe name (`feature-auth`) for worktree directory |
 
-## Feature Parity Checklist
-
-Port from zsh:
-- [ ] 9 commands: new, goto, home, init, eject, list, merge, rebase, delete
-- [ ] .wtconfig parsing (copy, symlink actions)
-- [ ] Override flags (--copy, --symlink)
-- [ ] Worktree name resolution (suffix matching)
-- [ ] Eject with stash handling
-- [ ] Branch fallback detection (main/master or inferred)
-- [ ] List with current worktree marker (*)
-- [ ] Error messages for all failure modes
-
-Add for Go/npm:
-- [ ] Shell wrapper generation (bash, zsh, fish)
-- [ ] Interactive installer (npm postinstall)
-- [ ] Platform binary selection
-- [ ] Shell completion generation (cobra)
-- [ ] --help and --version flags
-- [ ] Proper exit codes
-- [ ] CD directive protocol (binary → wrapper communication)
+---
 
 ## Sources
 
-**CONFIDENCE: MEDIUM to LOW**
+**HIGH confidence (official docs, codebase analysis):**
+- [Git worktree official documentation](https://git-scm.com/docs/git-worktree) -- main worktree vs linked worktree semantics, GIT_DIR/GIT_COMMON_DIR
+- [Git config official documentation](https://git-scm.com/docs/git-config) -- worktree config scope, bare repo config
+- ptt codebase analysis (`repo.go`, `worktree.go`, `resolve.go`, `config/resolve.go`)
 
-This research is based on:
-- **HIGH confidence:** Analysis of existing wt.zsh implementation (read directly from codebase)
-- **MEDIUM confidence:** General knowledge of Cobra CLI framework patterns (from training data, pre-2025)
-- **MEDIUM confidence:** npm binary distribution patterns (from training data, pre-2025)
-- **LOW confidence:** Current best practices for Go CLI tools in 2026 (could not verify with WebSearch)
-- **LOW confidence:** Specific Cobra completion API (could not verify with Context7 or official docs)
+**MEDIUM confidence (verified across multiple sources):**
+- [Morgan Cugerone: How to use git worktree and in a clean way](https://morgan.cugerone.com/blog/how-to-use-git-worktree-and-in-a-clean-way/) -- canonical `.bare/` + `.git` pointer pattern
+- [Morgan Cugerone: Workarounds for bare repo fetch issues](https://morgan.cugerone.com/blog/workarounds-to-git-worktree-using-bare-repository-and-cannot-fetch-remote-branches/) -- `remote.origin.fetch` fix
+- [Andreas Schneider: Sliced bread: git-worktree and bare repo](https://blog.cryptomilk.org/2023/02/10/sliced-bread-git-worktree-and-bare-repo/) -- bare repo setup, git aliases
+- [Nick Nisi: How I use git worktrees](https://nicknisi.com/posts/git-worktrees/) -- real-world bare repo usage, `git-bare-clone` script
+- [Pablo Arias: Exploring Git Worktrees](https://pabloariasal.github.io/2023/12/27/git-worktrees/) -- bare clone workflow
+- [Thomas Frans: A gentle introduction to Git worktree](https://gist.github.com/ThomasFrans/ab1cb531410ab0cd0616a88a735dd840) -- worktree.guessRemote, setup gotchas
+- [matklad: How I Use Git Worktrees](https://matklad.github.io/2024/07/25/git-worktrees.html) -- fixed worktree set pattern (main/review/hotfix/work/scratch)
+- [git-prole: announcing blog post](https://becca.ooo/blog/announcing-git-prole/) -- `convert` command design, bare repo layout
 
-**Verification needed:**
-- Cobra shell completion API (current version, 2026)
-- npm best practices for platform-specific binaries (verify with official npm docs)
-- Fish shell function syntax (verify wrapper example)
-- Current conventions for NO_COLOR support (verify with no-color.org or similar)
+**MEDIUM confidence (tool READMEs, single source):**
+- [git-wt by Ahmed El Gabri](https://gabri.me/blog/git-wt) -- migrate command, bare repo structure
+- [worktree-manager (wtm)](https://github.com/jarredkenny/worktree-manager) -- post_create hooks, cleanup command
+- [gwq](https://github.com/d-kuro/gwq) -- global worktree management, config hierarchy
+- [wtp](https://github.com/satococoa/wtp) -- .wtp.yml config, copy/symlink/command hooks
+- [worktrunk](https://github.com/max-sixty/worktrunk) -- AI agent workflows
+- [git-worktree-runner (gtr)](https://github.com/coderabbitai/git-worktree-runner) -- .gtrconfig, editor integration
+- [git-worktree-wrapper](https://github.com/lu0/git-worktree-wrapper) -- git checkout/branch wrapping approach
 
-**Note to roadmap creator:** Treat shell wrapper pattern and installer flow as HIGH confidence (well-established patterns). Treat specific library APIs (Cobra completion, npm distribution) as MEDIUM-LOW confidence pending verification with official documentation during implementation.
+**LOW confidence (needs verification during implementation):**
+- Exact behavior of `git rev-parse --show-toplevel` when run from inside a worktree nested in a bare repo container (needs integration testing)
+- Whether `git worktree add` from inside a nested worktree correctly resolves relative paths to container root
+- Submodule behavior during bare repo conversion

@@ -8,15 +8,13 @@ A cross-platform Git worktree manager ("a potato worktree manager"). Go binary w
 
 A single `ptt` command that works in any shell on any platform with full autocompletion — managing git worktrees should be effortless everywhere.
 
-## Current Milestone: v2.1 Release Polish
+## Current Milestone: v0.1.2 Release
 
-**Goal:** Cheatsheet-style README and clean git history before first public release.
+**Goal:** Cheatsheet-style README and first published release (GitHub + npm).
 
 **Target changes:**
-- README.md rewrite: concise cheatsheet with banner, install, all commands with one-liner examples — fits one screen
-- Remove all verbose documentation, no separate docs files
-- Remove `.planning/` from entire git history via history rewrite
-- Untrack `.planning/` going forward (.gitignore)
+- README.md rewrite: SVG banner, concise cheatsheet with core commands + init bare workflow — one screen
+- Tag v0.1.2, GitHub release via goreleaser, publish @a-tarek/ptt to npm
 
 ## Requirements
 
@@ -36,9 +34,9 @@ A single `ptt` command that works in any shell on any platform with full autocom
 
 ### Active
 
-- [ ] README.md rewrite: cheatsheet-style, all commands, one screen
-- [ ] Remove `.planning/` from git history (filter-repo/BFG)
-- [ ] Untrack `.planning/` via .gitignore
+- [ ] README.md rewrite: cheatsheet-style with SVG banner, core commands, init bare workflow
+- [ ] Tag v0.1.2, GitHub release via goreleaser
+- [ ] Publish @a-tarek/ptt to npm
 
 ### Out of Scope
 
@@ -95,7 +93,7 @@ A single `ptt` command that works in any shell on any platform with full autocom
 | .pttconfig at bare root | Project-level config shared by all worktrees, not per-worktree | — Pending |
 
 | Cheatsheet README | Verbose README adds friction; one-screen cheatsheet is more scannable | — Pending |
-| Remove .planning from history | Internal planning docs shouldn't be in public release | — Pending |
+| First release v0.1.2 | GitHub + npm publish; establishes release pipeline | — Pending |
 
 ---
-*Last updated: 2026-02-09 after v2.1 release polish milestone start*
+*Last updated: 2026-02-09 after v0.1.2 release milestone start*

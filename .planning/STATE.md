@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-09)
 
 **Core value:** A single `ptt` command that works in any shell on any platform with full autocompletion
-**Current focus:** v2.1 Release Polish
+**Current focus:** v0.1.2 Release
 
 ## Current Position
 
 Phase: Not started (defining requirements)
 Plan: —
 Status: Defining requirements
-Last activity: 2026-02-09 — Milestone v2.1 started
+Last activity: 2026-02-09 — Milestone v0.1.2 started
 
 ## Performance Metrics
 
@@ -30,9 +30,9 @@ Last activity: 2026-02-09 — Milestone v2.1 started
 Previous decisions logged in PROJECT.md Key Decisions table.
 
 New decisions for this milestone:
-- **Cheatsheet README**: One-screen README with banner, install, all commands as one-liners — no verbose docs
-- **No separate docs**: Detailed documentation removed entirely, not moved elsewhere
-- **Rewrite git history**: Remove .planning/ from all commits via filter-repo/BFG, not just untrack
+- **Cheatsheet README**: One-screen README with SVG banner, install, core commands as one-liners, init bare workflow
+- **No separate docs**: No detailed docs files, everything on one README screen
+- **First public release**: v0.1.2 via goreleaser (GitHub) + npm publish (@a-tarek/ptt)
 
 ### Pending Todos
 
@@ -47,9 +47,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Defining requirements for v2.1 Release Polish
+Stopped at: Defining requirements for v0.1.2 Release
 Resume file: None
 
 ---
 *State initialized: 2026-02-07*
-*Updated: 2026-02-09 -- Milestone v2.1 Release Polish started.*
+*Updated: 2026-02-09 -- Milestone v0.1.2 Release started.*

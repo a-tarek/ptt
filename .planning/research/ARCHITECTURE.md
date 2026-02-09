@@ -1,956 +1,748 @@
-# Architecture Patterns
+# Architecture: Bare Repo Integration
 
-**Domain:** Go CLI tool with npm binary distribution and shell integration
-**Researched:** 2026-02-07
+**Domain:** Bare repo conversion + nested worktree support for ptt CLI
+**Researched:** 2026-02-09
+**Overall confidence:** HIGH
 
-## Recommended Architecture
+---
 
-The `wt` rewrite follows a **three-layer architecture**:
+## Executive Summary
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│ Shell Layer (bash/zsh/fish)                                 │
-│ - Thin wrapper functions sourced into user's shell          │
-│ - Handles `cd` operations (can't be done by subprocess)     │
-│ - Invokes Go binary, captures output, acts on it            │
-└────────────────┬────────────────────────────────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────────────────────────────────┐
-│ Go Binary Layer                                             │
-│ - All business logic (git operations, validation, etc.)     │
-│ - Outputs structured response (path to cd, or error)        │
-│ - No side effects on parent process                         │
-└────────────────┬────────────────────────────────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────────────────────────────────┐
-│ npm Distribution Layer                                      │
-│ - Main package (@scope/wt) with postinstall script          │
-│ - Platform-specific optional dependencies                   │
-│ - Interactive installer for shell setup                     │
-└─────────────────────────────────────────────────────────────┘
-```
+The bare repo features (`mk-bare-repo`, nested `mk`, `cd` rename, config resolution changes) integrate cleanly with the existing ptt architecture. The codebase already contains partial bare repo awareness -- `GetRepoRoot()`, `GetHomePath()`, and `WorktreePath()` in `internal/git/repo.go` already detect bare repos and switch behavior. The integration requires one new command file, surgical modifications to five existing packages, and shell wrapper updates. No new internal packages are needed.
 
-### Component Boundaries
+---
 
-| Component | Responsibility | Communicates With |
-|-----------|---------------|-------------------|
-| **Shell wrapper** | Directory changes, environment interaction | Go binary via exec |
-| **Go binary** | Git logic, validation, config parsing | Git, filesystem |
-| **npm package** | Binary distribution, installation | OS package managers, filesystem |
-| **Installer script** | Shell detection, dotfile modification | Shell rc files, filesystem |
+## 1. Where Does Bare Repo Detection Logic Live?
 
-### Data Flow
+### Current State
 
-```
-User types: wt goto staging
+Bare repo detection already exists in `internal/git/repo.go`:
 
-1. Shell wrapper function `wt()` receives "goto staging"
-2. Shell wrapper checks if command needs cd (goto/new/home/eject)
-3. For cd commands:
-   a. Invoke: wt-bin goto staging --output-path
-   b. Binary validates, resolves worktree, outputs: /path/to/worktree
-   c. Shell wrapper: cd /path/to/worktree
-4. For non-cd commands:
-   a. Invoke: wt-bin list (or merge/rebase/delete/init)
-   b. Binary executes, outputs to stdout/stderr
-   c. Shell wrapper passes through
+- **`IsBareRepository()`** (line 12) -- Shells out to `git rev-parse --is-bare-repository`, returns bool.
+- **`GetRepoRoot()`** (line 29) -- Already branches on bare/non-bare:
+  - Bare: uses `git rev-parse --git-dir` (returns bare repo root)
+  - Non-bare: uses `git rev-parse --show-toplevel` (returns checkout root)
+- **`GetHomePath()`** (line 62) -- Already parses `git worktree list --porcelain` to find bare entries and match HEAD branch to a worktree.
+- **`WorktreePath()`** (line 168) -- Already has bare/non-bare branching:
+  - Bare: nested mode (`filepath.Dir(repoRoot)/name`)
+  - Non-bare: sibling mode (`parentDir/repoName-name`)
+
+### Required Changes
+
+The existing detection logic is mostly correct but has issues:
+
+**Problem 1: `WorktreePath()` bare detection is fragile (line 174)**
+
+The current code checks `strings.HasSuffix(repoRoot, ".git")` as a heuristic, then falls back to parsing `git worktree list --porcelain` and stopping at the first empty line (only checks the first worktree entry). This is unreliable because:
+- Bare repos do not necessarily end in `.git` (e.g., ptt creates them as `project-bare/`)
+- The first entry may not be the bare one in all git versions
+
+**Fix:** Replace with a single call to `IsBareRepository()` which is already correct and authoritative. The function already exists; `WorktreePath` just does not use it.
+
+**Problem 2: `WorktreePath()` nested path calculation is wrong for ptt's model (line 200)**
+
+Currently:
+```go
+parentDir := filepath.Dir(repoRoot)
+targetPath = filepath.Join(parentDir, name)
 ```
 
-**Key insight:** The binary never attempts to `cd` — it only outputs paths. The shell wrapper is the only component that changes directories.
-
-## Go Project Structure
-
-### Standard Layout (cmd/internal/pkg pattern)
-
-```
-wt/
-├── cmd/
-│   └── wt/                    # Main package
-│       └── main.go            # Entry point, cobra root command setup
-├── internal/                  # Private application code
-│   ├── commands/              # Cobra command implementations
-│   │   ├── new.go
-│   │   ├── goto.go
-│   │   ├── home.go
-│   │   ├── init.go
-│   │   ├── eject.go
-│   │   ├── list.go
-│   │   ├── merge.go
-│   │   ├── rebase.go
-│   │   └── delete.go
-│   ├── git/                   # Git operations abstraction
-│   │   ├── worktree.go        # Worktree operations
-│   │   ├── repository.go      # Repository queries
-│   │   └── branch.go          # Branch operations
-│   ├── config/                # .wtconfig parsing and application
-│   │   ├── parser.go          # Parse .wtconfig file
-│   │   └── setup.go           # Apply copy/symlink actions
-│   ├── resolver/              # Worktree name/path/branch resolution
-│   │   └── resolver.go
-│   └── output/                # Structured output formatting
-│       └── formatter.go       # --output-path vs human-readable
-├── pkg/                       # Public libraries (if any)
-│   └── wtconfig/              # Config file types (exportable)
-├── scripts/                   # Build and distribution scripts
-│   ├── build.sh               # Cross-platform build script
-│   └── install.js             # npm postinstall interactive installer
-├── shell/                     # Shell wrapper functions
-│   ├── wt.bash
-│   ├── wt.zsh
-│   └── wt.fish
-├── completions/               # Shell completions
-│   ├── wt.bash
-│   ├── wt.zsh
-│   └── wt.fish
-├── npm/                       # npm package structure
-│   ├── package.json           # Main package
-│   └── platforms/             # Platform-specific packages
-│       ├── darwin-arm64/
-│       │   └── package.json
-│       ├── darwin-x64/
-│       │   └── package.json
-│       ├── linux-x64/
-│       │   └── package.json
-│       └── win32-x64/
-│           └── package.json
-├── go.mod
-├── go.sum
-└── README.md
-```
-
-### Directory Rationale
-
-**`cmd/wt/`**: Single entry point. Initializes cobra root command and executes.
-
-**`internal/commands/`**: One file per cobra command. Each exports a function returning `*cobra.Command`. Keeps command logic isolated and testable.
-
-**`internal/git/`**: Abstracts all `git` CLI invocations. Makes testing easier (mock git operations). Single source of truth for git command construction.
-
-**`internal/config/`**: Handles `.wtconfig` parsing and application. Separated because it's complex (overrides, validation) and reused by multiple commands (new, eject).
-
-**`internal/resolver/`**: Name-to-path and name-to-branch resolution. Used by goto, merge, rebase, delete. Centralized logic prevents duplication.
-
-**`internal/output/`**: Handles two output modes:
-- `--output-path`: Machine-readable (just the path, for shell wrapper)
-- Default: Human-readable (colorized, multi-line)
-
-**`pkg/`**: Exportable types (if needed). Start with none; add only if external tools need to parse `.wtconfig`.
-
-**`shell/`**: Thin wrapper functions. These are **not built into the binary** — they're separate files installed by the npm package.
-
-**`npm/`**: npm package structure with platform-specific optional dependencies pattern.
-
-## Cobra Command Structure
-
-### Root Command (cmd/wt/main.go)
+For the ptt bare repo model (`project-bare/` contains bare git data + worktrees), `repoRoot` from `GetRepoRoot()` returns the bare repo root itself. We need worktrees nested **inside** that directory, not as siblings of it. The correct path is:
 
 ```go
-package main
+targetPath = filepath.Join(repoRoot, name)
+```
 
-import (
-    "os"
-    "github.com/spf13/cobra"
-    "github.com/user/wt/internal/commands"
-)
+Wait -- this depends on the bare repo structure ptt creates. Let me trace this carefully.
 
-func main() {
-    rootCmd := &cobra.Command{
-        Use:   "wt",
-        Short: "Git worktree manager",
-        Long:  "A fast, ergonomic Git worktree manager",
+### Bare Repo Structure (ptt model)
+
+```
+project-bare/                 <-- parent directory
+  .bare/                      <-- actual git database (git clone --bare ... .bare)
+  .git                        <-- file containing "gitdir: ./.bare"
+  .pttconfig/                 <-- config, shared by all worktrees
+    default
+  main/                       <-- worktree for main branch
+  feature-x/                  <-- worktree for feature-x branch
+```
+
+Key insight: `git rev-parse --git-dir` when run inside a worktree under this structure returns `project-bare/.bare/worktrees/<id>` (for linked worktrees) or `project-bare/.bare` (from inside the bare repo root). `git rev-parse --git-common-dir` returns `project-bare/.bare` in all cases.
+
+For ptt, the "bare repo root" that matters is `project-bare/` (the parent containing `.bare/`, `.git`, and worktrees), NOT `.bare/` itself.
+
+**Detection strategy:** When inside a worktree under a bare repo:
+1. `git rev-parse --git-common-dir` returns path to `.bare/` directory
+2. `filepath.Dir(commonDir)` gives us `project-bare/` -- the ptt bare repo root
+3. New worktrees go at `project-bare/<name>`
+
+### Recommended Architecture
+
+Add a new function to `internal/git/repo.go`:
+
+```go
+// BareRepoRoot returns the ptt bare repo root directory.
+// This is the parent of .bare/ -- the directory containing worktrees and .pttconfig/.
+// Returns ("", false, nil) if not inside a bare repo structure.
+func BareRepoRoot() (string, bool, error)
+```
+
+This function:
+1. Calls `IsBareRepository()` or checks `git rev-parse --git-common-dir`
+2. Determines if the repo follows ptt's bare structure (has `.bare/` and `.git` file)
+3. Returns the parent directory of `.bare/` as the root
+
+Then update `WorktreePath()` to use `BareRepoRoot()` instead of its current heuristics.
+
+### Confidence: HIGH
+
+Based on direct code reading of `internal/git/repo.go` and verified git rev-parse behavior from official docs.
+
+---
+
+## 2. How Does `mk-bare-repo` Interact with Existing Packages?
+
+### New Command: `cmd/mk_bare_repo.go`
+
+This is an entirely new cobra command. It does NOT modify any existing command.
+
+**Flow:**
+
+```
+User runs: ptt mk-bare-repo [--name <dir-name>]
+
+1. Validate: must be inside a non-bare git repo (error if already bare)
+2. Validate: must have a remote origin (need URL for clone)
+3. Determine source info:
+   - remote URL: git remote get-url origin
+   - current branch: git branch --show-current
+   - repo name: filepath.Base(currentRoot)
+4. Compute target: <parent>/<repo>-bare/  (or --name override)
+5. Validate target does not exist
+6. Execute conversion:
+   a. mkdir <target>
+   b. git clone --bare <remote-url> <target>/.bare
+   c. echo "gitdir: ./.bare" > <target>/.git
+   d. git -C <target> config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+   e. git -C <target> fetch origin
+   f. git -C <target> worktree add main  (or whatever the default branch is)
+7. Copy .pttconfig/ from source to target (if exists)
+8. Output path for shell cd (via --output-path protocol)
+```
+
+### Package Interactions
+
+| Package | Interaction | New/Modified |
+|---------|-------------|--------------|
+| `internal/git/repo.go` | `GetRepoRoot()`, `IsBareRepository()`, `CurrentBranch()` for pre-validation | **Existing** (no changes) |
+| `internal/git/` | New helper: `GetRemoteURL()` to get `git remote get-url origin` | **New function** |
+| `internal/git/` | New helper: `GetDefaultBranch()` to detect main/master | **New function** |
+| `internal/config/resolve.go` | Used to check if source has `.pttconfig/` to copy | **Existing** (no changes) |
+| `internal/setup/copy.go` | `CopyPath()` to copy `.pttconfig/` directory | **Existing** (no changes) |
+| `internal/ui/task.go` | `TaskList` for progress display | **Existing** (no changes) |
+| `cmd/` | New file `mk_bare_repo.go` | **New file** |
+
+### Key Design Decisions
+
+**Clone from remote, not local restructure:** The command runs `git clone --bare <remote-url>` rather than trying to restructure the `.git/` directory in place. This is:
+- Safer (original repo is untouched)
+- Simpler (no manual git internals manipulation)
+- Idempotent (user can retry after failure)
+- Consistent with the community pattern (Morgan Cugerone's approach)
+
+**Remote URL requirement:** The command needs a remote to clone from. A purely local repo with no remote cannot be converted this way. This is an acceptable constraint because bare repos are most useful for remote-tracked repos.
+
+**`.pttconfig/` copy:** If the source repo has `.pttconfig/`, it gets copied to the bare repo root. This is a simple filesystem copy, not a git-tracked operation.
+
+### Confidence: HIGH
+
+The conversion flow uses only standard git commands. The package interactions are minimal and well-understood.
+
+---
+
+## 3. How Does `mk` Change Behavior Inside a Bare Repo?
+
+### Current `mk` Flow (cmd/new.go)
+
+```
+1. git.GetHomePath()           -> homePath (source for config resolution)
+2. git.CurrentWorktreeRoot()   -> srcRoot (source for copy/symlink)
+3. git.WorktreePath(homePath, name) -> targetPath
+4. config.ResolveConfigPath(homePath, ...)  -> config file
+5. config.ValidateActions(currentWorktreeRoot, actions) -> validate sources exist
+6. git worktree add <targetPath> -b <branchName>
+7. setup.ExecuteActions(currentWorktreeRoot, targetPath, ...)
+8. Output targetPath
+```
+
+### What Changes for Bare Repos
+
+The `mk` command itself needs **minimal changes** because the branching logic is already handled by `WorktreePath()` and `GetHomePath()`. Here is what changes:
+
+**A. Path computation (already partially handled):**
+
+`WorktreePath()` already switches to nested mode for bare repos. It just needs the fix described in section 1 (use `BareRepoRoot()` for correct root detection and path computation).
+
+- Non-bare: `<parent>/repo-name` -> target `<parent>/repo-name-feature`
+- Bare: `project-bare/` -> target `project-bare/feature`
+
+**B. Config resolution root:**
+
+Currently `mk` calls `config.ResolveConfigPath(homePath, ...)`. In a bare repo:
+- `homePath` comes from `GetHomePath()` which returns the main worktree path (e.g., `project-bare/main/`)
+- But `.pttconfig/` lives at the **bare repo root** (e.g., `project-bare/`), NOT inside a worktree
+
+This is the critical change. Config resolution needs to look at the bare repo root, not the home worktree.
+
+**C. Copy/symlink source root:**
+
+Currently `mk` uses `CurrentWorktreeRoot()` as the source for copy/symlink actions. In a bare repo context, this is still correct -- you copy from whatever worktree you are currently in.
+
+**D. Worktree creation command:**
+
+`git worktree add <path> -b <branch>` works the same in bare and non-bare repos. No change needed.
+
+### Modified Logic in `cmd/new.go`
+
+```go
+// Before (current):
+configPath, err = config.ResolveConfigPath(homePath, configFlag)
+
+// After:
+configRoot := homePath
+if bareRoot, isBare, err := git.BareRepoRoot(); err == nil && isBare {
+    configRoot = bareRoot
+}
+configPath, err = config.ResolveConfigPath(configRoot, configFlag)
+```
+
+The same pattern applies to `cmd/eject.go` which has identical config resolution logic.
+
+### Confidence: HIGH
+
+Direct code analysis of `cmd/new.go` lines 37-49 and 62-85. The change is surgical.
+
+---
+
+## 4. How Does Config Resolution Change?
+
+### Current Config Resolution (`internal/config/resolve.go`)
+
+```go
+func ResolveConfigPath(repoRoot string, name string) (string, error)
+```
+
+Takes `repoRoot` and looks for:
+- Empty name: `<repoRoot>/.pttconfig/default` or `<repoRoot>/.wtconfig`
+- Bare name: `<repoRoot>/.pttconfig/<name>` or `<repoRoot>/.wtconfig-<name>`
+- Path with `/`: exact path
+
+### What Changes
+
+**The function itself does NOT change.** The resolution logic is correct -- it just needs to receive the right `repoRoot`.
+
+The change is in **callers** -- they need to pass the bare repo root instead of the home worktree path when in a bare repo context.
+
+### Affected Callers
+
+| File | Current `repoRoot` Source | Bare Repo `repoRoot` |
+|------|---------------------------|----------------------|
+| `cmd/new.go` (line 66-67) | `homePath` (from `GetHomePath()`) | `BareRepoRoot()` |
+| `cmd/eject.go` (line 182) | `srcRoot` (from `CurrentWorktreeRoot()`) | `BareRepoRoot()` |
+| `cmd/init_cmd.go` (line 43-49) | `repoRoot` (from `GetHomePath()`) | `BareRepoRoot()` |
+
+### Config Layout in Bare Repos
+
+```
+project-bare/                   <-- BareRepoRoot()
+  .bare/
+  .git
+  .pttconfig/                   <-- Config lives HERE
+    default
+    ci
+  main/                         <-- GetHomePath() returns this
+    .pttconfig/                 <-- Does NOT exist here
+    src/
+  feature-x/
+    src/
+```
+
+### Validation Source Root
+
+`config.ValidateActions(srcRoot, actions)` checks that source files exist at `<srcRoot>/<path>`. In a bare repo, `srcRoot` should remain the **current worktree root** (where files actually are), NOT the bare repo root. This is already correct in the current code.
+
+### `ptt init` Changes
+
+`ptt init` creates `.pttconfig/default` at `GetHomePath()`. In a bare repo, it should create it at `BareRepoRoot()` instead. Same pattern as `mk` -- detect bare repo, use bare root for config location.
+
+### Recommended Helper
+
+Add a convenience function to centralize config root determination:
+
+```go
+// internal/git/repo.go
+func ConfigRoot() (string, error) {
+    if bareRoot, isBare, err := BareRepoRoot(); err == nil && isBare {
+        return bareRoot, nil
     }
-
-    // Add subcommands
-    rootCmd.AddCommand(
-        commands.NewCmd(),
-        commands.GotoCmd(),
-        commands.HomeCmd(),
-        commands.InitCmd(),
-        commands.EjectCmd(),
-        commands.ListCmd(),
-        commands.MergeCmd(),
-        commands.RebaseCmd(),
-        commands.DeleteCmd(),
-    )
-
-    if err := rootCmd.Execute(); err != nil {
-        os.Exit(1)
-    }
+    return GetHomePath()
 }
 ```
 
-### Command Implementation Pattern (internal/commands/goto.go)
+Then all callers use `git.ConfigRoot()` instead of `git.GetHomePath()` for config resolution.
 
-```go
-package commands
+### Confidence: HIGH
 
-import (
-    "fmt"
-    "github.com/spf13/cobra"
-    "github.com/user/wt/internal/git"
-    "github.com/user/wt/internal/output"
-    "github.com/user/wt/internal/resolver"
-)
+Direct code analysis. The separation between "config root" and "source root" is clean and well-bounded.
 
-func GotoCmd() *cobra.Command {
-    var outputPath bool
+---
 
-    cmd := &cobra.Command{
-        Use:   "goto <worktree>",
-        Short: "Change directory to a worktree",
-        Args:  cobra.ExactArgs(1),
-        RunE: func(cmd *cobra.Command, args []string) error {
-            name := args[0]
+## 5. How Does the `go` to `cd` Rename Affect Shell Wrappers?
 
-            // Resolve worktree name to path
-            path, err := resolver.ResolvePath(name)
-            if err != nil {
-                return fmt.Errorf("worktree '%s' not found", name)
-            }
+### Current Shell Wrapper (all three shells)
 
-            // Output mode: just path (for shell wrapper) or human-readable
-            if outputPath {
-                fmt.Println(path)
-            } else {
-                output.Success("Changed to: %s", path)
-            }
-
-            return nil
-        },
-    }
-
-    cmd.Flags().BoolVar(&outputPath, "output-path", false, "Output only the path (for shell integration)")
-
-    return cmd
-}
-```
-
-### Commands Needing `--output-path` Flag
-
-| Command | Needs cd | Output Format |
-|---------|----------|---------------|
-| `new` | YES | `--output-path` → path only |
-| `goto` | YES | `--output-path` → path only |
-| `home` | YES | `--output-path` → path only |
-| `eject` | YES | `--output-path` → path only |
-| `list` | NO | Human-readable table |
-| `merge` | NO | Git output passthrough |
-| `rebase` | NO | Git output passthrough |
-| `delete` | NO | Confirmation message |
-| `init` | NO | Confirmation message |
-
-## Shell Wrapper Architecture
-
-### The Problem
-
-A subprocess cannot change its parent's directory. When the Go binary executes `cd`, it only affects its own process, not the user's shell.
-
-### The Solution
-
-Thin shell functions sourced into the user's shell. These functions:
-1. Invoke the Go binary with `--output-path` for cd commands
-2. Capture stdout (the path)
-3. Execute `cd` in the current shell context
-
-### Wrapper Implementation (shell/wt.zsh)
-
-```zsh
-#!/usr/bin/env zsh
-# wt shell wrapper for zsh
-
-function wt() {
-  local cmd="$1"
-  shift 2>/dev/null
-
-  case "$cmd" in
-    new|goto|home|eject)
-      # Commands that need cd
-      local target_path
-      target_path=$(wt-bin "$cmd" --output-path "$@" 2>&1)
-      local exit_code=$?
-
-      if [[ $exit_code -eq 0 && -n "$target_path" ]]; then
-        cd "$target_path"
-      else
-        # Error occurred — output was error message, not path
-        echo "$target_path" >&2
-        return $exit_code
-      fi
+```bash
+# wrapper.zsh (and .bash, .fish equivalently)
+ptt() {
+  case "$1" in
+    go|goto|home|mk|new|eject)
+      # ... capture --output-path, cd to result
       ;;
     *)
-      # Commands that don't need cd — pass through
-      wt-bin "$cmd" "$@"
+      "__PTT_BIN__" "$@"
       ;;
   esac
 }
 ```
 
-### Key Design Decisions
+### Changes Required
 
-1. **Command categorization**: Hardcoded list of cd commands in wrapper. Alternative (flag-based detection) is more fragile.
+**A. Add `cd` to the case list:**
 
-2. **Error handling**: If binary exits non-zero, output is treated as error message, not path.
-
-3. **Stdout capture**: Only stdout is captured for path. Stderr passes through for progress messages during long operations.
-
-4. **Binary name**: `wt-bin` to distinguish from shell function `wt`. Prevents infinite recursion.
-
-## npm Package Structure
-
-### Pattern: Platform-Specific Optional Dependencies
-
-This is the standard pattern used by esbuild, swc, prisma, and other tools distributing native binaries via npm.
-
-### Main Package (@scope/wt)
-
-```json
-{
-  "name": "@scope/wt",
-  "version": "1.0.0",
-  "description": "Git worktree manager",
-  "bin": {
-    "wt-bin": "./bin/wt"
-  },
-  "optionalDependencies": {
-    "@scope/wt-darwin-arm64": "1.0.0",
-    "@scope/wt-darwin-x64": "1.0.0",
-    "@scope/wt-linux-x64": "1.0.0",
-    "@scope/wt-linux-arm64": "1.0.0",
-    "@scope/wt-win32-x64": "1.0.0"
-  },
-  "scripts": {
-    "postinstall": "node scripts/install.js"
-  },
-  "files": [
-    "bin/",
-    "shell/",
-    "completions/",
-    "scripts/"
-  ]
-}
+```bash
+case "$1" in
+    cd|go|goto|home|mk|new|eject)
 ```
 
-### Platform-Specific Package (@scope/wt-darwin-arm64)
+This is a one-line change in each of the three wrapper templates:
+- `internal/shell/templates/wrapper.bash`
+- `internal/shell/templates/wrapper.zsh`
+- `internal/shell/templates/wrapper.fish`
 
-```json
-{
-  "name": "@scope/wt-darwin-arm64",
-  "version": "1.0.0",
-  "os": ["darwin"],
-  "cpu": ["arm64"],
-  "files": [
-    "wt"
-  ]
-}
-```
+**B. Rename the cobra command in `cmd/goto.go`:**
 
-Each platform package contains a single file: the compiled binary for that platform.
-
-### How npm Resolves Binaries
-
-1. User runs `npm install @scope/wt`
-2. npm installs main package
-3. npm attempts to install all `optionalDependencies`
-4. npm skips packages where `os`/`cpu` don't match current platform
-5. **Only the matching platform package installs**
-6. Postinstall script runs
-
-### Postinstall Script (scripts/install.js)
-
-```javascript
-#!/usr/bin/env node
-
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-
-// Determine which platform package was installed
-const platform = `${process.platform}-${process.arch}`;
-const binarySource = path.join(
-  __dirname,
-  '..',
-  'node_modules',
-  `@scope/wt-${platform}`,
-  'wt'
-);
-
-// Copy binary to bin/ directory
-const binaryDest = path.join(__dirname, '..', 'bin', 'wt');
-
-if (fs.existsSync(binarySource)) {
-  fs.mkdirSync(path.dirname(binaryDest), { recursive: true });
-  fs.copyFileSync(binarySource, binaryDest);
-  fs.chmodSync(binaryDest, 0o755);
-
-  // Run interactive installer
-  require('./interactive-installer.js');
-} else {
-  console.error(`Error: No binary found for platform ${platform}`);
-  console.error('Supported platforms: darwin-arm64, darwin-x64, linux-x64, linux-arm64, win32-x64');
-  process.exit(1);
-}
-```
-
-### Why Not Just Include All Binaries?
-
-Including all binaries in the main package would work but:
-- Increases package size 5x (download bloat)
-- npm's optional dependencies pattern is the ecosystem standard
-- Tools expect this pattern (security scanners, CI caches)
-
-## Interactive Installer Architecture
-
-The installer runs during `npm install` (postinstall hook) and sets up shell integration.
-
-### Goals
-
-1. Detect user's shell (bash/zsh/fish)
-2. Determine correct rc file (~/.bashrc, ~/.zshrc, ~/.config/fish/config.fish)
-3. Check if already installed (idempotent)
-4. Prompt user for confirmation
-5. Append source line to rc file
-6. Install shell completions
-
-### Installer Flow
-
-```
-npm install @scope/wt
-  ↓
-postinstall hook runs
-  ↓
-Copy binary from platform package
-  ↓
-Run interactive installer
-  ↓
-┌─────────────────────────────────────┐
-│ Detect shell (SHELL env var)       │
-└──────────────┬──────────────────────┘
-               ↓
-┌─────────────────────────────────────┐
-│ Determine rc file location          │
-│ - bash: ~/.bashrc or ~/.bash_profile│
-│ - zsh: ~/.zshrc                     │
-│ - fish: ~/.config/fish/config.fish  │
-└──────────────┬──────────────────────┘
-               ↓
-┌─────────────────────────────────────┐
-│ Check if already installed          │
-│ (search for wt marker in rc file)   │
-└──────────────┬──────────────────────┘
-               ↓
-          Already installed?
-               ├─ YES → Exit (idempotent)
-               └─ NO → Continue
-                       ↓
-               ┌─────────────────────────┐
-               │ Prompt user:            │
-               │ "Add wt to ~/.zshrc?"   │
-               │ [Y/n]                   │
-               └──────┬──────────────────┘
-                      ↓
-                User confirms?
-                      ├─ NO → Exit
-                      └─ YES → Continue
-                              ↓
-                      ┌─────────────────────┐
-                      │ Append to rc file:  │
-                      │ source wt.zsh       │
-                      │ source wt-comp.zsh  │
-                      └──────┬──────────────┘
-                             ↓
-                      ┌─────────────────────┐
-                      │ Success message:    │
-                      │ "Restart shell or:  │
-                      │  source ~/.zshrc"   │
-                      └─────────────────────┘
-```
-
-### Implementation (scripts/interactive-installer.js)
-
-```javascript
-const readline = require('readline');
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-
-function detectShell() {
-  const shell = process.env.SHELL || '';
-  if (shell.includes('zsh')) return 'zsh';
-  if (shell.includes('bash')) return 'bash';
-  if (shell.includes('fish')) return 'fish';
-  return null;
-}
-
-function getRcFile(shell) {
-  const home = os.homedir();
-  switch (shell) {
-    case 'zsh':
-      return path.join(home, '.zshrc');
-    case 'bash':
-      // Prefer .bashrc on Linux, .bash_profile on macOS
-      const bashrc = path.join(home, '.bashrc');
-      const bashProfile = path.join(home, '.bash_profile');
-      return fs.existsSync(bashrc) ? bashrc : bashProfile;
-    case 'fish':
-      return path.join(home, '.config', 'fish', 'config.fish');
-    default:
-      return null;
-  }
-}
-
-function isInstalled(rcFile) {
-  if (!fs.existsSync(rcFile)) return false;
-  const content = fs.readFileSync(rcFile, 'utf8');
-  return content.includes('# wt - Git Worktree Manager');
-}
-
-async function promptUser(question) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer.trim().toLowerCase());
-    });
-  });
-}
-
-async function install() {
-  console.log('\n🔧 Setting up wt shell integration...\n');
-
-  const shell = detectShell();
-  if (!shell) {
-    console.log('⚠️  Could not detect shell. Manual setup required.');
-    console.log('Add this to your shell rc file:');
-    console.log(`  source ${path.join(__dirname, '..', 'shell', 'wt.<shell>')}`);
-    return;
-  }
-
-  const rcFile = getRcFile(shell);
-  if (!rcFile) {
-    console.log('⚠️  Could not determine rc file location.');
-    return;
-  }
-
-  if (isInstalled(rcFile)) {
-    console.log('✅ wt is already installed in', rcFile);
-    return;
-  }
-
-  console.log(`Detected shell: ${shell}`);
-  console.log(`RC file: ${rcFile}`);
-  console.log('');
-
-  const answer = await promptUser(`Add wt to ${rcFile}? [Y/n] `);
-  if (answer && answer !== 'y' && answer !== 'yes') {
-    console.log('Skipped. You can install manually later.');
-    return;
-  }
-
-  // Append to rc file
-  const wrapperPath = path.join(__dirname, '..', 'shell', `wt.${shell}`);
-  const completionPath = path.join(__dirname, '..', 'completions', `wt.${shell}`);
-
-  const snippet = `
-# wt - Git Worktree Manager
-source "${wrapperPath}"
-source "${completionPath}"
-`;
-
-  fs.appendFileSync(rcFile, snippet);
-
-  console.log('✅ Successfully installed!');
-  console.log('');
-  console.log('Restart your shell or run:');
-  console.log(`  source ${rcFile}`);
-}
-
-install().catch(console.error);
-```
-
-### Idempotence Strategy
-
-Installer checks for marker comment `# wt - Git Worktree Manager` in rc file. If found, skips installation. This allows:
-- Re-running `npm install` without duplication
-- Uninstall/reinstall workflows
-- Version upgrades
-
-### Manual Setup Fallback
-
-If shell detection fails or user declines, installer shows manual instructions. Critical for:
-- Unsupported shells
-- Custom shell configurations
-- CI/CD environments
-
-## Patterns to Follow
-
-### Pattern 1: Dependency Inversion for Git Operations
-
-**What:** Abstract git CLI calls behind an interface
-
-**When:** Testing, mocking git behavior
-
-**Example:**
 ```go
-// internal/git/interface.go
-type Repository interface {
-    WorktreeList() ([]Worktree, error)
-    WorktreeAdd(path, branch string) error
-    WorktreeRemove(path string) error
-}
+// Before:
+Use: "go [worktree]",
+Aliases: []string{"goto", "home"},
 
-// internal/git/gitcli.go
-type GitCLI struct{}
+// After:
+Use: "cd [worktree]",
+Aliases: []string{"go", "goto", "home"},
+```
 
-func (g *GitCLI) WorktreeList() ([]Worktree, error) {
-    // exec git worktree list --porcelain
-}
+`go` becomes an alias for backward compatibility. The file could also be renamed from `goto.go` to `cd.go` for clarity, though this is cosmetic.
 
-// In tests: mock Repository
-type MockRepository struct {
-    worktrees []Worktree
+**C. Update `cmd/root.go` help text:**
+
+```go
+// Before:
+"  go [worktree]      Navigate to a worktree (or home)"
+
+// After:
+"  cd [worktree]      Navigate to a worktree (or home)"
+```
+
+**D. Update completions:**
+
+Cobra completions are auto-generated from command definitions. Renaming the command `Use` field automatically updates completions. No separate completion code changes needed.
+
+**E. Shell function name conflict:**
+
+`cd` is a shell builtin. However, there is no conflict because:
+- The shell wrapper function is named `ptt()`, not `cd()`
+- `cd` is a **subcommand** of `ptt`, not a standalone command
+- `ptt cd foo` calls the binary which outputs a path, then the wrapper runs the real `cd`
+
+This is safe. The wrapper calls `cd "$result"` internally, which invokes the builtin `cd`, not a recursive call.
+
+### Confidence: HIGH
+
+Direct code analysis of all three wrapper templates and `cmd/goto.go`.
+
+---
+
+## Component Map: New vs Modified
+
+### New Components
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `mk-bare-repo` command | `cmd/mk_bare_repo.go` | New cobra command for bare repo conversion |
+| `GetRemoteURL()` | `internal/git/repo.go` | Get `origin` remote URL |
+| `GetDefaultBranch()` | `internal/git/repo.go` | Detect main/master as default branch |
+| `BareRepoRoot()` | `internal/git/repo.go` | Detect ptt bare repo structure, return root |
+| `ConfigRoot()` | `internal/git/repo.go` | Convenience: bare root or home path for config |
+
+### Modified Components
+
+| Component | File | Change |
+|-----------|------|--------|
+| `cd` command | `cmd/goto.go` | Rename `Use` from `go` to `cd`, add `go` as alias |
+| `mk` command | `cmd/new.go` | Use `ConfigRoot()` for config resolution |
+| `eject` command | `cmd/eject.go` | Use `ConfigRoot()` for config resolution |
+| `init` command | `cmd/init_cmd.go` | Use `ConfigRoot()` for `.pttconfig/` creation path |
+| `WorktreePath()` | `internal/git/repo.go` | Fix bare repo detection and path calculation |
+| Root help text | `cmd/root.go` | Update command listing |
+| Shell wrappers | `internal/shell/templates/wrapper.{bash,zsh,fish}` | Add `cd` to case list |
+| `ls` command | `cmd/list.go` | Filter out bare repo entry from display (optional) |
+
+### Unchanged Components
+
+| Component | Why Unchanged |
+|-----------|---------------|
+| `internal/config/resolve.go` | Logic is correct; callers pass different root |
+| `internal/config/parser.go` | No changes needed |
+| `internal/config/action.go` | No changes needed |
+| `internal/config/validator.go` | No changes needed |
+| `internal/config/flags.go` | No changes needed |
+| `internal/setup/executor.go` | No changes needed |
+| `internal/setup/copy.go` | Reused by `mk-bare-repo` for `.pttconfig/` copy |
+| `internal/setup/symlink.go` | No changes needed |
+| `internal/setup/run.go` | No changes needed |
+| `internal/shell/detect.go` | No changes needed |
+| `internal/shell/embed.go` | No changes needed |
+| `internal/installer/` | No changes needed |
+| `internal/ui/` | No changes needed |
+| `cmd/completion.go` | No changes needed (auto-generated from cobra) |
+| `cmd/merge.go` | No changes needed |
+| `cmd/rebase.go` | No changes needed |
+| `cmd/delete.go` | No changes needed |
+
+---
+
+## Data Flow Diagrams
+
+### `ptt mk-bare-repo` Flow
+
+```
+[User runs ptt mk-bare-repo]
+  |
+  v
+[Validate: not bare, has remote]
+  |-- git.IsBareRepository() -> must be false
+  |-- git.GetRemoteURL() -> must have origin
+  |-- git.GetRepoRoot() -> sourceRoot
+  |-- git.GetDefaultBranch() -> defaultBranch (main/master)
+  |
+  v
+[Compute target path]
+  |-- targetDir = filepath.Dir(sourceRoot) / filepath.Base(sourceRoot) + "-bare"
+  |
+  v
+[Execute conversion]  (sequence of exec.Command calls)
+  |-- mkdir targetDir
+  |-- git clone --bare <remoteURL> targetDir/.bare
+  |-- write "gitdir: ./.bare" to targetDir/.git
+  |-- git -C targetDir config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+  |-- git -C targetDir fetch origin
+  |-- git -C targetDir/.bare worktree add targetDir/<defaultBranch> <defaultBranch>
+  |
+  v
+[Copy .pttconfig/ if exists]
+  |-- setup.CopyPath(sourceRoot/.pttconfig, targetDir/.pttconfig)
+  |
+  v
+[Output path]
+  |-- fmt.Println(targetDir/<defaultBranch>)  // for shell wrapper cd
+```
+
+### `ptt mk <name>` in Bare Repo
+
+```
+[User runs ptt mk feature-x (inside project-bare/main/)]
+  |
+  v
+[Resolve roots]
+  |-- git.GetHomePath() -> project-bare/main/     (source for copy/symlink)
+  |-- git.ConfigRoot()  -> project-bare/           (for .pttconfig/ resolution)
+  |-- git.WorktreePath(homePath, "feature-x")
+  |     |-- BareRepoRoot() -> project-bare/
+  |     |-- return project-bare/feature-x
+  |
+  v
+[Resolve config]
+  |-- config.ResolveConfigPath(configRoot, "")
+  |     -> project-bare/.pttconfig/default
+  |
+  v
+[Validate sources against current worktree]
+  |-- config.ValidateActions(currentWorktreeRoot, actions)
+  |     -> checks project-bare/main/<path> exists
+  |
+  v
+[Create worktree]
+  |-- git worktree add project-bare/feature-x -b feature-x
+  |
+  v
+[Execute config actions]
+  |-- setup.ExecuteActions(currentWorktreeRoot, targetPath, actions, ...)
+  |     -> copies from project-bare/main/ to project-bare/feature-x/
+  |
+  v
+[Output path]
+  |-- fmt.Println(project-bare/feature-x)
+```
+
+### `ptt cd <name>` Flow (renamed from `go`)
+
+```
+[Shell wrapper intercepts "cd" subcommand]
+  |-- ptt --output-path cd feature-x
+  |
+  v
+[cobra routes to cdCmd (was goCmd)]
+  |-- git.ResolveWorktree("feature-x")
+  |     -> matches worktree by basename
+  |     -> returns Worktree{Path: "project-bare/feature-x", Branch: "feature-x"}
+  |
+  v
+[Output path to stdout]
+  |-- fmt.Println(wt.Path)
+  |
+  v
+[Shell wrapper does: cd "project-bare/feature-x"]
+```
+
+---
+
+## Bare Repo Root Detection: Deep Dive
+
+This is the trickiest part of the integration. Here is the precise algorithm for `BareRepoRoot()`:
+
+```go
+func BareRepoRoot() (string, bool, error) {
+    // Step 1: Get the common git dir (shared across all worktrees)
+    cmd := exec.Command("git", "rev-parse", "--git-common-dir")
+    output, err := cmd.Output()
+    if err != nil {
+        return "", false, err
+    }
+    commonDir := strings.TrimSpace(string(output))
+
+    // Step 2: Make absolute
+    if !filepath.IsAbs(commonDir) {
+        cwd, _ := os.Getwd()
+        commonDir = filepath.Join(cwd, commonDir)
+    }
+    commonDir = filepath.Clean(commonDir)
+
+    // Step 3: Check if this is a ptt bare repo structure
+    // In ptt's model, commonDir is project-bare/.bare
+    // The parent should have a .git file (not directory) containing "gitdir: ./.bare"
+    parentDir := filepath.Dir(commonDir)
+    gitFilePath := filepath.Join(parentDir, ".git")
+
+    info, err := os.Lstat(gitFilePath)
+    if err != nil {
+        return "", false, nil  // Not a ptt bare repo structure
+    }
+
+    // Must be a file (not a directory) -- gitdir pointer
+    if info.IsDir() {
+        return "", false, nil  // Regular repo, not bare
+    }
+
+    return parentDir, true, nil
 }
 ```
 
-### Pattern 2: Structured Output Mode
+**Why this works:**
+- In a regular repo, `--git-common-dir` returns `.git` (a directory). Its parent has `.git` as a directory, so the `Lstat` check fails (it IS a directory).
+- In a ptt bare repo, from any worktree, `--git-common-dir` returns `project-bare/.bare`. The parent `project-bare/` has a `.git` **file** pointing to `.bare/`. This is the signal.
+- This handles being inside any worktree (main, feature-x, etc.) because `--git-common-dir` always resolves to the shared `.bare/`.
 
-**What:** Two output modes — machine-readable and human-readable
+**Edge case:** What if the user is running from inside the `project-bare/` directory itself (not inside any worktree)? In that case, `git rev-parse --git-common-dir` still works because the `.git` file in that directory points git to `.bare/`.
 
-**When:** Shell integration commands (new, goto, home, eject)
+### Confidence: HIGH
 
-**Example:**
+Verified against git rev-parse documentation. The `.git`-file-not-directory heuristic is reliable because it is the mechanism git itself uses to link worktrees.
+
+---
+
+## `WorktreePath()` Fix for Nested Mode
+
+Current broken logic (line 198-201):
 ```go
-// internal/output/formatter.go
-type Formatter struct {
-    PathOnly bool
+if isBare {
+    parentDir := filepath.Dir(repoRoot)
+    targetPath = filepath.Join(parentDir, name)
 }
+```
 
-func (f *Formatter) Success(path string, message string) {
-    if f.PathOnly {
-        fmt.Println(path)
+The problem: `repoRoot` here comes from `GetHomePath()` which returns the home **worktree** path (e.g., `project-bare/main/`). So `filepath.Dir()` gives `project-bare/` and `filepath.Join(project-bare/, name)` gives `project-bare/name`. This **accidentally works** for the ptt model but for the wrong reason.
+
+However, if `repoRoot` were changed to come from `GetRepoRoot()` (as the parameter name suggests), it would return `project-bare/.bare` for bare repos, and then `filepath.Dir()` gives `project-bare/` which also works.
+
+**Recommendation:** Make `WorktreePath()` explicitly use `BareRepoRoot()`:
+
+```go
+func WorktreePath(repoRoot string, name string) (string, error) {
+    bareRoot, isBare, err := BareRepoRoot()
+    if err != nil {
+        return "", err
+    }
+
+    var targetPath string
+    if isBare {
+        targetPath = filepath.Join(bareRoot, name)
     } else {
-        fmt.Printf("✅ %s\n", message)
-        fmt.Printf("📁 %s\n", path)
+        parentDir := filepath.Dir(repoRoot)
+        repoName := filepath.Base(repoRoot)
+        targetPath = filepath.Join(parentDir, repoName+"-"+name)
     }
+
+    if _, err := os.Stat(targetPath); err == nil {
+        return "", fmt.Errorf("path already exists: %s", targetPath)
+    }
+
+    return targetPath, nil
 }
 ```
 
-### Pattern 3: Config Override Chain
+---
 
-**What:** Merge .wtconfig entries with CLI flag overrides
+## `ResolveWorktree()` Changes for Bare Repos
 
-**When:** `wt new --copy .env` should override `.wtconfig` entry
+The existing `ResolveWorktree()` in `internal/git/resolve.go` matches worktrees by basename using suffix matching: `basename == name || strings.HasSuffix(basename, "-"+name)`.
 
-**Example:**
+In bare repos, worktree basenames are just the name itself (e.g., `feature-x` not `repo-feature-x`). The exact match `basename == name` already handles this. The suffix match (`-name`) may produce false positives if worktree names contain dashes, but this is the same risk as in non-bare repos. No change needed.
+
+### Confidence: HIGH
+
+---
+
+## `ls` Command Changes for Bare Repos
+
+The `ls` command currently lists ALL worktrees from `git worktree list --porcelain`, including the bare repo entry itself. In a bare repo context, the bare entry shows up as:
+
+```
+  project-bare/.bare             (bare)
+```
+
+This is noise -- users care about their worktrees, not the bare repo metadata directory.
+
+**Recommended fix:** Filter out entries where `wt.IsBare == true` in `cmd/list.go`:
+
 ```go
-// internal/config/setup.go
-func ApplySetup(src, dest string, overrides map[string]Action) error {
-    config := parseConfig(path.Join(src, ".wtconfig"))
-
-    // Apply overrides
-    for path, action := range overrides {
-        config[path] = action
+for _, wt := range worktrees {
+    if wt.IsBare {
+        continue  // Skip bare repo entry
     }
-
-    for path, action := range config {
-        switch action {
-        case Copy:
-            copyFile(path.Join(src, path), path.Join(dest, path))
-        case Symlink:
-            symlinkFile(path.Join(src, path), path.Join(dest, path))
-        }
-    }
+    // ... display logic
 }
 ```
 
-### Pattern 4: Cobra Command Factory Functions
+### Confidence: HIGH
 
-**What:** Each command is a function returning `*cobra.Command`
+---
 
-**When:** Setting up root command
+## Suggested Build Order
 
-**Why:** Allows command-specific flag variables without global state
+Based on dependency analysis:
 
-**Example:**
-```go
-// internal/commands/new.go
-func NewCmd() *cobra.Command {
-    var (
-        outputPath bool
-        copyPaths  []string
-        symlinkPaths []string
-    )
+### Phase A: Foundation (no user-visible changes)
 
-    cmd := &cobra.Command{
-        Use: "new",
-        RunE: func(cmd *cobra.Command, args []string) error {
-            // Use local variables
-        },
-    }
+1. **Add `BareRepoRoot()` and `ConfigRoot()` to `internal/git/repo.go`**
+   - Pure additions, no existing behavior changes
+   - Write tests using real bare repo setup in temp dirs
+   - This unblocks everything else
 
-    cmd.Flags().BoolVar(&outputPath, "output-path", false, "...")
-    cmd.Flags().StringArrayVar(&copyPaths, "copy", nil, "...")
-    cmd.Flags().StringArrayVar(&symlinkPaths, "symlink", nil, "...")
+2. **Fix `WorktreePath()` bare detection**
+   - Replace heuristic with `BareRepoRoot()` call
+   - Update existing test `TestWorktreePath_BareRepo` (currently skipped)
 
-    return cmd
-}
+### Phase B: `cd` rename (smallest, most independent change)
+
+3. **Rename `go` to `cd` in `cmd/goto.go`**
+   - Change `Use`, add `go` as alias
+   - Update `cmd/root.go` help text
+   - Optionally rename file to `cmd/cd.go`
+
+4. **Update shell wrappers**
+   - Add `cd` to case list in all three templates
+   - Existing aliases (`go`, `goto`, `home`) remain in case list for backward compat
+
+### Phase C: Config resolution (needed before `mk-bare-repo` and bare `mk`)
+
+5. **Update config resolution callers to use `ConfigRoot()`**
+   - `cmd/new.go`: use `ConfigRoot()` for config path, keep `CurrentWorktreeRoot()` for source
+   - `cmd/eject.go`: same pattern
+   - `cmd/init_cmd.go`: use `ConfigRoot()` for `.pttconfig/` creation
+
+### Phase D: `mk-bare-repo` command (the big new feature)
+
+6. **Add `GetRemoteURL()` and `GetDefaultBranch()` helpers**
+   - Simple git command wrappers
+
+7. **Implement `cmd/mk_bare_repo.go`**
+   - Full conversion flow
+   - Integration test with real git repos
+
+### Phase E: Polish
+
+8. **Update `ls` to filter bare entries**
+9. **Update README / docs**
+10. **End-to-end testing of full bare repo workflow**
+
+### Dependency Graph
+
 ```
+Phase A: BareRepoRoot(), ConfigRoot(), WorktreePath fix
+  |
+  +---> Phase B: cd rename (independent of A, but ordered after for cleanliness)
+  |
+  +---> Phase C: Config resolution callers (depends on A)
+  |       |
+  |       +---> Phase D: mk-bare-repo (depends on A + C)
+  |
+  +---> Phase E: ls filter, docs (depends on all above)
+```
+
+**Phase B is fully independent** and could be done first or in parallel with Phase A.
+
+---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Binary Attempts to cd
+### 1. Do NOT put bare repo logic in `internal/config/`
 
-**What:** Go binary tries to change user's directory
+The config package should remain unaware of bare repos. Config resolution is just "given a root path, find the config file." The bare repo awareness belongs in `internal/git/` and the callers.
 
-**Why bad:** Subprocesses cannot affect parent shell
+### 2. Do NOT create a new `internal/bare/` package
 
-**Instead:** Binary outputs path, shell wrapper does cd
+The bare repo logic is small (one detection function + two helpers). It belongs in `internal/git/repo.go` alongside the existing `IsBareRepository()`, `GetRepoRoot()`, and `WorktreePath()`.
 
-### Anti-Pattern 2: Monolithic main.go
+### 3. Do NOT restructure the existing repo in-place
 
-**What:** All command logic in cmd/wt/main.go
+The `mk-bare-repo` command creates a **new** bare repo directory alongside the original. Users verify it works, then manually delete the old repo. Never modify or delete the user's existing repository.
 
-**Why bad:**
-- Untestable (main package can't be imported)
-- Difficult to navigate
-- Violates single responsibility
+### 4. Do NOT change `ResolveConfigPath()` signature
 
-**Instead:** Move logic to internal/commands/, keep main.go minimal
+The function is correct as-is. Changing its interface to accept a "repo type" parameter would leak bare repo awareness into the config package. Instead, callers compute the correct root and pass it in.
 
-### Anti-Pattern 3: Global State for Flags
+### 5. Do NOT use `git init --bare` for conversion
 
-**What:** Package-level variables for cobra flags
+`git clone --bare <remote-url>` is safer than `git init --bare` + manual copying because it handles all git internals correctly (packfiles, refs, hooks, etc.).
 
-```go
-// BAD
-var outputPath bool
-
-func init() {
-    rootCmd.PersistentFlags().BoolVar(&outputPath, "output-path", false, "...")
-}
-```
-
-**Why bad:**
-- Makes testing difficult
-- Causes race conditions in parallel tests
-- Unclear ownership
-
-**Instead:** Use command factory pattern with local variables
-
-### Anti-Pattern 4: Bundling All Binaries in One npm Package
-
-**What:** Include darwin-arm64, darwin-x64, linux-x64, win32-x64 binaries in single package
-
-**Why bad:**
-- 50-100MB download for 10-20MB needed binary
-- Wastes bandwidth, disk space
-- Violates npm ecosystem conventions
-
-**Instead:** Use platform-specific optional dependencies
-
-### Anti-Pattern 5: Silent Postinstall
-
-**What:** Modify shell rc files without user confirmation
-
-**Why bad:**
-- Violates user expectations
-- npm install should be non-interactive (CI/CD)
-- Security concern (arbitrary shell code injection)
-
-**Instead:** Prompt for confirmation, provide manual fallback
-
-### Anti-Pattern 6: Assuming Shell Type
-
-**What:** Only support zsh, ignore bash/fish
-
-**Why bad:**
-- Alienates large user base
-- Prevents adoption in teams with diverse setups
-- Creates compatibility issues
-
-**Instead:** Detect shell, provide wrappers for bash/zsh/fish
-
-## Scalability Considerations
-
-| Concern | At 10 users | At 1K users | At 100K users |
-|---------|------------|-------------|---------------|
-| Binary size | <10MB acceptable | <10MB still fine | <5MB ideal (optimize) |
-| Platform support | macOS/Linux sufficient | Add Windows | Add ARM variants |
-| Shell support | zsh only | bash + zsh | bash + zsh + fish |
-| Installation UX | Manual setup OK | Need npm package | Polish installer, error handling |
-| Documentation | README sufficient | Need examples, troubleshooting | Video tutorials, community support |
-| Error messages | Generic errors OK | Context-specific errors | Actionable suggestions |
-
-## Build Order Dependencies
-
-Suggested implementation order based on dependencies:
-
-### Phase 1: Core Go Binary (no cd commands)
-
-1. **Project setup**: `go mod init`, directory structure
-2. **Git abstraction**: `internal/git/` (worktree list, branch operations)
-3. **Simple commands**: `list`, `init`, `delete`
-4. **Cobra structure**: Root command, subcommand registration
-5. **Testing**: Unit tests for git abstraction
-
-**Milestone**: `wt-bin list` works, outputs worktree table
-
-### Phase 2: Config System
-
-1. **Parser**: `internal/config/parser.go` (.wtconfig syntax)
-2. **Setup logic**: `internal/config/setup.go` (copy/symlink application)
-3. **Override support**: CLI flags override config entries
-4. **Testing**: Config parsing edge cases
-
-**Milestone**: Can parse .wtconfig, apply actions (tested separately)
-
-### Phase 3: Complex Commands
-
-1. **Resolver**: `internal/resolver/` (name → path, name → branch)
-2. **Commands with cd**: `new`, `goto`, `home`, `eject`
-3. **Output formatting**: `--output-path` flag support
-4. **Testing**: Integration tests with temp git repos
-
-**Milestone**: `wt-bin new test --output-path` outputs path
-
-### Phase 4: Shell Integration
-
-1. **Shell wrappers**: `shell/wt.{bash,zsh,fish}`
-2. **Completions**: `completions/wt.{bash,zsh,fish}`
-3. **Manual testing**: Source wrapper, test cd commands
-4. **Edge cases**: Error handling, path with spaces
-
-**Milestone**: Can `source shell/wt.zsh` and `wt goto` changes directory
-
-### Phase 5: npm Distribution
-
-1. **Build script**: `scripts/build.sh` (cross-compile for all platforms)
-2. **npm packages**: Main package + platform-specific packages
-3. **Postinstall**: Binary copy script
-4. **Testing**: `npm pack`, test on different platforms
-
-**Milestone**: Can `npm install`, binary is available as `wt-bin`
-
-### Phase 6: Interactive Installer
-
-1. **Shell detection**: Detect bash/zsh/fish from $SHELL
-2. **RC file logic**: Determine correct rc file path
-3. **Idempotence**: Check if already installed
-4. **Interactive prompts**: User confirmation
-5. **Append logic**: Add source lines to rc file
-6. **Testing**: Test on different shells, edge cases
-
-**Milestone**: `npm install` prompts and sets up shell integration
-
-### Phase 7: Polish & Documentation
-
-1. **Error messages**: Improve UX, add suggestions
-2. **README**: Installation, usage, examples
-3. **Troubleshooting**: Common issues, manual setup
-4. **Examples**: Workflow guides
-5. **CI/CD**: GitHub Actions for releases
-
-**Milestone**: Production-ready, documented, tested
-
-### Critical Path
-
-```
-Core Go Binary → Config System → Complex Commands → Shell Integration
-                                                              ↓
-                                                   npm Distribution
-                                                              ↓
-                                                   Interactive Installer
-```
-
-**Cannot parallelize:**
-- Shell wrappers need `--output-path` support in binary
-- npm distribution needs compiled binaries
-- Installer needs shell wrappers and completions
-
-**Can parallelize:**
-- Completions and shell wrappers (independent)
-- Documentation and installer (independent)
-
-## Detailed Component Diagrams
-
-### npm Package Dependency Graph
-
-```
-@scope/wt (main package)
-├── optionalDependencies
-│   ├── @scope/wt-darwin-arm64 ← Only installs on macOS ARM64
-│   ├── @scope/wt-darwin-x64   ← Only installs on macOS x64
-│   ├── @scope/wt-linux-x64    ← Only installs on Linux x64
-│   ├── @scope/wt-linux-arm64  ← Only installs on Linux ARM64
-│   └── @scope/wt-win32-x64    ← Only installs on Windows x64
-└── files
-    ├── bin/wt                 ← Symlink to installed binary
-    ├── shell/
-    │   ├── wt.bash
-    │   ├── wt.zsh
-    │   └── wt.fish
-    ├── completions/
-    │   ├── wt.bash
-    │   ├── wt.zsh
-    │   └── wt.fish
-    └── scripts/
-        ├── install.js         ← Postinstall: copy binary from platform package
-        └── interactive-installer.js
-```
-
-### Go Module Dependency Graph
-
-```
-cmd/wt/main.go
-└── internal/commands/*
-    ├── internal/git
-    ├── internal/config
-    ├── internal/resolver
-    │   └── internal/git
-    └── internal/output
-```
-
-No circular dependencies. All dependencies flow downward.
-
-## Testing Strategy
-
-### Unit Tests
-
-- `internal/git`: Mock git CLI, test parsing
-- `internal/config`: Test .wtconfig parser with various inputs
-- `internal/resolver`: Mock worktree list, test name resolution
-
-### Integration Tests
-
-- Create temp git repos with worktrees
-- Run commands, verify filesystem changes
-- Test error conditions (missing branch, invalid path)
-
-### Shell Integration Tests
-
-- Source shell wrapper in test shell
-- Execute commands, verify `$PWD` changes
-- Test error passthrough
-
-### npm Package Tests
-
-- `npm pack` → install in temp directory
-- Verify binary is executable
-- Verify postinstall runs
-- Test on different platforms (CI matrix)
+---
 
 ## Sources
 
-This architecture document is based on established patterns from:
-
-- **Go project layout**: golang-standards/project-layout (community standard)
-- **Cobra CLI**: spf13/cobra (used by kubectl, GitHub CLI, Hugo)
-- **npm binary distribution**: esbuild, swc, prisma (platform-specific optional dependencies pattern)
-- **Shell integration**: nvm, rvm, z.sh (source-based wrappers for cd functionality)
-
-**Confidence level: HIGH** - These are well-established, battle-tested patterns used by major tools in the ecosystem.
+- [Git rev-parse documentation](https://git-scm.com/docs/git-rev-parse) -- `--git-common-dir`, `--is-bare-repository`, `--git-dir` behavior (HIGH confidence)
+- [Git worktree documentation](https://git-scm.com/docs/git-worktree) -- worktree list, bare repo display, linked worktree mechanics (HIGH confidence)
+- [Git clone documentation](https://git-scm.com/docs/git-clone) -- `--bare` flag behavior and limitations (HIGH confidence)
+- [Morgan Cugerone: How to use git worktree in a clean way](https://morgan.cugerone.com/blog/how-to-use-git-worktree-and-in-a-clean-way/) -- `.bare/` + `.git` file pattern (MEDIUM confidence, community pattern)
+- [Morgan Cugerone: Workarounds for bare repo fetch](https://morgan.cugerone.com/blog/workarounds-to-git-worktree-using-bare-repository-and-cannot-fetch-remote-branches/) -- `remote.origin.fetch` fix (MEDIUM confidence, verified against git docs)
+- [Andreas Schneider: git-worktree and bare repo](https://blog.cryptomilk.org/2023/02/10/sliced-bread-git-worktree-and-bare-repo/) -- nested worktree pattern (MEDIUM confidence)
+- Direct source code analysis of `internal/git/repo.go`, `cmd/new.go`, `cmd/goto.go`, shell wrapper templates (HIGH confidence)

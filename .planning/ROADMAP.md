@@ -5,7 +5,8 @@
 - ✅ **v1.0 Documentation** - Phases 1-2 (shipped 2026-02-07)
 - ✅ **v2.0 Go Rewrite** - Phases 3-10 (shipped 2026-02-08)
 - ✅ **v2.0 Pre-Release Rebrand** - Phases 11-14 (shipped 2026-02-08)
-- 🚧 **v2.0 Bare Repo + cd Rename** - Phases 15-19 (in progress)
+- ✅ **v2.0 Bare Repo + cd Rename** - Phases 15-19 (shipped 2026-02-09)
+- **v0.1.2 Release** - Phases 20-21
 
 ## Phases
 
@@ -230,15 +231,12 @@ Plans:
 
 </details>
 
-### v2.0 Bare Repo + cd Rename (Phases 15-19)
+<details>
+<summary>✅ v2.0 Bare Repo + cd Rename (Phases 15-19) - SHIPPED 2026-02-09</summary>
+
+### v2.0 Bare Repo + cd Rename (Complete)
 
 **Milestone Goal:** Add bare repo conversion and nested worktree support, rename go to cd, ship v2.0.
-
-- [x] **Phase 15: Bare Repo Infrastructure** - Detection, path resolution, and config resolution for bare repo contexts
-- [x] **Phase 16: cd Rename** - Rename `go` to `cd` as primary navigation command
-- [x] **Phase 17: mk-bare-repo Command** - Convert normal clone to bare repo with nested worktrees
-- [x] **Phase 18: Adopt + Smart Init** - Restructure raw bare repos and enhance `ptt init`
-- [ ] **Phase 19: Polish** - Clean up bare repo artifacts from user-facing output
 
 #### Phase 15: Bare Repo Infrastructure
 **Goal**: ptt correctly detects bare repo context and resolves worktree paths and config from the right locations
@@ -311,12 +309,49 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 19-01-PLAN.md -- Filter bare repo metadata entries from ptt ls output
+- [x] 19-01-PLAN.md -- Filter bare repo metadata entries from ptt ls output
+
+</details>
+
+### v0.1.2 Release (Phases 20-21)
+
+**Milestone Goal:** Cheatsheet-style README and first published release (GitHub + npm).
+
+#### Phase 20: README Rewrite
+**Goal**: README is a one-screen cheatsheet with SVG banner and concise command reference
+**Depends on**: Phase 19
+**Requirements**: README-01, README-02, README-03, README-04, README-05, README-06
+**Success Criteria** (what must be TRUE):
+  1. User sees SVG banner at top of README (from assets/banner.svg)
+  2. User sees one-line project description immediately after banner
+  3. User sees npm install command (`npm install @a-tarek/ptt`) in installation section
+  4. User sees core commands (mk, cd, rm, ls) with one-liner examples in command reference
+  5. User sees `ptt init` bare repo workflow documented with example
+  6. README fits approximately one screen — no verbose explanations or separate docs files
+**Plans**: TBD
+
+Plans:
+- [ ] 20-01-PLAN.md — README rewrite: SVG banner, one-line description, npm install, core commands with examples, init workflow
+
+#### Phase 21: v0.1.2 Release
+**Goal**: v0.1.2 is published to GitHub and npm with downloadable binaries
+**Depends on**: Phase 20
+**Requirements**: REL-01, REL-02, REL-03
+**Success Criteria** (what must be TRUE):
+  1. Git tag `v0.1.2` exists and is pushed to GitHub
+  2. GitHub release exists at https://github.com/a-tarek/ptt/releases/tag/v0.1.2 with platform binaries attached
+  3. Package `@a-tarek/ptt` is published to npm registry with version 0.1.2
+  4. Running `npm install @a-tarek/ptt` downloads version 0.1.2
+**Plans**: TBD
+
+Plans:
+- [ ] 21-01-PLAN.md — Create git tag v0.1.2, trigger goreleaser workflow for GitHub release
+- [ ] 21-02-PLAN.md — Publish @a-tarek/ptt@0.1.2 to npm registry
 
 ## Progress
 
 **Execution Order:**
-Phases 15 and 16 can execute in parallel (independent). Phase 17 and 18 depend on Phase 15. Phase 19 depends on Phase 17.
+Phase 20 must complete before Phase 21 (README must be ready before release).
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -338,9 +373,11 @@ Phases 15 and 16 can execute in parallel (independent). Phase 17 and 18 depend o
 | 16. cd Rename | Bare Repo + cd | 1/1 | Complete | 2026-02-09 |
 | 17. mk-bare-repo Command | Bare Repo + cd | 2/2 | Complete | 2026-02-09 |
 | 18. Adopt + Smart Init | Bare Repo + cd | 3/3 | Complete | 2026-02-09 |
-| 19. Polish | Bare Repo + cd | 0/1 | Planned | - |
+| 19. Polish | Bare Repo + cd | 1/1 | Complete | 2026-02-09 |
+| 20. README Rewrite | v0.1.2 | 0/1 | Pending | - |
+| 21. v0.1.2 Release | v0.1.2 | 0/2 | Pending | - |
 
 ---
 *Roadmap created: 2026-02-07*
-*v1.0 complete (phases 1-2), v2.0 complete (phases 3-10), rebrand complete (phases 11-14)*
-*Bare repo + cd rename milestone added: 2026-02-09*
+*v1.0 complete (phases 1-2), v2.0 complete (phases 3-10), rebrand complete (phases 11-14), bare repo + cd complete (phases 15-19)*
+*v0.1.2 release milestone added: 2026-02-09*
