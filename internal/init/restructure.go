@@ -16,6 +16,11 @@ var defaultYAMLConfig = []byte(`# ptt worktree config
 #   - copy: .env
 #   - symlink: node_modules
 #   - run: npm install
+#   - copyEnv:
+#       file: .env
+#       vars:
+#         PORT:
+#           strategy: ptt_increment
 #
 # remove:
 #   - run: echo "cleaning up"
