@@ -106,6 +106,176 @@ func TestRmWithBranch(t *testing.T) {
 	}
 }
 
+func TestRmWithYAMLRemoveHook(t *testing.T) {
+	containerRoot := setupPttBareRepoWithCommit(t)
+	mainPath := filepath.Join(containerRoot, "main")
+	stagingPath := addWorktree(t, containerRoot, "staging")
+
+	// Create YAML config with remove hook that writes a marker file
+	markerPath := filepath.Join(containerRoot, "hook-marker")
+	pttconfigDir := filepath.Join(containerRoot, ".pttconfig")
+	os.MkdirAll(pttconfigDir, 0755)
+	os.WriteFile(filepath.Join(pttconfigDir, "default.yml"),
+		[]byte("remove:\n  - run: touch "+markerPath+"\n"), 0644)
+
+	res := runPtt(t, mainPath, "rm", "staging")
+	if res.Err != nil {
+		t.Fatalf("rm with YAML remove hook failed: %s", res.Stderr)
+	}
+
+	// Marker file should exist (hook ran)
+	if _, err := os.Stat(markerPath); os.IsNotExist(err) {
+		t.Error("marker file should exist after remove hook")
+	}
+
+	// Worktree should be gone
+	if _, err := os.Stat(stagingPath); !os.IsNotExist(err) {
+		t.Error("worktree should be removed")
+	}
+}
+
+func TestRmHookFailureBlocksDeletion(t *testing.T) {
+	containerRoot := setupPttBareRepoWithCommit(t)
+	mainPath := filepath.Join(containerRoot, "main")
+	stagingPath := addWorktree(t, containerRoot, "staging")
+
+	// Create YAML config with a failing remove hook
+	pttconfigDir := filepath.Join(containerRoot, ".pttconfig")
+	os.MkdirAll(pttconfigDir, 0755)
+	os.WriteFile(filepath.Join(pttconfigDir, "default.yml"),
+		[]byte("remove:\n  - run: exit 1\n"), 0644)
+
+	res := runPtt(t, mainPath, "rm", "staging")
+	if res.Err == nil {
+		t.Fatal("expected error when hook fails, got nil")
+	}
+
+	// Worktree should still exist
+	if _, err := os.Stat(stagingPath); os.IsNotExist(err) {
+		t.Error("worktree should still exist after hook failure")
+	}
+}
+
+func TestRmHookFailureWithForce(t *testing.T) {
+	containerRoot := setupPttBareRepoWithCommit(t)
+	mainPath := filepath.Join(containerRoot, "main")
+	stagingPath := addWorktree(t, containerRoot, "staging")
+
+	// Create YAML config with a failing remove hook
+	pttconfigDir := filepath.Join(containerRoot, ".pttconfig")
+	os.MkdirAll(pttconfigDir, 0755)
+	os.WriteFile(filepath.Join(pttconfigDir, "default.yml"),
+		[]byte("remove:\n  - run: exit 1\n"), 0644)
+
+	res := runPtt(t, mainPath, "rm", "--force", "staging")
+	if res.Err != nil {
+		t.Fatalf("rm --force should succeed despite hook failure: %s", res.Stderr)
+	}
+
+	// Worktree should be gone
+	if _, err := os.Stat(stagingPath); !os.IsNotExist(err) {
+		t.Error("worktree should be removed with --force")
+	}
+}
+
+func TestRmWithInlineRunFlag(t *testing.T) {
+	containerRoot := setupPttBareRepoWithCommit(t)
+	mainPath := filepath.Join(containerRoot, "main")
+	addWorktree(t, containerRoot, "staging")
+
+	markerPath := filepath.Join(containerRoot, "inline-marker")
+
+	res := runPtt(t, mainPath, "rm", "--run", "touch "+markerPath, "staging")
+	if res.Err != nil {
+		t.Fatalf("rm --run failed: %s", res.Stderr)
+	}
+
+	// Marker file should exist
+	if _, err := os.Stat(markerPath); os.IsNotExist(err) {
+		t.Error("marker file should exist after inline --run hook")
+	}
+
+	// Worktree should be gone
+	stagingPath := filepath.Join(containerRoot, "staging")
+	if _, err := os.Stat(stagingPath); !os.IsNotExist(err) {
+		t.Error("worktree should be removed")
+	}
+}
+
+func TestRmWithTextConfigNoHooks(t *testing.T) {
+	containerRoot := setupPttBareRepoWithCommit(t)
+	mainPath := filepath.Join(containerRoot, "main")
+	stagingPath := addWorktree(t, containerRoot, "staging")
+
+	// Create a text config (no remove section possible)
+	pttconfigDir := filepath.Join(containerRoot, ".pttconfig")
+	os.MkdirAll(pttconfigDir, 0755)
+	os.WriteFile(filepath.Join(pttconfigDir, "default"), []byte("copy .env\n"), 0644)
+
+	res := runPtt(t, mainPath, "rm", "staging")
+	if res.Err != nil {
+		t.Fatalf("rm with text config should succeed: %s", res.Stderr)
+	}
+
+	// Worktree should be gone
+	if _, err := os.Stat(stagingPath); !os.IsNotExist(err) {
+		t.Error("worktree should be removed")
+	}
+}
+
+func TestRmSkipConfig(t *testing.T) {
+	containerRoot := setupPttBareRepoWithCommit(t)
+	mainPath := filepath.Join(containerRoot, "main")
+	addWorktree(t, containerRoot, "staging")
+
+	// Create YAML config with a failing remove hook
+	pttconfigDir := filepath.Join(containerRoot, ".pttconfig")
+	os.MkdirAll(pttconfigDir, 0755)
+	os.WriteFile(filepath.Join(pttconfigDir, "default.yml"),
+		[]byte("remove:\n  - run: exit 1\n"), 0644)
+
+	// --skip-config should skip the failing hook
+	res := runPtt(t, mainPath, "rm", "--skip-config", "staging")
+	if res.Err != nil {
+		t.Fatalf("rm --skip-config should succeed: %s", res.Stderr)
+	}
+
+	// Worktree should be gone
+	stagingPath := filepath.Join(containerRoot, "staging")
+	if _, err := os.Stat(stagingPath); !os.IsNotExist(err) {
+		t.Error("worktree should be removed")
+	}
+}
+
+func TestRmWithNamedConfig(t *testing.T) {
+	containerRoot := setupPttBareRepoWithCommit(t)
+	mainPath := filepath.Join(containerRoot, "main")
+	addWorktree(t, containerRoot, "staging")
+
+	// Create named YAML config with remove hook
+	markerPath := filepath.Join(containerRoot, "ci-marker")
+	pttconfigDir := filepath.Join(containerRoot, ".pttconfig")
+	os.MkdirAll(pttconfigDir, 0755)
+	os.WriteFile(filepath.Join(pttconfigDir, "ci.yml"),
+		[]byte("remove:\n  - run: touch "+markerPath+"\n"), 0644)
+
+	res := runPtt(t, mainPath, "rm", "--config", "ci", "staging")
+	if res.Err != nil {
+		t.Fatalf("rm --config ci failed: %s", res.Stderr)
+	}
+
+	// Marker from named config should exist
+	if _, err := os.Stat(markerPath); os.IsNotExist(err) {
+		t.Error("marker file should exist from named config hook")
+	}
+
+	// Worktree should be gone
+	stagingPath := filepath.Join(containerRoot, "staging")
+	if _, err := os.Stat(stagingPath); !os.IsNotExist(err) {
+		t.Error("worktree should be removed")
+	}
+}
+
 func TestRmNonexistent(t *testing.T) {
 	containerRoot := setupPttBareRepoWithCommit(t)
 	mainPath := filepath.Join(containerRoot, "main")

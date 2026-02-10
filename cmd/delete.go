@@ -8,13 +8,18 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/a-tarek/ptt/internal/config"
 	"github.com/a-tarek/ptt/internal/git"
+	"github.com/a-tarek/ptt/internal/setup"
 	"github.com/spf13/cobra"
 )
 
 var (
-	forceDelete  bool
-	deleteBranch bool
+	forceDelete    bool
+	deleteBranch   bool
+	rmRunFlags     []string
+	rmConfigFlag   string
+	rmSkipConfig   bool
 )
 
 var rmCmd = &cobra.Command{
@@ -61,6 +66,45 @@ var rmCmd = &cobra.Command{
 			response = strings.TrimSpace(response)
 			if response != "y" && response != "Y" {
 				return fmt.Errorf("cancelled")
+			}
+		}
+
+		// Load and execute pre-remove hooks
+		var removeActions []config.Action
+
+		if !rmSkipConfig {
+			configRoot, configErr := git.ConfigRoot()
+			if configErr == nil {
+				configName := rmConfigFlag
+				configPath, resolveErr := config.ResolveConfigPath(configRoot, configName)
+				if resolveErr == nil && config.IsYAMLConfig(configPath) {
+					lc, parseErr := config.ParseYAMLFile(configPath)
+					if parseErr != nil {
+						return parseErr
+					}
+					removeActions = append(removeActions, lc.Remove...)
+				}
+				// Text configs have no remove section — skip silently
+			}
+		}
+
+		// Append inline --run flags as run actions
+		for _, runCmd := range rmRunFlags {
+			removeActions = append(removeActions, config.Action{Type: config.ActionRun, Path: runCmd})
+		}
+
+		// Validate and execute hooks
+		if len(removeActions) > 0 {
+			if err := config.ValidateRemoveActions(removeActions); err != nil {
+				return err
+			}
+
+			if err := setup.RunPreRemoveHooks(wt.Path, removeActions, nil, 0); err != nil {
+				if forceDelete {
+					fmt.Fprintf(os.Stderr, "warning: pre-remove hook failed: %v\n", err)
+				} else {
+					return err
+				}
 			}
 		}
 
@@ -118,4 +162,7 @@ func init() {
 	rootCmd.AddCommand(rmCmd)
 	rmCmd.Flags().BoolVarP(&forceDelete, "force", "f", false, "skip confirmation for dirty worktrees")
 	rmCmd.Flags().BoolVarP(&deleteBranch, "branch", "b", false, "also delete the branch after removing worktree")
+	rmCmd.Flags().StringSliceVar(&rmRunFlags, "run", []string{}, "run command before deletion (repeatable)")
+	rmCmd.Flags().StringVar(&rmConfigFlag, "config", "", "use named config (.pttconfig/<name>)")
+	rmCmd.Flags().BoolVar(&rmSkipConfig, "skip-config", false, "skip config-based remove hooks")
 }

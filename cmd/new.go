@@ -76,36 +76,22 @@ var mkCmd = &cobra.Command{
 
 				// If config file found, parse and validate
 				if err == nil {
-
-					actions, parseErr := config.ParseFile(configPath)
+					createActions, parseErr := parseCreateActions(configPath, currentWorktreeRoot)
 					if parseErr != nil {
 						return parseErr
 					}
-
-					validateErr := config.ValidateActions(currentWorktreeRoot, actions)
-					if validateErr != nil {
-						return validateErr
-					}
-
-					allActions = append(allActions, actions...)
+					allActions = append(allActions, createActions...)
 				}
 				// Silently skip if config file not found
 			} else if !skipConfig && hasInlineFlags && configFlag != "" {
 				// --config with inline flags: load named config, then append inline flags
 				configPath, cfgErr := config.ResolveConfigPath(configRoot, configFlag)
 				if cfgErr == nil {
-
-					actions, parseErr := config.ParseFile(configPath)
+					createActions, parseErr := parseCreateActions(configPath, currentWorktreeRoot)
 					if parseErr != nil {
 						return parseErr
 					}
-
-					validateErr := config.ValidateActions(currentWorktreeRoot, actions)
-					if validateErr != nil {
-						return validateErr
-					}
-
-					allActions = append(allActions, actions...)
+					allActions = append(allActions, createActions...)
 				}
 			}
 
@@ -162,6 +148,30 @@ var mkCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+// parseCreateActions parses and validates create actions from a config file.
+// Dispatches to YAML or text parser based on file extension.
+func parseCreateActions(configPath, srcRoot string) ([]config.Action, error) {
+	if config.IsYAMLConfig(configPath) {
+		lc, err := config.ParseYAMLFile(configPath)
+		if err != nil {
+			return nil, err
+		}
+		if err := config.ValidateActions(srcRoot, lc.Create); err != nil {
+			return nil, err
+		}
+		return lc.Create, nil
+	}
+
+	actions, err := config.ParseFile(configPath)
+	if err != nil {
+		return nil, err
+	}
+	if err := config.ValidateActions(srcRoot, actions); err != nil {
+		return nil, err
+	}
+	return actions, nil
 }
 
 func init() {

@@ -272,6 +272,81 @@ func TestResolveConfigPath_FallbackToWtconfigNamed(t *testing.T) {
 	}
 }
 
+func TestResolveConfigPath_YAMLDefaultPriority(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create both .pttconfig/default.yml and .pttconfig/default (text)
+	pttconfigDir := filepath.Join(tmpDir, ".pttconfig")
+	os.MkdirAll(pttconfigDir, 0755)
+	os.WriteFile(filepath.Join(pttconfigDir, "default.yml"), []byte("create:\n  - copy: .env\n"), 0644)
+	os.WriteFile(filepath.Join(pttconfigDir, "default"), []byte("copy .env\n"), 0644)
+
+	resolved, err := ResolveConfigPath(tmpDir, "")
+	if err != nil {
+		t.Fatalf("ResolveConfigPath failed: %v", err)
+	}
+
+	expected := filepath.Join(tmpDir, ".pttconfig", "default.yml")
+	if resolved != expected {
+		t.Errorf("expected %s, got %s", expected, resolved)
+	}
+}
+
+func TestResolveConfigPath_YAMLNamedConfig(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	pttconfigDir := filepath.Join(tmpDir, ".pttconfig")
+	os.MkdirAll(pttconfigDir, 0755)
+	os.WriteFile(filepath.Join(pttconfigDir, "ci.yml"), []byte("create:\n  - run: npm ci\n"), 0644)
+
+	resolved, err := ResolveConfigPath(tmpDir, "ci")
+	if err != nil {
+		t.Fatalf("ResolveConfigPath failed: %v", err)
+	}
+
+	expected := filepath.Join(tmpDir, ".pttconfig", "ci.yml")
+	if resolved != expected {
+		t.Errorf("expected %s, got %s", expected, resolved)
+	}
+}
+
+func TestResolveConfigPath_YAMLFallbackToText(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Only text config exists, no YAML
+	pttconfigDir := filepath.Join(tmpDir, ".pttconfig")
+	os.MkdirAll(pttconfigDir, 0755)
+	os.WriteFile(filepath.Join(pttconfigDir, "default"), []byte("copy .env\n"), 0644)
+
+	resolved, err := ResolveConfigPath(tmpDir, "")
+	if err != nil {
+		t.Fatalf("ResolveConfigPath failed: %v", err)
+	}
+
+	expected := filepath.Join(tmpDir, ".pttconfig", "default")
+	if resolved != expected {
+		t.Errorf("expected %s, got %s", expected, resolved)
+	}
+}
+
+func TestResolveConfigPath_YAMLAlternateExtension(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	pttconfigDir := filepath.Join(tmpDir, ".pttconfig")
+	os.MkdirAll(pttconfigDir, 0755)
+	os.WriteFile(filepath.Join(pttconfigDir, "default.yaml"), []byte("create:\n  - copy: .env\n"), 0644)
+
+	resolved, err := ResolveConfigPath(tmpDir, "")
+	if err != nil {
+		t.Fatalf("ResolveConfigPath failed: %v", err)
+	}
+
+	expected := filepath.Join(tmpDir, ".pttconfig", "default.yaml")
+	if resolved != expected {
+		t.Errorf("expected %s, got %s", expected, resolved)
+	}
+}
+
 func TestResolveConfigPath_PttconfigTakesPriority(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "wt-resolve-test-*")
 	if err != nil {

@@ -191,6 +191,61 @@ func TestValidateActions_MixedValidAndInvalid(t *testing.T) {
 	}
 }
 
+func TestValidateRemoveActions_ValidRunCommands(t *testing.T) {
+	actions := []Action{
+		{Type: ActionRun, Path: "echo hello"},
+		{Type: ActionRun, Path: "git log --oneline"},
+	}
+	if err := ValidateRemoveActions(actions); err != nil {
+		t.Errorf("expected no error, got: %v", err)
+	}
+}
+
+func TestValidateRemoveActions_RejectsCopyAction(t *testing.T) {
+	actions := []Action{
+		{Type: ActionCopy, Path: ".env"},
+	}
+	err := ValidateRemoveActions(actions)
+	if err == nil {
+		t.Fatal("expected error for copy in remove, got nil")
+	}
+	if !strings.Contains(err.Error(), "copy actions not allowed") {
+		t.Errorf("expected 'copy actions not allowed' error, got: %v", err)
+	}
+}
+
+func TestValidateRemoveActions_RejectsSymlinkAction(t *testing.T) {
+	actions := []Action{
+		{Type: ActionSymlink, Path: "node_modules"},
+	}
+	err := ValidateRemoveActions(actions)
+	if err == nil {
+		t.Fatal("expected error for symlink in remove, got nil")
+	}
+	if !strings.Contains(err.Error(), "symlink actions not allowed") {
+		t.Errorf("expected 'symlink actions not allowed' error, got: %v", err)
+	}
+}
+
+func TestValidateRemoveActions_EmptyRunCommand(t *testing.T) {
+	actions := []Action{
+		{Type: ActionRun, Path: ""},
+	}
+	err := ValidateRemoveActions(actions)
+	if err == nil {
+		t.Fatal("expected error for empty run command, got nil")
+	}
+	if !strings.Contains(err.Error(), "run command cannot be empty") {
+		t.Errorf("expected 'run command cannot be empty' error, got: %v", err)
+	}
+}
+
+func TestValidateRemoveActions_EmptyList(t *testing.T) {
+	if err := ValidateRemoveActions([]Action{}); err != nil {
+		t.Errorf("expected no error for empty list, got: %v", err)
+	}
+}
+
 func TestValidateActions_EmptyActionList(t *testing.T) {
 	tmpDir, err := os.MkdirTemp("", "wt-validator-test-*")
 	if err != nil {
