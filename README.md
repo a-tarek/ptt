@@ -38,17 +38,16 @@ ptt rm feature-auth       # Remove worktree (keeps branch)
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `ptt init` | Create `.pttconfig/default.yml` template |
-| `ptt mk <name> [branch]` | Create worktree and switch to it |
-| `ptt cd [name]` | Navigate to worktree (no args = main) |
-| `ptt ls` | List all worktrees |
-| `ptt rm <name>` | Remove worktree (`--branch` to also delete branch) |
-| `ptt eject [name]` | Eject current branch into its own worktree |
-| `ptt merge <name>` | Merge worktree's branch into current branch |
-| `ptt rebase <name>` | Rebase current branch onto worktree's branch |
-| `ptt mk-bare-repo` | Convert clone to bare repo with nested worktrees |
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `ptt init` | | Convert repo to ptt bare layout + create `.pttconfig/default.yml` |
+| `ptt mk <name>` | `new` | Create worktree and cd into it |
+| `ptt cd [name]` | | Jump to worktree (no args = main) |
+| `ptt ls` | `list` | List all worktrees (`--all` for full paths) |
+| `ptt rm <name>` | `delete` | Remove worktree (`--branch` to also delete branch, `--force` to skip confirmation) |
+| `ptt eject [name]` | | Eject current branch into its own worktree |
+| `ptt merge <name>` | | Merge worktree's branch into current branch |
+| `ptt rebase <name>` | | Rebase current branch onto worktree's branch |
 
 All worktree name arguments support **suffix matching** — `ptt cd auth` matches `myapp-feature-auth`.
 
@@ -81,21 +80,15 @@ ptt mk staging --config staging    # Use .pttconfig/staging
 ptt mk quick --skip-config         # Skip all config actions
 ```
 
-## Bare Repo Support
+## Bare Repo Layout
 
-For a cleaner layout where all worktrees live inside one directory:
-
-```bash
-ptt mk-bare-repo
-cd ../myapp-bare/main
-ptt mk feature-auth       # Creates myapp-bare/feature-auth/
-```
+`ptt init` converts a standard clone into a bare repo where all worktrees live as siblings:
 
 ```
-myapp-bare/
+myapp/
 ├── .bare/          # Git database
 ├── .git            # Pointer to .bare
-├── .pttconfig/     # Shared config
+├── .pttconfig/     # Shared config (all worktrees read from here)
 ├── main/           # Default worktree
 └── feature-auth/   # Created by ptt mk
 ```
