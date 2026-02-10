@@ -22,6 +22,7 @@ var (
 	runFlags       []string
 	copyEnvFlag    string
 	setFlags       []string
+	branchFlag     string
 )
 
 var mkCmd = &cobra.Command{
@@ -61,6 +62,9 @@ var mkCmd = &cobra.Command{
 
 		// 4. Determine branch name
 		branchName := name
+		if branchFlag != "" {
+			branchName = branchFlag
+		}
 
 		// 5. Parse --set flags
 		setOverrides, err := parseSetFlags(setFlags)
@@ -167,12 +171,20 @@ var mkCmd = &cobra.Command{
 		tasks.Add("cd:", basename)
 
 		// 7. Create worktree (all validation passed)
-		createCmd := exec.Command("git", "worktree", "add", targetPath, "-b", branchName)
+		var createCmd *exec.Cmd
+		if branchFlag != "" {
+			// --branch: check out existing branch, don't create new
+			createCmd = exec.Command("git", "worktree", "add", targetPath, branchName)
+		} else {
+			createCmd = exec.Command("git", "worktree", "add", targetPath, "-b", branchName)
+		}
 		output, err := createCmd.CombinedOutput()
 		if err != nil {
-			// Branch might already exist, try without -b
-			createCmd = exec.Command("git", "worktree", "add", targetPath, branchName)
-			output, err = createCmd.CombinedOutput()
+			if branchFlag == "" {
+				// Branch might already exist, try without -b
+				createCmd = exec.Command("git", "worktree", "add", targetPath, branchName)
+				output, err = createCmd.CombinedOutput()
+			}
 			if err != nil {
 				tasks.FailRemaining(0)
 				return fmt.Errorf("failed to create worktree: %s", strings.TrimSpace(string(output)))
@@ -260,4 +272,6 @@ func init() {
 	mkCmd.Flags().StringSliceVar(&runFlags, "run", []string{}, "inline run commands (repeatable)")
 	mkCmd.Flags().StringVar(&copyEnvFlag, "copy-env", "", "copy env file with variable transformations")
 	mkCmd.Flags().StringArrayVar(&setFlags, "set", []string{}, "set env var override (KEY=VALUE, repeatable)")
+	mkCmd.Flags().StringVarP(&branchFlag, "branch", "b", "", "use existing branch instead of creating new")
+	mkCmd.RegisterFlagCompletionFunc("branch", branchNameCompletion)
 }
