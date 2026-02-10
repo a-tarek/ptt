@@ -35,17 +35,6 @@ func init() {
 	rootCmd.AddCommand(promptCmd)
 }
 
-func shortenPath(p string) string {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return p
-	}
-	if strings.HasPrefix(p, home) {
-		return "~" + p[len(home):]
-	}
-	return p
-}
-
 func runPrompt(cmd *cobra.Command, args []string) error {
 	bareRoot, err := git.BareRepoRoot()
 	if err != nil {
@@ -61,10 +50,8 @@ func runPrompt(cmd *cobra.Command, args []string) error {
 	cwd, _ = filepath.EvalSymlinks(cwd)
 	bareRoot, _ = filepath.EvalSymlinks(bareRoot)
 
-	displayPath := shortenPath(bareRoot)
-
 	if cwd == bareRoot {
-		fmt.Printf("%s 🥔 %sroot%s", displayPath, ansiGray, ansiReset)
+		fmt.Printf("🥔 %sroot%s", ansiGray, ansiReset)
 		return nil
 	}
 
@@ -98,6 +85,6 @@ func runPrompt(cmd *cobra.Command, args []string) error {
 		statusStr = " " + strings.Join(parts, " ")
 	}
 
-	fmt.Printf("%s 🥔 %s[ %s%s%s%s %s]%s", displayPath, ansiDim, ansiReset, ansiBold+ansiCyan, branch, ansiReset, statusStr+ansiDim, ansiReset)
+	fmt.Printf("🥔 %s[ %s%s%s%s %s]%s", ansiDim, ansiReset, ansiBold+ansiCyan, branch, ansiReset, statusStr+ansiDim, ansiReset)
 	return nil
 }
