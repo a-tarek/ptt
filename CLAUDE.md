@@ -10,7 +10,7 @@ ptt is a fast, cross-platform git worktree manager written in Go, distributed vi
 
 ```bash
 # Build
-go build .
+go build -o dist/ptt .
 
 # Run all tests
 go test ./...

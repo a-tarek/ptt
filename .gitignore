@@ -2,6 +2,7 @@
 .DS_Store
 potato-*
 wt
+ptt
 !npm/bin/wt
 .planning*
 dist*
