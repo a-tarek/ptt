@@ -5,3 +5,4 @@ wt
 !npm/bin/wt
 .planning*
 dist*
+.env
