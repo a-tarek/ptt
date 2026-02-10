@@ -28,7 +28,7 @@ Requires Node.js 18+ and git 2.5+.
 ## Quick Start
 
 ```bash
-ptt init                  # Create .pttconfig/default in your repo
+ptt init                  # Set up repo with .pttconfig/default.yml
 ptt mk feature-auth       # Create worktree + branch, cd into it
 # ... work on your feature ...
 ptt cd                    # Jump back to main worktree
@@ -40,7 +40,7 @@ ptt rm feature-auth       # Remove worktree (keeps branch)
 
 | Command | Description |
 |---------|-------------|
-| `ptt init` | Create `.pttconfig/default` template |
+| `ptt init` | Create `.pttconfig/default.yml` template |
 | `ptt mk <name> [branch]` | Create worktree and switch to it |
 | `ptt cd [name]` | Navigate to worktree (no args = main) |
 | `ptt ls` | List all worktrees |
@@ -54,14 +54,16 @@ All worktree name arguments support **suffix matching** — `ptt cd auth` matche
 
 ## Configuration
 
-`ptt init` creates `.pttconfig/default` at your repo root. It defines what happens when a new worktree is created:
+`ptt init` creates `.pttconfig/default.yml` at your repo root. It defines what happens when a new worktree is created or removed:
 
-```
-copy .env                 # Independent copy per worktree
-copy .env.local
-symlink node_modules      # Shared via symlink (saves disk space)
-symlink .venv
-run npm install           # Run command in new worktree
+```yaml
+# create:
+#   - copy: .env
+#   - symlink: node_modules
+#   - run: npm install
+#
+# remove:
+#   - run: echo "cleaning up"
 ```
 
 **Override on the fly:**

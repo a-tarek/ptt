@@ -37,8 +37,8 @@ func TestInit_NormalRepo_Success(t *testing.T) {
 	}
 
 	// Verify .pttconfig/default created
-	if _, err := os.Stat(filepath.Join(repoDir, ".pttconfig", "default")); os.IsNotExist(err) {
-		t.Errorf(".pttconfig/default not created")
+	if _, err := os.Stat(filepath.Join(repoDir, ".pttconfig", "default.yml")); os.IsNotExist(err) {
+		t.Errorf(".pttconfig/default.yml not created")
 	}
 }
 
@@ -102,8 +102,8 @@ func TestInit_NormalRepo_LocalOnly(t *testing.T) {
 		t.Fatalf("init failed: %s", res.Stderr)
 	}
 
-	if _, err := os.Stat(filepath.Join(repoDir, ".pttconfig", "default")); os.IsNotExist(err) {
-		t.Errorf(".pttconfig/default not created")
+	if _, err := os.Stat(filepath.Join(repoDir, ".pttconfig", "default.yml")); os.IsNotExist(err) {
+		t.Errorf(".pttconfig/default.yml not created")
 	}
 }
 
@@ -163,22 +163,64 @@ func TestInit_PttBare_CreatesPttconfig(t *testing.T) {
 		t.Fatalf("init failed: %s", res.Stderr)
 	}
 
-	if _, err := os.Stat(filepath.Join(containerRoot, ".pttconfig", "default")); os.IsNotExist(err) {
-		t.Errorf(".pttconfig/default not created")
+	if _, err := os.Stat(filepath.Join(containerRoot, ".pttconfig", "default.yml")); os.IsNotExist(err) {
+		t.Errorf(".pttconfig/default.yml not created")
 	}
 }
 
 func TestInit_PttBare_AlreadySetUp(t *testing.T) {
 	containerRoot := setupPttBareRepoWithCommit(t)
 
-	// Pre-create .pttconfig/default
+	// Pre-create .pttconfig/default.yml
 	pttconfigDir := filepath.Join(containerRoot, ".pttconfig")
 	os.MkdirAll(pttconfigDir, 0755)
-	os.WriteFile(filepath.Join(pttconfigDir, "default"), []byte(""), 0644)
+	os.WriteFile(filepath.Join(pttconfigDir, "default.yml"), []byte(""), 0644)
 
 	res := runPtt(t, containerRoot, "init", "-y")
 	if res.Err != nil {
 		t.Errorf("init should be idempotent, got: %s", res.Stderr)
+	}
+}
+
+func TestInit_CreatesDefaultYAMLWithStub(t *testing.T) {
+	repoDir := setupNormalRepoWithRemote(t)
+
+	res := runPtt(t, repoDir, "init", "-y")
+	if res.Err != nil {
+		t.Fatalf("init failed: %s", res.Stderr)
+	}
+
+	content, err := os.ReadFile(filepath.Join(repoDir, ".pttconfig", "default.yml"))
+	if err != nil {
+		t.Fatalf("failed to read default.yml: %v", err)
+	}
+
+	body := string(content)
+	for _, want := range []string{"# create:", "#   - copy:", "#   - symlink:", "#   - run:", "# remove:"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("default.yml missing expected line %q", want)
+		}
+	}
+}
+
+func TestInit_PttBare_RepairsMissingYAMLConfig(t *testing.T) {
+	containerRoot := setupPttBareRepoWithCommit(t)
+
+	// Ensure no .pttconfig/ exists
+	os.RemoveAll(filepath.Join(containerRoot, ".pttconfig"))
+
+	res := runPtt(t, containerRoot, "init", "-y")
+	if res.Err != nil {
+		t.Fatalf("init failed: %s", res.Stderr)
+	}
+
+	content, err := os.ReadFile(filepath.Join(containerRoot, ".pttconfig", "default.yml"))
+	if err != nil {
+		t.Fatalf(".pttconfig/default.yml not created: %v", err)
+	}
+
+	if !strings.Contains(string(content), "# create:") {
+		t.Errorf("default.yml missing stub content")
 	}
 }
 

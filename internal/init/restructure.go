@@ -8,6 +8,31 @@ import (
 	"strings"
 )
 
+// defaultYAMLConfig is the commented-out YAML template written to .pttconfig/default.yml on init.
+var defaultYAMLConfig = []byte(`# ptt worktree config
+# Uncomment and edit the actions below.
+#
+# create:
+#   - copy: .env
+#   - symlink: node_modules
+#   - run: npm install
+#
+# remove:
+#   - run: echo "cleaning up"
+`)
+
+// createDefaultYAMLConfig creates .pttconfig/default.yml with a commented-out YAML template.
+func createDefaultYAMLConfig(pttconfigDir string) error {
+	if err := os.MkdirAll(pttconfigDir, 0755); err != nil {
+		return fmt.Errorf("failed to create .pttconfig directory: %w", err)
+	}
+	defaultConfig := filepath.Join(pttconfigDir, "default.yml")
+	if err := os.WriteFile(defaultConfig, defaultYAMLConfig, 0644); err != nil {
+		return fmt.Errorf("failed to create .pttconfig/default.yml: %w", err)
+	}
+	return nil
+}
+
 // RestructureNormalRepo converts a normal git clone into a ptt-managed bare repo in place.
 // This preserves untracked files by moving them through staging and into the final worktree.
 //
@@ -198,15 +223,11 @@ func RestructureNormalRepo(repoRoot string, info *RepoInfo, progress ProgressCal
 		return fmt.Errorf("failed to remove staging directory: %w", err)
 	}
 
-	// Step 14: Create .pttconfig/default
+	// Step 14: Create .pttconfig/default.yml
 	progress("Creating .pttconfig")
 	pttconfigDir := filepath.Join(repoRoot, ".pttconfig")
-	if err := os.MkdirAll(pttconfigDir, 0755); err != nil {
-		return fmt.Errorf("failed to create .pttconfig directory: %w", err)
-	}
-	defaultConfig := filepath.Join(pttconfigDir, "default")
-	if err := os.WriteFile(defaultConfig, []byte{}, 0644); err != nil {
-		return fmt.Errorf("failed to create .pttconfig/default: %w", err)
+	if err := createDefaultYAMLConfig(pttconfigDir); err != nil {
+		return err
 	}
 
 	// Success - clear cleanup stack

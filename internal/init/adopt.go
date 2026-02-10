@@ -171,15 +171,11 @@ func AdoptRawBareRepo(repoRoot string, info *RepoInfo, progress ProgressCallback
 		}
 	}
 
-	// Step 10: Create .pttconfig/default
+	// Step 10: Create .pttconfig/default.yml
 	progress("Creating .pttconfig")
 	pttconfigDir := filepath.Join(repoRoot, ".pttconfig")
-	if err := os.MkdirAll(pttconfigDir, 0755); err != nil {
-		return fmt.Errorf("failed to create .pttconfig directory: %w", err)
-	}
-	defaultConfig := filepath.Join(pttconfigDir, "default")
-	if err := os.WriteFile(defaultConfig, []byte{}, 0644); err != nil {
-		return fmt.Errorf("failed to create .pttconfig/default: %w", err)
+	if err := createDefaultYAMLConfig(pttconfigDir); err != nil {
+		return err
 	}
 
 	// Success - clear cleanup stack

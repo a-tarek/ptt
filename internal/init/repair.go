@@ -19,7 +19,7 @@ import (
 func RepairPttRepo(containerRoot string, repairItems []string, progress ProgressCallback) error {
 	// If no repair items, check if we just need to create .pttconfig
 	if len(repairItems) == 0 {
-		pttconfigDefault := filepath.Join(containerRoot, ".pttconfig", "default")
+		pttconfigDefault := filepath.Join(containerRoot, ".pttconfig", "default.yml")
 		if _, err := os.Stat(pttconfigDefault); os.IsNotExist(err) {
 			repairItems = []string{"create-pttconfig"}
 		} else {
@@ -65,15 +65,11 @@ func RepairPttRepo(containerRoot string, repairItems []string, progress Progress
 			return fmt.Errorf("cannot repair: .bare/ directory is missing (repo structure is corrupted)")
 
 		} else if strings.Contains(item, "pttconfig") || item == "create-pttconfig" {
-			// Create .pttconfig/default
+			// Create .pttconfig/default.yml
 			progress("Creating .pttconfig")
 			pttconfigDir := filepath.Join(containerRoot, ".pttconfig")
-			if err := os.MkdirAll(pttconfigDir, 0755); err != nil {
-				return fmt.Errorf("failed to create .pttconfig directory: %w", err)
-			}
-			defaultConfig := filepath.Join(pttconfigDir, "default")
-			if err := os.WriteFile(defaultConfig, []byte{}, 0644); err != nil {
-				return fmt.Errorf("failed to create .pttconfig/default: %w", err)
+			if err := createDefaultYAMLConfig(pttconfigDir); err != nil {
+				return err
 			}
 
 		} else {

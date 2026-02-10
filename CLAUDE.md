@@ -46,7 +46,7 @@ This is necessary because a subprocess cannot change the parent shell's working 
 
 - **`cmd/`** — Cobra command definitions. Each command file registers itself in `init()`. Commands that change directories accept `--output-path`.
 - **`internal/git/`** — Git operations: repo type detection, worktree path resolution (suffix matching), bare repo root discovery. `BareRepoRoot()` looks for `.bare/` directory with a `.git` pointer file.
-- **`internal/config/`** — Parses `.pttconfig/` files (syntax: `copy|symlink|run <path>`). Handles CLI flag overrides that merge with file-based config (flags win per-path).
+- **`internal/config/`** — Parses `.pttconfig/` YAML config files with `create:` and `remove:` lifecycle hooks (actions: `copy`, `symlink`, `run`). Handles CLI flag overrides that merge with file-based config (flags win per-path).
 - **`internal/setup/`** — Executes config actions (copy, symlink, run) with rollback on failure.
 - **`internal/shell/`** — Shell detection from `$SHELL` and embedded wrapper templates.
 - **`internal/installer/`** — RC file modification using marker blocks (`# >>> ptt >>>` / `# <<< ptt <<<`).
