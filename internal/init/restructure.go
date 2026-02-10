@@ -21,6 +21,8 @@ var defaultYAMLConfig = []byte(`# ptt worktree config
 #       vars:
 #         PORT:
 #           strategy: ptt_increment
+#         BRANCH:
+#           strategy: git branch --show-current
 #
 # remove:
 #   - run: echo "cleaning up"

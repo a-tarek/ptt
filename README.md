@@ -61,6 +61,13 @@ All worktree name arguments support **suffix matching** — `ptt cd auth` matche
 #   - copy: .env
 #   - symlink: node_modules
 #   - run: npm install
+#   - copyEnv:
+#       file: .env
+#       vars:
+#         PORT:
+#           strategy: ptt_increment
+#         BRANCH:
+#           strategy: git branch --show-current
 #
 # remove:
 #   - run: echo "cleaning up"
