@@ -21,9 +21,19 @@ type yamlConfig struct {
 }
 
 type yamlAction struct {
-	Copy    string `yaml:"copy"`
-	Symlink string `yaml:"symlink"`
-	Run     string `yaml:"run"`
+	Copy    string             `yaml:"copy"`
+	Symlink string             `yaml:"symlink"`
+	Run     string             `yaml:"run"`
+	CopyEnv *yamlCopyEnvConfig `yaml:"copyEnv"`
+}
+
+type yamlCopyEnvConfig struct {
+	File string                    `yaml:"file"`
+	Vars map[string]yamlEnvVarRule `yaml:"vars"`
+}
+
+type yamlEnvVarRule struct {
+	Strategy string `yaml:"strategy"`
 }
 
 // ParseYAMLFile reads a YAML config file and returns a LifecycleConfig.
@@ -67,22 +77,36 @@ func IsYAMLConfig(path string) bool {
 
 func convertYAMLAction(a yamlAction, line int) (Action, error) {
 	count := 0
-	var actionType, actionPath string
+	var action Action
+	action.Line = line
 
 	if a.Copy != "" {
 		count++
-		actionType = ActionCopy
-		actionPath = a.Copy
+		action.Type = ActionCopy
+		action.Path = a.Copy
 	}
 	if a.Symlink != "" {
 		count++
-		actionType = ActionSymlink
-		actionPath = a.Symlink
+		action.Type = ActionSymlink
+		action.Path = a.Symlink
 	}
 	if a.Run != "" {
 		count++
-		actionType = ActionRun
-		actionPath = a.Run
+		action.Type = ActionRun
+		action.Path = a.Run
+	}
+	if a.CopyEnv != nil {
+		count++
+		action.Type = ActionCopyEnv
+		action.Path = a.CopyEnv.File
+		vars := make(map[string]EnvVarRule, len(a.CopyEnv.Vars))
+		for k, v := range a.CopyEnv.Vars {
+			vars[k] = EnvVarRule{Strategy: v.Strategy}
+		}
+		action.CopyEnv = &CopyEnvConfig{
+			File: a.CopyEnv.File,
+			Vars: vars,
+		}
 	}
 
 	if count == 0 {
@@ -92,5 +116,5 @@ func convertYAMLAction(a yamlAction, line int) (Action, error) {
 		return Action{}, fmt.Errorf("action has multiple fields set")
 	}
 
-	return Action{Type: actionType, Path: actionPath, Line: line}, nil
+	return action, nil
 }

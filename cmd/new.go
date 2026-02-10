@@ -20,6 +20,8 @@ var (
 	copyFlags      []string
 	symlinkFlags   []string
 	runFlags       []string
+	copyEnvFlag    string
+	setFlags       []string
 )
 
 var mkCmd = &cobra.Command{
@@ -60,11 +62,18 @@ var mkCmd = &cobra.Command{
 		// 4. Determine branch name
 		branchName := name
 
-		// 5. Validate and build config actions (before creating worktree)
+		// 5. Parse --set flags
+		setOverrides, err := parseSetFlags(setFlags)
+		if err != nil {
+			return err
+		}
+
+		// 5b. Validate and build config actions (before creating worktree)
 		var allActions []config.Action
 		hasInlineFlags := len(copyFlags) > 0 || len(symlinkFlags) > 0 || len(runFlags) > 0
+		hasCopyEnv := copyEnvFlag != "" || len(setFlags) > 0
 
-		if !skipConfig || hasInlineFlags {
+		if !skipConfig || hasInlineFlags || hasCopyEnv {
 			// Load file-based config (unless --skip-config or inline flags override)
 			if !skipConfig && !hasInlineFlags {
 				var configPath string
@@ -103,6 +112,48 @@ var mkCmd = &cobra.Command{
 
 				flagActions := config.BuildActionsFromFlags(copyFlags, symlinkFlags, runFlags, os.Args)
 				allActions = append(allActions, flagActions...)
+			}
+
+			// Build inline --copy-env action
+			if copyEnvFlag != "" {
+				inlineCopyEnv := config.Action{
+					Type: config.ActionCopyEnv,
+					Path: copyEnvFlag,
+					Line: 0,
+					CopyEnv: &config.CopyEnvConfig{
+						File:      copyEnvFlag,
+						Vars:      map[string]config.EnvVarRule{},
+						Overrides: setOverrides,
+					},
+				}
+				allActions = append(allActions, inlineCopyEnv)
+			}
+
+			// Merge --set overrides into config-based copyEnv actions
+			if len(setOverrides) > 0 {
+				for i := range allActions {
+					if allActions[i].Type == config.ActionCopyEnv && allActions[i].CopyEnv != nil {
+						if allActions[i].CopyEnv.Overrides == nil {
+							allActions[i].CopyEnv.Overrides = make(map[string]string)
+						}
+						for k, v := range setOverrides {
+							allActions[i].CopyEnv.Overrides[k] = v
+						}
+					}
+				}
+			}
+
+			// Validate copyEnv actions with merged overrides
+			var copyEnvActions []config.Action
+			for _, a := range allActions {
+				if a.Type == config.ActionCopyEnv {
+					copyEnvActions = append(copyEnvActions, a)
+				}
+			}
+			if len(copyEnvActions) > 0 {
+				if err := config.ValidateActions(currentWorktreeRoot, copyEnvActions); err != nil {
+					return err
+				}
 			}
 		}
 
@@ -174,6 +225,32 @@ func parseCreateActions(configPath, srcRoot string) ([]config.Action, error) {
 	return actions, nil
 }
 
+// parseSetFlags parses --set KEY=VALUE flags into a map.
+func parseSetFlags(flags []string) (map[string]string, error) {
+	result := make(map[string]string, len(flags))
+	for _, flag := range flags {
+		key, value, err := parseSetFlag(flag)
+		if err != nil {
+			return nil, err
+		}
+		result[key] = value
+	}
+	return result, nil
+}
+
+// parseSetFlag splits a KEY=VALUE string on the first '='.
+func parseSetFlag(s string) (string, string, error) {
+	eqIdx := strings.Index(s, "=")
+	if eqIdx < 0 {
+		return "", "", fmt.Errorf("invalid --set flag %q: expected KEY=VALUE", s)
+	}
+	key := s[:eqIdx]
+	if key == "" {
+		return "", "", fmt.Errorf("invalid --set flag %q: key cannot be empty", s)
+	}
+	return key, s[eqIdx+1:], nil
+}
+
 func init() {
 	rootCmd.AddCommand(mkCmd)
 	mkCmd.Flags().StringVar(&configFlag, "config", "", "use named config (.pttconfig/<name>)")
@@ -181,4 +258,6 @@ func init() {
 	mkCmd.Flags().StringSliceVar(&copyFlags, "copy", []string{}, "inline copy overrides (repeatable)")
 	mkCmd.Flags().StringSliceVar(&symlinkFlags, "symlink", []string{}, "inline symlink overrides (repeatable)")
 	mkCmd.Flags().StringSliceVar(&runFlags, "run", []string{}, "inline run commands (repeatable)")
+	mkCmd.Flags().StringVar(&copyEnvFlag, "copy-env", "", "copy env file with variable transformations")
+	mkCmd.Flags().StringArrayVar(&setFlags, "set", []string{}, "set env var override (KEY=VALUE, repeatable)")
 }

@@ -57,6 +57,11 @@ func executeOne(srcRoot, targetRoot string, action config.Action) error {
 			return err
 		}
 
+	case config.ActionCopyEnv:
+		if err := ExecuteCopyEnv(srcRoot, targetRoot, action.CopyEnv); err != nil {
+			return err
+		}
+
 	default:
 		return fmt.Errorf("unknown action type: %s", action.Type)
 	}
