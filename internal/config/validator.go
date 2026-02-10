@@ -39,3 +39,30 @@ func ValidateActions(srcRoot string, actions []Action) error {
 
 	return nil
 }
+
+// ValidateRemoveActions validates actions for the remove lifecycle phase.
+// Only "run" actions are allowed in remove hooks.
+func ValidateRemoveActions(actions []Action) error {
+	var errs []string
+
+	for i, action := range actions {
+		switch action.Type {
+		case ActionRun:
+			if action.Path == "" {
+				errs = append(errs, fmt.Sprintf("remove[%d]: run command cannot be empty", i))
+			}
+		case ActionCopy:
+			errs = append(errs, fmt.Sprintf("remove[%d]: copy actions not allowed in remove hooks", i))
+		case ActionSymlink:
+			errs = append(errs, fmt.Sprintf("remove[%d]: symlink actions not allowed in remove hooks", i))
+		default:
+			errs = append(errs, fmt.Sprintf("remove[%d]: unknown action type: %s", i, action.Type))
+		}
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("validation failed:\n  %s", strings.Join(errs, "\n  "))
+	}
+
+	return nil
+}

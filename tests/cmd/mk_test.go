@@ -188,6 +188,55 @@ func TestMkWorktreeOnCorrectBranch(t *testing.T) {
 	}
 }
 
+func TestMkWithYAMLCreateConfig(t *testing.T) {
+	containerRoot := setupPttBareRepoWithCommit(t)
+	mainPath := filepath.Join(containerRoot, "main")
+
+	// Create YAML config with create section
+	pttconfigDir := filepath.Join(containerRoot, ".pttconfig")
+	os.MkdirAll(pttconfigDir, 0755)
+	os.WriteFile(filepath.Join(pttconfigDir, "default.yml"), []byte("create:\n  - copy: .env\n"), 0644)
+
+	// Create source file
+	os.WriteFile(filepath.Join(mainPath, ".env"), []byte("DB_HOST=localhost\n"), 0644)
+
+	res := runPtt(t, mainPath, "mk", "staging")
+	if res.Err != nil {
+		t.Fatalf("mk with YAML config failed: %s", res.Stderr)
+	}
+
+	// Verify .env was copied
+	stagingEnv := filepath.Join(containerRoot, "staging", ".env")
+	content, err := os.ReadFile(stagingEnv)
+	if err != nil {
+		t.Fatalf(".env not copied: %v", err)
+	}
+	if string(content) != "DB_HOST=localhost\n" {
+		t.Errorf("copied .env has wrong content: %s", content)
+	}
+}
+
+func TestMkWithYAMLNoCreateSection(t *testing.T) {
+	containerRoot := setupPttBareRepoWithCommit(t)
+	mainPath := filepath.Join(containerRoot, "main")
+
+	// Create YAML config with only remove section (no create)
+	pttconfigDir := filepath.Join(containerRoot, ".pttconfig")
+	os.MkdirAll(pttconfigDir, 0755)
+	os.WriteFile(filepath.Join(pttconfigDir, "default.yml"), []byte("remove:\n  - run: echo bye\n"), 0644)
+
+	res := runPtt(t, mainPath, "mk", "staging")
+	if res.Err != nil {
+		t.Fatalf("mk with YAML (no create section) should succeed: %s", res.Stderr)
+	}
+
+	// Worktree should exist
+	stagingPath := filepath.Join(containerRoot, "staging")
+	if _, err := os.Stat(stagingPath); os.IsNotExist(err) {
+		t.Errorf("worktree directory should exist at %s", stagingPath)
+	}
+}
+
 func TestMkOutputPath(t *testing.T) {
 	containerRoot := setupPttBareRepoWithCommit(t)
 	mainPath := filepath.Join(containerRoot, "main")
