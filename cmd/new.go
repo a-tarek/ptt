@@ -23,6 +23,8 @@ var (
 	copyEnvFlag    string
 	setFlags       []string
 	branchFlag     string
+	prFlag         bool
+	prTitleFlag    string
 )
 
 var mkCmd = &cobra.Command{
@@ -53,8 +55,14 @@ var mkCmd = &cobra.Command{
 			return err
 		}
 
-		// 3. Compute target path
+		// 3. Validate name and compute target path. Worktree name becomes a directory
+		// (and, when -b is not given, also the new branch name) — slashes break path
+		// resolution and create awkward nested layouts. Hyphens are the only allowed
+		// separator.
 		name := args[0]
+		if err := validateWorktreeName(name); err != nil {
+			return err
+		}
 		targetPath, err := git.WorktreePath(homePath, name)
 		if err != nil {
 			return err
@@ -202,7 +210,15 @@ var mkCmd = &cobra.Command{
 		// 9. cd
 		tasks.MarkDone(tasks.Len() - 1)
 
-		// 10. Output path to stdout for shell wrapper
+		// 10. Auto-PR (best-effort: failures print but don't roll back the worktree)
+		if prFlag {
+			if err := openDraftPR(targetPath, branchName, prTitleFlag); err != nil {
+				fmt.Fprintf(os.Stderr, "\n--pr failed: %v\n", err)
+				fmt.Fprintf(os.Stderr, "Worktree is intact; resume manually with: cd %s && git push -u origin %s && gh pr create --draft --fill\n", targetPath, branchName)
+			}
+		}
+
+		// 11. Output path to stdout for shell wrapper
 		if outputPath {
 			fmt.Println(targetPath)
 		} else {
@@ -211,6 +227,62 @@ var mkCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+// validateWorktreeName rejects names that would break ptt's flat sibling layout
+// or create unintended branch namespaces.
+func validateWorktreeName(name string) error {
+	if name == "" {
+		return fmt.Errorf("worktree name cannot be empty")
+	}
+	if strings.ContainsRune(name, '/') {
+		return fmt.Errorf("worktree name %q contains '/': use hyphens (e.g. %q)", name, strings.ReplaceAll(name, "/", "-"))
+	}
+	if strings.HasPrefix(name, "-") {
+		return fmt.Errorf("worktree name %q cannot start with '-'", name)
+	}
+	return nil
+}
+
+// openDraftPR scaffolds a draft PR for the freshly-created worktree:
+// 1. empty initial commit (so there's something to push)
+// 2. push -u origin <branch>
+// 3. gh pr create --draft --fill (or --title if prTitle is set)
+func openDraftPR(worktreePath, branch, prTitle string) error {
+	if _, err := exec.LookPath("gh"); err != nil {
+		return fmt.Errorf("gh CLI not found in PATH (install from https://cli.github.com/)")
+	}
+
+	commitMsg := branch
+	if prTitle != "" {
+		commitMsg = prTitle
+	}
+	commitCmd := exec.Command("git", "commit", "--allow-empty", "-m", commitMsg)
+	commitCmd.Dir = worktreePath
+	if out, err := commitCmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("git commit --allow-empty: %s", strings.TrimSpace(string(out)))
+	}
+
+	pushCmd := exec.Command("git", "push", "-u", "origin", branch)
+	pushCmd.Dir = worktreePath
+	if out, err := pushCmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("git push -u origin %s: %s", branch, strings.TrimSpace(string(out)))
+	}
+
+	prArgs := []string{"pr", "create", "--draft"}
+	if prTitle != "" {
+		prArgs = append(prArgs, "--title", prTitle, "--body", "")
+	} else {
+		prArgs = append(prArgs, "--fill")
+	}
+	prCmd := exec.Command("gh", prArgs...)
+	prCmd.Dir = worktreePath
+	out, err := prCmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("gh pr create: %s", strings.TrimSpace(string(out)))
+	}
+	fmt.Fprintf(os.Stderr, "%s", string(out))
+	return nil
 }
 
 // parseCreateActions parses and validates create actions from a config file.
@@ -274,4 +346,6 @@ func init() {
 	mkCmd.Flags().StringArrayVar(&setFlags, "set", []string{}, "set env var override (KEY=VALUE, repeatable)")
 	mkCmd.Flags().StringVarP(&branchFlag, "branch", "b", "", "use existing branch instead of creating new")
 	mkCmd.RegisterFlagCompletionFunc("branch", branchNameCompletion)
+	mkCmd.Flags().BoolVar(&prFlag, "pr", false, "after creating the worktree, open a draft PR (empty commit + push + gh pr create)")
+	mkCmd.Flags().StringVar(&prTitleFlag, "pr-title", "", "title for the draft PR (also used as the empty commit message); defaults to the branch name")
 }
