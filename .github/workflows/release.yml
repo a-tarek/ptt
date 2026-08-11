@@ -34,8 +34,6 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     environment: npm-publish
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
     steps:
       - name: Checkout code
@@ -55,6 +53,10 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Verify npm auth
+        # NODE_AUTH_TOKEN must be set per-step, not on the job: setup-node
+        # overwrites a job-level value with its own XXXXX-XXXXX placeholder.
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           # Fail fast: goreleaser cuts an immutable GitHub release, so a bad
           # NPM_TOKEN must be caught before that, not after.
@@ -90,6 +92,8 @@ jobs:
           echo "Publishing version: $VERSION"
 
       - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: bash scripts/publish-npm.sh ${{ steps.version.outputs.version }}
 
 # Secrets required:
