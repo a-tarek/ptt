@@ -60,8 +60,9 @@ jobs:
         run: |
           # Fail fast: goreleaser cuts an immutable GitHub release, so a bad
           # NPM_TOKEN must be caught before that, not after.
+          # Only whoami: `npm access list packages @atarek` hits the org
+          # endpoint, and @atarek is a user scope, so it 403s on a good token.
           npm whoami
-          npm access list packages @atarek
 
       - name: Install goreleaser
         uses: goreleaser/goreleaser-action@v6
