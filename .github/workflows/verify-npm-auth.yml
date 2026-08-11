@@ -51,3 +51,5 @@ jobs:
           else
             echo "result: present"
           fi
+
+# touch to force GitHub to reparse this workflow
