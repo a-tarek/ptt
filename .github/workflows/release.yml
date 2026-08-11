@@ -54,6 +54,13 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Verify npm auth
+        run: |
+          # Fail fast: goreleaser cuts an immutable GitHub release, so a bad
+          # NPM_TOKEN must be caught before that, not after.
+          npm whoami
+          npm access list packages @atarek
+
       - name: Install goreleaser
         uses: goreleaser/goreleaser-action@v6
         with:
