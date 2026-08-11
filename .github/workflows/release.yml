@@ -7,6 +7,9 @@ on:
 
 permissions:
   contents: write
+  # Required for npm trusted publishing (OIDC). Without this the runner
+  # cannot mint the identity token npm exchanges for publish rights.
+  id-token: write
 
 jobs:
   test:
@@ -33,7 +36,6 @@ jobs:
     name: Build and publish
     needs: test
     runs-on: ubuntu-latest
-    environment: npm-publish
 
     steps:
       - name: Checkout code
@@ -49,20 +51,23 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Verify npm auth
-        # NODE_AUTH_TOKEN must be set per-step, not on the job: setup-node
-        # overwrites a job-level value with its own XXXXX-XXXXX placeholder.
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Upgrade npm for trusted publishing
+        # Trusted publishing (OIDC) needs npm >= 11.5.1.
+        run: npm install -g npm@latest
+
+      - name: Verify OIDC prerequisites
         run: |
-          # Fail fast: goreleaser cuts an immutable GitHub release, so a bad
-          # NPM_TOKEN must be caught before that, not after.
-          # Only whoami: `npm access list packages @atarek` hits the org
-          # endpoint, and @atarek is a user scope, so it 403s on a good token.
-          npm whoami
+          # Fail fast: goreleaser cuts an immutable GitHub release, so a broken
+          # publish setup must be caught before that, not after.
+          npm --version
+          if [ -z "$ACTIONS_ID_TOKEN_REQUEST_URL" ]; then
+            echo "ERROR: no OIDC token endpoint - 'id-token: write' is missing"
+            exit 1
+          fi
+          echo "OIDC token endpoint present"
 
       - name: Install goreleaser
         uses: goreleaser/goreleaser-action@v6
@@ -93,11 +98,14 @@ jobs:
           echo "Publishing version: $VERSION"
 
       - name: Publish to npm
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # No NODE_AUTH_TOKEN: auth comes from OIDC trusted publishing.
         run: bash scripts/publish-npm.sh ${{ steps.version.outputs.version }}
 
-# Secrets required:
-# - NPM_TOKEN: npm automation token for publishing @atarek/* packages
-#   Create at: https://www.npmjs.com/settings/<username>/tokens
-#   Add to repository: Settings -> Secrets and variables -> Actions -> New repository secret
+# Publishing uses npm trusted publishing (OIDC) - no NPM_TOKEN secret.
+# Each of the 5 packages must have a trusted publisher configured on npmjs.com:
+#   Package -> Settings -> Trusted publisher
+#     Provider: GitHub Actions
+#     Repository: a-tarek/ptt
+#     Workflow: release.yml
+#     Environment: (leave blank)
+# Packages: @atarek/ptt, @atarek/ptt-{darwin,linux}-{arm64,amd64}
